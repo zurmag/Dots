@@ -82,7 +82,7 @@ function game(size){
 
 	this.getPlayer = function(color){
 		return new Player(color);
-	}
+	};
 
 	this.setPointMouseDown = function (x, y, player){
 		var i = Math.round(Math.abs((x-offset)/distance));
@@ -91,14 +91,14 @@ function game(size){
 
 		if (cell.player == null){//valid cell
 			player.i = i;
-			player.j = j		
+			player.j = j;		
 			cell.dot.setFill(player.color);
 			boardLayer.draw();
 		}
 
 
 		
-	}
+	};
 
 	this.setPointMouseUp = function (x, y, player){
 		var i = Math.round(Math.abs((x-offset)/distance));
@@ -119,6 +119,6 @@ function game(size){
 		player.i = null; player.j = null;
 		boardLayer.draw();
 				
-	}
+	};
 	
 }

@@ -1,4 +1,4 @@
-package com.games.dots;
+package com.games.dots.controllers;
 
 import java.util.Locale;
 
