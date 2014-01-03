@@ -1,10 +1,14 @@
 package com.games.dots.controllers;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,23 +16,41 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.games.dots.enities.Coordinates;
+import com.games.dots.entities.Coordinates;
+import com.games.dots.entities.Move;
+import com.games.dots.entities.Player;
+import com.games.dots.logic.Game;
+import com.games.dots.repositories.IRepository;
 
 @Controller
 public class MovesController {
-	@RequestMapping(value = "/games/{gameId}/moves", method = RequestMethod.POST)
-	public ResponseEntity<?> PostMove( @RequestBody Coordinates coordinates, @RequestParam String gameId, UriComponentsBuilder builder){
+	private final Logger logger = LoggerFactory.getLogger(GamesController.class);
+	
+	@Autowired
+	IRepository<Game> games;
+	
+	@Autowired
+	IRepository<Player> players;
+	
+	@RequestMapping(value = "/games/{gameId}/players/{playerId}/moves", method = RequestMethod.POST)
+	public ResponseEntity<Coordinates[]> PostMove( 
+			@RequestBody Coordinates coordinates, 
+			@PathVariable String gameId, 
+			@PathVariable String playerId,
+			UriComponentsBuilder builder){
 		UUID id = UUID.randomUUID();
-		UriComponents uriComponents = builder.path("/games/{gameId}/moves/{id}").buildAndExpand(id);
-
+		UriComponents uriComponents = builder.path("/games/{gameId}/players/{playerId}/moves/{id}").buildAndExpand(gameId, id);
+		logger.debug("Move created for game Id " + gameId + " MoveId" + id);
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());
+	    Game game = games.get(gameId);
+	    Player player = players.get(playerId);
+	    Move move = new Move(player, coordinates);
+		game.makeMove(move);
 	    
-	    Coordinates[] loop = new Coordinates[4];	    
-	    loop[0] = new Coordinates();loop[0].x = 0;loop[0].y = 1;
-	    loop[1] = new Coordinates();loop[1].x = 1;loop[1].y = 2;
-	    loop[2] = new Coordinates();loop[2].x = 2;loop[2].y = 1;
-	    loop[3] = new Coordinates();loop[3].x = 1;loop[3].y = 0;
+	    
+	    Coordinates[] loop = null;
+	    
 	    
 	    return new ResponseEntity<Coordinates[]>(loop, headers, HttpStatus.CREATED);
 	}

@@ -1,4 +1,4 @@
-package com.games.dots.enities;
+package com.games.dots.entities;
 
 import java.io.Serializable;
 

@@ -10,7 +10,6 @@ import org.jgrapht.generate.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.traverse.*;
 
-import com.games.dots.enities.Coordinates;
 import com.games.dots.entities.*;
 
 public class Game {

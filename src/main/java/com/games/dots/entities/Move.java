@@ -1,6 +1,5 @@
 package com.games.dots.entities;
 
-import com.games.dots.enities.Coordinates;
 
 public class Move {
 	private Player player;

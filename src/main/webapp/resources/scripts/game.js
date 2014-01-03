@@ -1,13 +1,15 @@
-function game(size){
+function game(size, location){
 	
 	var offset = 10;
 	var distance = 20;
 	var boardLayer = null;
 	var board = [];
 	var boardColor = 'grey';
-	init(size);
+	var gameLocation = '';
+	init(size, location);
 
-	function init(size){
+	function init(size, location){
+		gameLocation = location;
 		var width = 0;
 		var height = 0;		
 		if (size == 'small'){
@@ -58,8 +60,9 @@ function game(size){
 
 		  	    // add the shape to the layer
 		        layer.add(circle);
-
-		        board[xx][yy] = new BoardCell(circle, null);
+		        var coordinate = {};
+		        coordinate.x = xx; coordinate.y = yy;
+		        board[xx][yy] = new BoardCell(circle, null, coordinate);
 			}
 		}
 	    
@@ -80,8 +83,8 @@ function game(size){
 		return boardLayer;
 	};
 
-	this.getPlayer = function(color){
-		return new Player(color);
+	this.getPlayer = function(color, id){
+		return new Player(color, id);
 	};
 
 	this.setPointMouseDown = function (x, y, player){
@@ -103,7 +106,9 @@ function game(size){
 	this.setPointMouseUp = function (x, y, player){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
-
+		var coordinates = {};
+		coordinates.x = i;
+		coordinates.y = j;
 		if (i == player.i && j == player.j){
 			cell = board[i][j]; 
 			dot = board[i][j].dot;
@@ -111,8 +116,25 @@ function game(size){
 			dot.setStroke('black');
 			dot.setStrokeWidth(1);			
 			cell.player = player;
+			post(gameLocation+'/players' + player.id + '/moves',JSON.stringify(coordinates), function(data){
+				if (data.length > 0){
+					data.push(data[0]);
+					for (var index = 0; index < data.length - 1; index++){
+						startPoint = board[data[index].x][data[index].y];
+						endPoint = board[data[index+1].x][data[index+1].y];
+						var line = new Kinetic.Line({
+							points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
+							strokeWidth: 1,
+							stroke: player.color
+						});
+						boardLayer.add(line);
+						boardLayer.draw();
+					}
+				}
+				console.log(data);
+			});
 		}
-		else{
+		else{//undo
 			dot = board[player.i][player.j].dot;
 			dot.setFill(boardColor);
 		}

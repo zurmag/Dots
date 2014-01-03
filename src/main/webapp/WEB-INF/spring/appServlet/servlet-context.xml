@@ -25,5 +25,6 @@
 	
 	
 	<beans:bean class="com.games.dots.repositories.GamesRepository" scope="singleton"/>
+	<beans:bean class="com.games.dots.repositories.PlayersRepository" scope="singleton"/>
 
 </beans:beans>
