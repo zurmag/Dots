@@ -1,6 +1,8 @@
 package com.games.dots.controllers;
 import java.util.UUID;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +28,14 @@ import com.games.dots.repositories.IRepository;
 public class MovesController {
 	private final Logger logger = LoggerFactory.getLogger(GamesController.class);
 	
-	@Autowired
+	@Resource(name="gamesRepository")
 	IRepository<Game> games;
 	
-	@Autowired
+	@Resource(name="playersRepository")
 	IRepository<Player> players;
 	
 	@RequestMapping(value = "/games/{gameId}/players/{playerId}/moves", method = RequestMethod.POST)
-	public ResponseEntity<Coordinates[]> PostMove( 
+	public ResponseEntity<Coordinates[][]> PostMove( 
 			@RequestBody Coordinates coordinates, 
 			@PathVariable String gameId, 
 			@PathVariable String playerId,
@@ -49,10 +51,10 @@ public class MovesController {
 		game.makeMove(move);
 	    
 	    
-	    Coordinates[] loop = null;
+	    Coordinates[][] loop = null;
 	    
 	    
-	    return new ResponseEntity<Coordinates[]>(loop, headers, HttpStatus.CREATED);
+	    return new ResponseEntity<Coordinates[][]>(loop, headers, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/moves/{moveId}", method = RequestMethod.GET)

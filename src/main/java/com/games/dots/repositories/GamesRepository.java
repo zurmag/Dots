@@ -16,16 +16,17 @@ public class GamesRepository implements IRepository<Game> {
 	}
 
 	@Override
-	public Game Create() {
-		Game game = new Game();
-		UUID id = UUID.randomUUID();
-		game.id = id.toString();
-		storage.put(id.toString(), game);
+	public Game add(Game game) {
+		if(game.id == null){
+			UUID id = UUID.randomUUID();
+			game.id = id.toString();
+		}
+		storage.put(game.id, game);
 		return game;
 	}
 
 	@Override
-	public void Remove(String id) {
+	public void remove(String id) {
 		storage.remove(id);		
 	}
 

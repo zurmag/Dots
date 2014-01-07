@@ -16,15 +16,17 @@ public class PlayersRepository implements IRepository<Player>{
 	}
 
 	@Override
-	public Player Create() {
-		UUID id = UUID.randomUUID();
-		Player player = new Player();
-		player.id = id.toString();
+	public Player add(Player player) {
+		if (player.id == null ){
+			UUID id = UUID.randomUUID();		
+			player.id = id.toString();
+		}
+		repository.put(player.id, player);
 		return player;
 	}
 
 	@Override
-	public void Remove(String id) {
+	public void remove(String id) {
 		repository.remove(id);
 		
 	}
