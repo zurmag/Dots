@@ -65,11 +65,11 @@ public class Game {
 	
 	
 	
-	public Coordinates[][] makeMove(Move move){
-		
+	public ActionList makeMove(Move move){		
+		moves.add(move);
 		
 		m_moves_board.addVertex(move);
-		for (Coordinates coordinates : getAdgacentVertices(move.getCoordinates())){
+		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
 			Move target = new Move(move.getPlayer(), coordinates);
 			DijkstraShortestPath<Move, MyEdge> daijkstra = new DijkstraShortestPath<Move, Game.MyEdge>(m_moves_board, move, target);
 			GraphPath<Move, MyEdge> path = daijkstra.getPath();
@@ -85,13 +85,13 @@ public class Game {
 		
 		
 		
-		moves.add(move);
+		
 		
 		return null;
 		
 	}
 	
-	private Set<Coordinates> getAdgacentVertices(Coordinates vertex){
+	private Set<Coordinates> getAdjacentVertices(Coordinates vertex){
 		Set<Coordinates> vertexes = new HashSet<Coordinates>();
 		for(MyEdge e : m_board.edgesOf(vertex)){
 			vertexes.add((Coordinates) e.getTarget());

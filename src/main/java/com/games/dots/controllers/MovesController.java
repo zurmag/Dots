@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.games.dots.entities.ActionList;
 import com.games.dots.entities.Coordinates;
 import com.games.dots.entities.Move;
 import com.games.dots.entities.Player;
@@ -35,7 +36,7 @@ public class MovesController {
 	IRepository<Player> players;
 	
 	@RequestMapping(value = "/games/{gameId}/players/{playerId}/moves", method = RequestMethod.POST)
-	public ResponseEntity<Coordinates[][]> PostMove( 
+	public ResponseEntity<ActionList> PostMove( 
 			@RequestBody Coordinates coordinates, 
 			@PathVariable String gameId, 
 			@PathVariable String playerId,
@@ -48,13 +49,10 @@ public class MovesController {
 	    Game game = games.get(gameId);
 	    Player player = players.get(playerId);
 	    Move move = new Move(player, coordinates);
-		game.makeMove(move);
+		ActionList actionList = game.makeMove(move);
+		
 	    
-	    
-	    Coordinates[][] loop = null;
-	    
-	    
-	    return new ResponseEntity<Coordinates[][]>(loop, headers, HttpStatus.CREATED);
+	    return new ResponseEntity<ActionList>(actionList, headers, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/moves/{moveId}", method = RequestMethod.GET)
