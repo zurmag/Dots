@@ -1,10 +1,13 @@
 package com.games.dots.logic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.jgrapht.*;
@@ -25,7 +28,7 @@ public class Game {
 	public List<Player> players = new ArrayList<Player>();
 	public String id;
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
-	SimpleWeightedGraph<Move, MyEdge> m_moves_board = new SimpleWeightedGraph<>(MyEdge.class); 
+	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class); 
 	public Game(BoardSize size){
 		
 		//Create vertexes
@@ -65,58 +68,116 @@ public class Game {
 	
 	
 	
-	public ActionList makeMove(Move move){		
+	public ActionList makeMove(Move move){
+		ActionList actionList = new ActionList();
 		moves.add(move);
 		
 		m_moves_board.addVertex(move);
 		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
 			Move target = new Move(move.getPlayer(), coordinates);
-			DijkstraShortestPath<Move, MyEdge> daijkstra = new DijkstraShortestPath<Move, Game.MyEdge>(m_moves_board, move, target);
+			if (	!m_board.containsVertex(coordinates) || //was removed
+					!m_moves_board.containsVertex(target)) //only my moves
+				continue;
+			
+			
+			DijkstraShortestPath<Move, MyEdge> daijkstra = new DijkstraShortestPath<Move, MyEdge>(m_moves_board, move, target);
 			GraphPath<Move, MyEdge> path = daijkstra.getPath();
-			double weight = -1;
+			double weight = 0;
 			if (path != null){
 				weight = 1;
-				for (MyEdge edge : path.getEdgeList()){
+				List<Coordinates> vertexes = new ArrayList<>();
+				List<MyEdge> edgeList = path.getEdgeList();
+				
+				
+				for (ListIterator<MyEdge> listIterator = edgeList.listIterator(); listIterator.hasNext(); ){
+					MyEdge edge = listIterator.next();
+					Coordinates c = null;
+					if (vertexes.size() == 0){
+						c = ((Move) edge.getTarget()).getCoordinates();
+					}else{
+						Coordinates last = vertexes.get(vertexes.size()-1);
+						if (last.equals(((Move)edge.getSource()).getCoordinates())) {
+							c = ((Move)edge.getTarget()).getCoordinates();
+						}else{
+							c = ((Move)edge.getSource()).getCoordinates();
+						}
+					}
+					vertexes.add(c);
 					m_moves_board.setEdgeWeight(edge, weight);					
 				}
+				Coordinates[] cycle = vertexes.toArray(new Coordinates[0]);				
+				
+				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
+				if (deadPoints.size() > 0){
+					actionList.newDeadDots.addAll(deadPoints);
+					actionList.newCycles.add(cycle);
+				}
 			}
-			
+			MyEdge newEdge = m_moves_board.addEdge(move, target);
+			m_moves_board.setEdgeWeight(newEdge, weight);
 		}
 		
 		
 		
 		
 		
-		return null;
+		return actionList;
 		
 	}
 	
 	private Set<Coordinates> getAdjacentVertices(Coordinates vertex){
 		Set<Coordinates> vertexes = new HashSet<Coordinates>();
 		for(MyEdge e : m_board.edgesOf(vertex)){
+			vertexes.add((Coordinates) e.getSource());
 			vertexes.add((Coordinates) e.getTarget());
 		}
-		
+		vertexes.remove(vertex);
 		return vertexes;
 	}
 	
-	
-	private class MyEdge extends DefaultWeightedEdge{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public Object getSource(){
-			return super.getSource();
+	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, Player me){
+		Set<Coordinates> deadPoints = new HashSet<>();
+		//sort by second coordinate:
+		Coordinates[] newCycle =cycle.clone();
+		Arrays.sort(newCycle, new Comparator<Coordinates>() {
+			@Override public int compare(Coordinates c1, Coordinates c2) {
+				if (c1.y != c2.y)
+					return c1.y - c2.y;
+				else
+					return c1.x - c2.x ;
+			}		
+		});
+		
+		
+		Coordinates left, right;
+		for (int i = 0; i < newCycle.length; i++){
+			left = right= newCycle[i];
+			int j = i;
+			for (; j < newCycle.length && left.y == newCycle[j].y ;j++){
+				right = newCycle[j];
+			}
+			
+			if (left.x < right.x){
+				for (Player otherPlayer : players){
+					if (otherPlayer == me) continue;
+					for (int x = left.x; x <right.x;x++){
+						Coordinates c = new Coordinates(x, left.y);
+						Move move = new Move(otherPlayer, c);
+						if (m_moves_board.containsVertex(move))
+							deadPoints.add(c);								
+					}
+				}
+			}
+			i = j-1;
+			
 		}
 		
-		public Object getTarget(){
-			return super.getTarget();
-		}
+		return deadPoints;
 		
-		public double getWeight(){
-			return super.getWeight();
-		}
 	}
+	
+	
+	
+	
+	
 }
