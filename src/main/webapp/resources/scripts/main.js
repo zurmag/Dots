@@ -5,12 +5,11 @@ var stage = new Kinetic.Stage({
      });
      var game;
      
+     var playerOne = new Player('red', 1);
+     var playerTwo = new Player('green', 2);
      
-     post('games/', '[]', function (data, textStatus, request){
+     post('games/', JSON.stringify([playerOne, playerTwo]), function (data, textStatus, request){
     	 game = new game('big', request.getResponseHeader('location'));
-    	 
-    	 var playerOne = game.getPlayer('red', 1);
-         var playerTwo = game.getPlayer('green', 2);
          
          var currentPlayer = null;
          var layer = game.getBoard();

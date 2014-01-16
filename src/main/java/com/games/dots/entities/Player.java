@@ -2,7 +2,7 @@ package com.games.dots.entities;
 
 public class Player {
 	public String id;
-
+	public String color;
 	@Override
 	public int hashCode() {
 		final int prime = 31;

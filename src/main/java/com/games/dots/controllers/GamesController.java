@@ -37,6 +37,7 @@ public class GamesController {
 		}
 		Game game = new Game(BoardSize.valueOf(size));
 		game.players = Arrays.asList(players);
+		games.add(game);
 		logger.info("Game created with Id" + game.id);
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();

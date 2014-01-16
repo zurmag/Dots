@@ -182,7 +182,7 @@ public class Game {
 			if (left.x < right.x){
 				for (Player otherPlayer : players){
 					if (otherPlayer == me) continue;
-					for (int x = left.x; x <right.x;x++){
+					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
 						Move move = new Move(otherPlayer, c);
 						if (m_moves_board.containsVertex(move))

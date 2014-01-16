@@ -8,11 +8,22 @@ import com.games.dots.entities.Player;
 
 public class PlayersRepository implements IRepository<Player>{
 
-	private Map<String, Player> repository = new ConcurrentHashMap<String, Player>(); 
+	private Map<String, Player> m_repository = new ConcurrentHashMap<String, Player>(); 
+	
+	public PlayersRepository(){
+		Player player1 = new Player();
+		player1.id = "1";
+		
+		Player player2 = new Player();
+		player2.id = "2";
+		
+		m_repository.put("1", player1);
+		m_repository.put("2", player2);
+	}
 	
 	@Override
 	public Player get(String id) {
-		return repository.get(id);
+		return m_repository.get(id);
 	}
 
 	@Override
@@ -21,13 +32,13 @@ public class PlayersRepository implements IRepository<Player>{
 			UUID id = UUID.randomUUID();		
 			player.id = id.toString();
 		}
-		repository.put(player.id, player);
+		m_repository.put(player.id, player);
 		return player;
 	}
 
 	@Override
 	public void remove(String id) {
-		repository.remove(id);
+		m_repository.remove(id);
 		
 	}
 

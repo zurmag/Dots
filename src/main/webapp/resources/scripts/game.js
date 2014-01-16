@@ -83,10 +83,6 @@ function game(size, location){
 		return boardLayer;
 	};
 
-	this.getPlayer = function(color, id){
-		return new Player(color, id);
-	};
-
 	this.setPointMouseDown = function (x, y, player){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
@@ -109,6 +105,10 @@ function game(size, location){
 		var coordinates = {};
 		coordinates.x = i;
 		coordinates.y = j;
+		if (player.i == null || player.j == null)
+		{
+			return;
+		}
 		if (i == player.i && j == player.j){
 			cell = board[i][j]; 
 			dot = board[i][j].dot;
@@ -116,7 +116,7 @@ function game(size, location){
 			dot.setStroke('black');
 			dot.setStrokeWidth(1);			
 			cell.player = player;
-			post(gameLocation+'/players' + player.id + '/moves',JSON.stringify(coordinates), function(data){
+			post(gameLocation+'/players/' + player.id + '/moves',JSON.stringify(coordinates), function(data){
 				if (data.length > 0){
 					data.push(data[0]);
 					for (var index = 0; index < data.length - 1; index++){

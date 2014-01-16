@@ -40,7 +40,7 @@ public class MovesController {
 			@PathVariable String playerId,
 			UriComponentsBuilder builder){
 		UUID id = UUID.randomUUID();
-		UriComponents uriComponents = builder.path("/games/{gameId}/players/{playerId}/moves/{id}").buildAndExpand(gameId, id);
+		UriComponents uriComponents = builder.path("/games/{gameId}/players/{playerId}/moves/{id}").buildAndExpand(gameId, playerId, id);
 		logger.debug("Move created for game Id " + gameId + " MoveId" + id);
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());
