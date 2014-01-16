@@ -73,6 +73,7 @@ public class GameTests {
 		List<Move> player1Moves = new ArrayList<Move>();
 		List<Move> player2Moves = new ArrayList<Move>();
 		player1Coordinates.add(new Coordinates(1, 1));
+		player1Coordinates.add(new Coordinates(1, 2));
 		player2Coordinates.add(new Coordinates(1, 0));
 		player2Coordinates.add(new Coordinates(0, 1));
 		player2Coordinates.add(new Coordinates(0, 2));
@@ -102,7 +103,7 @@ public class GameTests {
 		
 		//Assert		
 		assertEquals(1, actionList.newCycles.size());
-		assertEquals(1, actionList.newDeadDots.size());
+		assertEquals(2, actionList.newDeadDots.size());
 		
 	}
 	
