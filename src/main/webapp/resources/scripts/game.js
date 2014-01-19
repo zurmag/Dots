@@ -1,4 +1,4 @@
-function game(size, location){
+function game(size, location, players){
 	
 	var offset = 10;
 	var distance = 20;
@@ -6,9 +6,14 @@ function game(size, location){
 	var board = [];
 	var boardColor = 'grey';
 	var gameLocation = '';
-	init(size, location);
+	this.players = [];
+	var currentPlayerIndex = 0;
+	var pressedDot = null;
+	init(size, location, players);
 
-	function init(size, location){
+	function init(size, location, players){
+		this.players = players;
+		
 		gameLocation = location;
 		var width = 0;
 		var height = 0;		
@@ -83,64 +88,75 @@ function game(size, location){
 		return boardLayer;
 	};
 
-	this.setPointMouseDown = function (x, y, player){
+	this.setPointMouseDown = function (x, y){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
 		var cell = board[i][j];
 
 		if (cell.player == null){//valid cell
-			player.i = i;
-			player.j = j;		
-			cell.dot.setFill(player.color);
+			pressedDot = {};
+			pressedDot.i = i;
+			pressedDot.j = j;					
+			cell.dot.setFill(getCurrentPlayer().color);
 			boardLayer.draw();
-		}
-
-
-		
+		}		
 	};
 
-	this.setPointMouseUp = function (x, y, player){
+	this.setPointMouseUp = function (x, y){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
 		var coordinates = {};
 		coordinates.x = i;
 		coordinates.y = j;
-		if (player.i == null || player.j == null)
+		if (pressedDot == null)//invalid point pressed
 		{
 			return;
 		}
-		if (i == player.i && j == player.j){
+		
+		if (i == pressedDot.i && j == pressedDot.j){
 			cell = board[i][j]; 
 			dot = board[i][j].dot;
 			dot.setRadius(3);
 			dot.setStroke('black');
 			dot.setStrokeWidth(1);			
-			cell.player = player;
-			post(gameLocation+'/players/' + player.id + '/moves',JSON.stringify(coordinates), function(data){
-				if (data.length > 0){
-					data.push(data[0]);
-					for (var index = 0; index < data.length - 1; index++){
-						startPoint = board[data[index].x][data[index].y];
-						endPoint = board[data[index+1].x][data[index+1].y];
-						var line = new Kinetic.Line({
-							points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
-							strokeWidth: 1,
-							stroke: player.color
-						});
-						boardLayer.add(line);
-						boardLayer.draw();
+			cell.player = getCurrentPlayer();
+			post(gameLocation+'/players/' + getCurrentPlayer().id + '/moves',JSON.stringify(coordinates), function(data){
+				if (data.newCycles.length > 0){
+					for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
+						var cycle = data.newCycles[cycleIndex];
+						cycle.push(cycle[0]);
+						for (var index = 0; index < cycle.length - 1; index++){
+							startPoint = board[cycle[index].x][cycle[index].y];
+							endPoint = board[cycle[index+1].x][cycle[index+1].y];
+							var line = new Kinetic.Line({
+								points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
+								strokeWidth: 1,
+								stroke: startPoint.player.color
+							});
+							boardLayer.add(line);
+							boardLayer.draw();
+						}
 					}
 				}
-				console.log(data);
+				
 			});
+			switchPlayer();
 		}
 		else{//undo
-			dot = board[player.i][player.j].dot;
+			dot = board[pressedDot.i][pressedDot.j].dot;
 			dot.setFill(boardColor);
 		}
-		player.i = null; player.j = null;
+		pressedDot = null;
 		boardLayer.draw();
 				
 	};
 	
+	//privates
+	function switchPlayer(){
+		currentPlayerIndex = ++currentPlayerIndex % this.players.length ;
+	}
+	
+	function getCurrentPlayer(){
+		return this.players[currentPlayerIndex];
+	}	
 }

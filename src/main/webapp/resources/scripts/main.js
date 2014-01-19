@@ -4,28 +4,25 @@ var stage = new Kinetic.Stage({
        height: 578
      });
      var game;
-     
+     var gameSize = "Medium";
      var playerOne = new Player('red', 1);
      var playerTwo = new Player('green', 2);
-     
-     post('games/', JSON.stringify([playerOne, playerTwo]), function (data, textStatus, request){
-    	 game = new game('big', request.getResponseHeader('location'));
+     var players = [playerOne, playerTwo];
+     post('games' + "?boardSize=" + gameSize, JSON.stringify(players), function (data, textStatus, request){
+    	 game = new game(gameSize, request.getResponseHeader('location'), players);
          
-         var currentPlayer = null;
          var layer = game.getBoard();
          
          // add the layer to the stage
          stage.add(layer);
          stage.on('mousedown', function () {
-           currentPlayer = (currentPlayer == playerOne)?playerTwo:playerOne;
            var mousePos = stage.getPointerPosition();        
-           game.setPointMouseDown(mousePos.x, mousePos.y, currentPlayer);
+           game.setPointMouseDown(mousePos.x, mousePos.y);
          });
 
          stage.on('mouseup', function () {
-           //player = (currentPlayer == playerOne)?playerTwo:playerOne;
            var mousePos = stage.getPointerPosition();
-           game.setPointMouseUp(mousePos.x, mousePos.y, currentPlayer);
+           game.setPointMouseUp(mousePos.x, mousePos.y);
          });
      });
       

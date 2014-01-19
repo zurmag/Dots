@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -30,11 +31,12 @@ public class GamesController {
 	GamesRepository games;
 
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
-	public ResponseEntity<String> postGame(@RequestBody Player[] players, UriComponentsBuilder builder){
-		String size = null;
-		if (size == null || size.isEmpty()){
-			size = "Medium";
-		}
+	public ResponseEntity<String> postGame(
+			@RequestBody Player[] players, 
+			@RequestParam(value = "boardSize", required = false, defaultValue = "Medium") String size,
+			UriComponentsBuilder builder 
+			){
+	
 		Game game = new Game(BoardSize.valueOf(size));
 		game.players = Arrays.asList(players);
 		games.add(game);

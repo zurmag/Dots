@@ -5,10 +5,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.GraphPath;
@@ -32,7 +34,8 @@ public class Game {
 	public List<Player> players = new ArrayList<Player>();
 	public String id;
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
-	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class); 
+	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
+	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
 	public Game(BoardSize size){
 		
 		//Create vertexes
@@ -67,17 +70,73 @@ public class Game {
 		
 	}
 	
-	public List<Move> moves = new LinkedList<Move>();
+	public Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
 
 	
 	
 	
 	public ActionList makeMove(Move move){
 		ActionList actionList = new ActionList();
-		moves.add(move);
-		
-		
+		m_moves.put(move.getCoordinates(), move);		
 		m_moves_board.addVertex(move);
+		
+		for (Coordinates[] cycle : m_cycles){
+			if (isDeadPoint(move, cycle)){
+				actionList.newCycles.add(cycle);
+				actionList.newDeadDots.add(move.getCoordinates());
+				break;
+			}
+		}
+		if (actionList.newCycles.isEmpty()){			
+		
+			for (Coordinates[] cycle : createAndGetNewCycles(move)){			
+					
+				m_cycles.add(cycle);			
+				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
+				if (deadPoints.size() > 0){
+					
+					actionList.newDeadDots.addAll(deadPoints);
+					actionList.newCycles.add(cycle);
+								
+				}				
+			
+				
+			}
+		}
+		
+		m_board.removeAllVertices(actionList.newDeadDots);
+		for (Coordinates coordinate: actionList.newDeadDots){
+			m_moves_board.removeVertex(m_moves.get(coordinate));						
+		}
+		
+		return actionList;		
+	}	
+	
+	private boolean isDeadPoint(Move move, Coordinates[] cycle) {
+	
+		boolean xLessThan = false, xBiggerThan = false, yLessThan = false, yBiggerThan = false;
+		for (int i = 0;i<cycle.length;i++){
+			if (move.getCoordinates().x < cycle[i].x){
+				xLessThan = true;
+			}
+			if (move.getCoordinates().x > cycle[i].x){
+				xBiggerThan = true;
+			}
+			if (move.getCoordinates().y < cycle[i].y){
+				yLessThan = true;
+			}
+			if (move.getCoordinates().y > cycle[i].y){
+				yBiggerThan = true;
+			}
+			
+		}
+		return xLessThan && xBiggerThan && yLessThan && yBiggerThan;
+	}
+
+	private List<Coordinates[]> createAndGetNewCycles(Move move) {
+		
+		List<Coordinates[]> cycles = new LinkedList<Coordinates[]>();
+		
 		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
 			Move target = new Move(move.getPlayer(), coordinates);
 			if (!m_moves_board.containsVertex(target)) //only my moves
@@ -87,38 +146,25 @@ public class Game {
 			GraphPath<Move, MyEdge> path = daijkstra.getPath();
 			double weight = 0;
 			if (path != null){
-				weight = 1;
+				
 				Set<Coordinates> vertexes = new HashSet<>();
 				List<MyEdge> edgeList = path.getEdgeList();
-				
-				
 				for (ListIterator<MyEdge> listIterator = edgeList.listIterator(); listIterator.hasNext(); ){
-					MyEdge edge = listIterator.next();
-					
+					MyEdge edge = listIterator.next();					
 					vertexes.add(((Move) edge.getSource()).getCoordinates());
 					vertexes.add(((Move) edge.getTarget()).getCoordinates());
-					m_moves_board.setEdgeWeight(edge, weight);					
 				}
-				Coordinates[] cycle = fixCycle(vertexes);				
 				
-				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
-				if (deadPoints.size() > 0){
-					actionList.newDeadDots.addAll(deadPoints);
-					actionList.newCycles.add(cycle);
-				}
+				Coordinates[] cycle = fixCycle(vertexes);
+				cycles.add(cycle);				
+				
 			}
 			MyEdge newEdge = m_moves_board.addEdge(move, target);
 			m_moves_board.setEdgeWeight(newEdge, weight);
 		}
-		
-		
-		
-		
-		
-		return actionList;
-		
-	}	
-	
+		return cycles;
+	}
+
 	private Coordinates[] fixCycle(Collection<Coordinates> vertexes){
 		Deque<Coordinates> newCycle = new LinkedList<Coordinates>();
 		List<Coordinates> leftovers = new LinkedList<Coordinates>();
@@ -181,7 +227,7 @@ public class Game {
 			
 			if (left.x < right.x){
 				for (Player otherPlayer : players){
-					if (otherPlayer == me) continue;
+					if (otherPlayer.equals(me)) continue;
 					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
 						Move move = new Move(otherPlayer, c);
