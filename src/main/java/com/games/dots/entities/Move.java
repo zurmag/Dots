@@ -3,14 +3,14 @@ package com.games.dots.entities;
 
 public class Move {
 	
-	private Player player;
+	private User player;
 	private Coordinates coordinates;	
 	
-	public Move(Player player, Coordinates coordinates) {
+	public Move(User player, Coordinates coordinates) {
 		this.player = player;
 		this.coordinates = coordinates;
 	}
-	public Player getPlayer() {
+	public User getPlayer() {
 		return player;
 	}	
 	public Coordinates getCoordinates() {

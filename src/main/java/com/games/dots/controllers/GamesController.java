@@ -18,7 +18,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.games.dots.entities.BoardSize;
-import com.games.dots.entities.Player;
+import com.games.dots.entities.User;
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 
@@ -32,7 +32,7 @@ public class GamesController {
 
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
 	public ResponseEntity<String> postGame(
-			@RequestBody Player[] players, 
+			@RequestBody User[] players, 
 			@RequestParam(value = "boardSize", required = false, defaultValue = "Medium") String size,
 			UriComponentsBuilder builder 
 			){

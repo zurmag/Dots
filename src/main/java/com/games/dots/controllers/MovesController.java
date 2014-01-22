@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.games.dots.entities.ActionList;
 import com.games.dots.entities.Coordinates;
 import com.games.dots.entities.Move;
-import com.games.dots.entities.Player;
+import com.games.dots.entities.User;
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.IRepository;
 
@@ -31,7 +31,7 @@ public class MovesController {
 	IRepository<Game> games;
 	
 	@Resource(name="playersRepository")
-	IRepository<Player> players;
+	IRepository<User> players;
 	
 	@RequestMapping(value = "/games/{gameId}/players/{playerId}/moves", method = RequestMethod.POST)
 	public ResponseEntity<ActionList> PostMove( 
@@ -45,7 +45,7 @@ public class MovesController {
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());
 	    Game game = games.get(gameId);
-	    Player player = players.get(playerId);
+	    User player = players.get(playerId);
 	    Move move = new Move(player, coordinates);
 		ActionList actionList = game.makeMove(move);
 		
