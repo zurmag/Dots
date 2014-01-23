@@ -21,18 +21,29 @@
    		$.getScript('resources/scripts/game.js');   		
    		$.getScript('resources/scripts/main.js');
    	});
-   	</script>
-   	
-   	
-            
-    <!-- <script src="resources/scripts/player.js" type="text/javascript"></script>
-    <script src="resources/scripts/board-cell.js" type="text/javascript"></script>
-    <script src="resources/scripts/game.js" type="text/javascript"></script>
-    <script src="resources/scripts/utilities.js" type="text/javascript"></script>
-    <script src="resources/scripts/main.js" type="text/javascript"></script> -->
-    
+   	</script>    
 </head>
 <body>
+	<div id="fb-root"></div>
+	<script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '${fbApiId}',
+          status     : true,
+          xfbml      : true
+        });
+        
+        console.debug("hello");
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
 	<div id="game-container"></div>    
 </body>
 </html>

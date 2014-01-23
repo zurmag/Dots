@@ -17,8 +17,8 @@ public class ConfigurationManager {
         }
 	}
 	
-	public String getFbApiId(){
-		return m_properies.getProperty("FbApiId");
+	public String getFbAppId(){
+		return m_properies.getProperty("FbAppId");
 	}
 	
 	public String getFbSecretKey(){
