@@ -122,7 +122,7 @@ public class FacebookController {
                 String accessToken = data.get("oauth_token");
                 FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
                 User user = facebookClient.fetchObject("me", User.class);
-                mav.addObject("fbApiId", m_configurationManger.getFbAppId());
+                mav.addObject("fbAppId", m_configurationManger.getFbAppId());
                 mav.addObject("user", user);
             }
 			

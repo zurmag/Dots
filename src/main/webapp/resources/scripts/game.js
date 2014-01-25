@@ -1,4 +1,4 @@
-function game(size, location, players){
+function game(size, location){
 	
 	var offset = 10;
 	var distance = 20;
@@ -9,10 +9,11 @@ function game(size, location, players){
 	this.players = [];
 	var currentPlayerIndex = 0;
 	var pressedDot = null;
-	init(size, location, players);
-
-	function init(size, location, players){
-		this.players = players;
+	var stage = null;
+	
+	init(size, location);
+	
+	function init(size, location){
 		
 		gameLocation = location;
 		var width = 0;
@@ -34,8 +35,24 @@ function game(size, location, players){
 			};
 		};
 
+		stage = new Kinetic.Stage({
+		       container: 'board-container',
+		       width: 578,
+		       height: 578
+		});
+		
 		boardLayer = createBoardLayer(width, height);
+		stage.add(boardLayer);
+		
+		stage.on('mousedown', function () {
+	    	var mousePos = stage.getPointerPosition();        
+	        setPointMouseDown(mousePos.x, mousePos.y);
+	    });
 
+	    stage.on('mouseup', function () {
+	    	var mousePos = stage.getPointerPosition();
+	    	setPointMouseUp(mousePos.x, mousePos.y);
+	    });
 	}
 
 	function createBoardLayer(){
@@ -83,12 +100,9 @@ function game(size, location, players){
 		layer.add(rect);
 	    return layer;
 	}
-
-	this.getBoard = function (){		
-		return boardLayer;
-	};
-
-	this.setPointMouseDown = function (x, y){
+	
+	//privates
+	function setPointMouseDown (x, y){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
 		var cell = board[i][j];
@@ -100,9 +114,9 @@ function game(size, location, players){
 			cell.dot.setFill(getCurrentPlayer().color);
 			boardLayer.draw();
 		}		
-	};
+	}
 
-	this.setPointMouseUp = function (x, y){
+	function setPointMouseUp (x, y){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
 		var coordinates = {};
@@ -149,9 +163,9 @@ function game(size, location, players){
 		pressedDot = null;
 		boardLayer.draw();
 				
-	};
+	}
 	
-	//privates
+	
 	function switchPlayer(){
 		currentPlayerIndex = ++currentPlayerIndex % this.players.length ;
 	}

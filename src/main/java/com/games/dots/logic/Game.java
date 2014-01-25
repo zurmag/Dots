@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.games.dots.entities.ActionList;
 import com.games.dots.entities.BoardSize;
 import com.games.dots.entities.Coordinates;
+import com.games.dots.entities.GameSettings;
 import com.games.dots.entities.Move;
 import com.games.dots.entities.User;
 
@@ -31,12 +32,25 @@ public class Game {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
-	public List<User> players = new ArrayList<User>();
+	private List<User> m_players = new ArrayList<User>();
+	private int m_maxNumberOfPlayers;
 	public String id;
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
 	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
-	public Game(BoardSize size){
+	public Game (GameSettings settings){
+		BoardSize size;
+		m_maxNumberOfPlayers = settings.players;
+		try {
+			size = BoardSize.valueOf(settings.size);
+		} catch (IllegalArgumentException e) {
+			m_logger.warn("Unknown size %s", settings.size);
+			size = BoardSize.Medium;			
+		}
+		initBoard(size);
+	}
+	
+	public void initBoard (BoardSize size){
 		
 		//Create vertexes
 		for (int i = 0; i<size.value; i++){
@@ -226,7 +240,7 @@ public class Game {
 			}
 			
 			if (left.x < right.x){
-				for (User otherPlayer : players){
+				for (User otherPlayer : m_players){
 					if (otherPlayer.equals(me)) continue;
 					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
@@ -241,6 +255,16 @@ public class Game {
 		}
 		
 		return deadPoints;
+		
+	}
+
+	public void addPlayer(User user) {
+		if (m_players.size() < m_maxNumberOfPlayers)
+			m_players.add(user);
+		else{
+			//TODO: Think about error
+		}
+			
 		
 	}
 	

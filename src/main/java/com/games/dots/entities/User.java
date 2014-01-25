@@ -2,8 +2,9 @@ package com.games.dots.entities;
 
 public class User {
 	public String id;
-	public UserType userType;
+	public UserType userType;	
 	public String color;
+	public String avatarUrl;
 	
 	@Override
 	public int hashCode() {
