@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.games.dots.entities.ActionList;
 import com.games.dots.entities.BoardSize;
 import com.games.dots.entities.Coordinates;
+import com.games.dots.entities.GameSettings;
 import com.games.dots.entities.Move;
 import com.games.dots.entities.User;
 import com.games.dots.logic.Game;
@@ -18,9 +19,15 @@ import com.games.dots.logic.Game;
 public class GameTests {
 	@Test
 	public void gameCreationTest(){
-		Game smallGame = new Game(BoardSize.Small);
-		Game mediumGame = new Game(BoardSize.Medium);
-		Game largeGame = new Game(BoardSize.Large);
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
+		settings.size = "Medium";
+		Game mediumGame = new Game(settings);
+		settings.size = "Big";
+		Game largeGame = new Game(settings);
 
 		assertNotNull(smallGame);
 		assertNotNull(mediumGame);
@@ -30,11 +37,14 @@ public class GameTests {
 	@Test
 	public void SimpleCycleTest(){
 		//Arrange
-		Game smallGame = new Game(BoardSize.Small);
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
 		User player1 = new User();player1.id = "1";		
 		User player2 = new User();player2.id = "2";
-		smallGame.players.add(player1);
-		smallGame.players.add(player2);
+		smallGame.addPlayer(player1);
+		smallGame.addPlayer(player2);
 		
 		Coordinates[] coordinates = new Coordinates[5];
 		coordinates[0] = new Coordinates(1, 1);
@@ -62,12 +72,16 @@ public class GameTests {
 	@Test
 	public void BigCycleTest(){
 		//Arrange
-		Game smallGame = new Game(BoardSize.Small);
+		
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
 		User player1 = new User();player1.id = "1";		
 		User player2 = new User();player2.id = "2";
-		smallGame.players.add(player1);
-		smallGame.players.add(player2);
-		
+		smallGame.addPlayer(player1);
+		smallGame.addPlayer(player2);
+
 		List<Coordinates> player1Coordinates = new ArrayList<Coordinates>();
 		List<Coordinates> player2Coordinates = new ArrayList<Coordinates>();
 		List<Move> player1Moves = new ArrayList<Move>();
