@@ -1,5 +1,8 @@
 package com.games.dots.controllers;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
@@ -48,5 +51,10 @@ public class GamesController {
 			@PathVariable String id,
 			@RequestBody User user){
 		m_games.get(id).addPlayer(user);
+	}
+	
+	@RequestMapping(value = "/games", method = RequestMethod.GET)
+	public Collection<Game> getGames(){
+		return m_games.getAllOpenGames();
 	}
 }
