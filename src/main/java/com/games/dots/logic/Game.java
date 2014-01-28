@@ -21,12 +21,12 @@ import org.jgrapht.graph.WeightedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.games.dots.entities.ActionList;
-import com.games.dots.entities.BoardSize;
-import com.games.dots.entities.Coordinates;
-import com.games.dots.entities.GameSettings;
-import com.games.dots.entities.Move;
-import com.games.dots.entities.User;
+import com.games.dots.ui.entities.ActionList;
+import com.games.dots.ui.entities.BoardSize;
+import com.games.dots.ui.entities.Coordinates;
+import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.Move;
+import com.games.dots.ui.entities.User;
 
 public class Game {
 	
@@ -50,7 +50,7 @@ public class Game {
 		initBoard(size);
 	}
 	
-	public void initBoard (BoardSize size){
+	private void initBoard (BoardSize size){
 		
 		//Create vertexes
 		for (int i = 0; i<size.value; i++){
@@ -83,7 +83,14 @@ public class Game {
 		}
 		
 	}
+
+	public int getMaxNumberOfPlayers(){
+		return m_maxNumberOfPlayers;
+	}
 	
+	public Collection<User> getPlayers(){
+		return m_players;
+	}
 	public Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
 
 	

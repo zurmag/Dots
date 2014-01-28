@@ -1,4 +1,4 @@
-package com.games.dots.entities;
+package com.games.dots.ui.entities;
 
 import java.util.ArrayList;
 import java.util.HashSet;

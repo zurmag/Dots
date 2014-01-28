@@ -10,3 +10,16 @@ function post(url, data, success){
 		  }
 	});
 }
+
+function put(url, data, success){
+	$.ajax({
+		  url:url,
+		  type:"PUT",
+		  data:data,
+		  contentType:"application/json; charset=utf-8",
+		  success: success,
+		  error: function (data, textStatus, request){
+			  console.error(textStatus);
+		  }
+	});
+}

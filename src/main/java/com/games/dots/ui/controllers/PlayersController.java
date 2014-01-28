@@ -1,4 +1,4 @@
-package com.games.dots.controllers;
+package com.games.dots.ui.controllers;
 
 import org.springframework.stereotype.Controller;
 

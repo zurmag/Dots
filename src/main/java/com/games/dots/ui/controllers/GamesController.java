@@ -1,6 +1,7 @@
-package com.games.dots.controllers;
+package com.games.dots.ui.controllers;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -18,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.games.dots.entities.GameSettings;
-import com.games.dots.entities.User;
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
+import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.User;
 
 @Controller
 public class GamesController {
@@ -47,14 +48,30 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games/{id}", method = RequestMethod.PUT)
-	public void addPlayerToGame(
-			@PathVariable String id,
-			@RequestBody User user){
+	public ResponseEntity<?> addPlayerToGame(
+			@PathVariable String id	, @RequestBody User user
+			){
+		logger.debug("addPlayerToGame");		
 		m_games.get(id).addPlayer(user);
+		return new ResponseEntity<String>(id, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.GET)
-	public Collection<Game> getGames(){
-		return m_games.getAllOpenGames();
+	public Collection<com.games.dots.ui.entities.Game> getGames(){
+		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();;
+		
+		for(Game game: m_games.getAllOpenGames()){
+			games.add(toUiGame(game));			
+		}
+		
+		return games;
+	}
+	
+	private static com.games.dots.ui.entities.Game toUiGame(Game game){
+		com.games.dots.ui.entities.Game retVal = new com.games.dots.ui.entities.Game();
+		retVal.id = game.id;
+		retVal.maxUserNumber = game.getMaxNumberOfPlayers();
+		retVal.users.addAll(game.getPlayers());
+		return retVal;
 	}
 }

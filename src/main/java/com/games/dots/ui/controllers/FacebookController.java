@@ -1,4 +1,4 @@
-package com.games.dots.controllers;
+package com.games.dots.ui.controllers;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,9 +30,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.games.dots.entities.ActionList;
-import com.games.dots.entities.UserType;
 import com.games.dots.repositories.IRepository;
+import com.games.dots.ui.entities.ActionList;
+import com.games.dots.ui.entities.UserType;
 import com.games.dots.utilities.ConfigurationManager;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.DefaultWebRequestor;
@@ -49,7 +49,7 @@ public class FacebookController {
 	private static final Logger logger = LoggerFactory.getLogger(FacebookController.class);
 	
 	@Resource(name="playersRepository")
-	IRepository<com.games.dots.entities.User> m_players;
+	IRepository<com.games.dots.ui.entities.User> m_players;
 	
 	@Autowired
 	private ConfigurationManager m_configurationManger;
@@ -68,7 +68,7 @@ public class FacebookController {
 		FacebookClient.AccessToken token = getFacebookUserToken(code, m_configurationManger.getFbCanvasUrl());
 		FacebookClient facebookClient = new DefaultFacebookClient(token.getAccessToken());
         User fbuser = facebookClient.fetchObject("me", User.class);
-        com.games.dots.entities.User user = new com.games.dots.entities.User();
+        com.games.dots.ui.entities.User user = new com.games.dots.ui.entities.User();
         user.id = fbuser.getId();
         user.setUserType(UserType.FBUser);
         m_players.add(user);

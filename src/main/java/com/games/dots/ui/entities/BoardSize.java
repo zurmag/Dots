@@ -1,4 +1,4 @@
-package com.games.dots.entities;
+package com.games.dots.ui.entities;
 
 public enum BoardSize {
 	Large(30), 

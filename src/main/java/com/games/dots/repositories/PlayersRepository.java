@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.games.dots.entities.User;
+import com.games.dots.ui.entities.User;
 
 public class PlayersRepository implements IRepository<User>{
 

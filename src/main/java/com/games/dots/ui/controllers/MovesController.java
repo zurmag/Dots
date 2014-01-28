@@ -1,4 +1,4 @@
-package com.games.dots.controllers;
+package com.games.dots.ui.controllers;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.games.dots.entities.ActionList;
-import com.games.dots.entities.Coordinates;
-import com.games.dots.entities.Move;
-import com.games.dots.entities.User;
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.IRepository;
+import com.games.dots.ui.entities.ActionList;
+import com.games.dots.ui.entities.Coordinates;
+import com.games.dots.ui.entities.Move;
+import com.games.dots.ui.entities.User;
 
 @Controller
 public class MovesController {

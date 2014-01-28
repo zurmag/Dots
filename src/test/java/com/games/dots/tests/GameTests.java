@@ -7,13 +7,13 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.games.dots.entities.ActionList;
-import com.games.dots.entities.BoardSize;
-import com.games.dots.entities.Coordinates;
-import com.games.dots.entities.GameSettings;
-import com.games.dots.entities.Move;
-import com.games.dots.entities.User;
 import com.games.dots.logic.Game;
+import com.games.dots.ui.entities.ActionList;
+import com.games.dots.ui.entities.BoardSize;
+import com.games.dots.ui.entities.Coordinates;
+import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.Move;
+import com.games.dots.ui.entities.User;
 
 
 public class GameTests {
