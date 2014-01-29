@@ -17,8 +17,9 @@
    	<script src="https://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.4.min.js" type="text/javascript"></script>
    	
    	<script>
+   	var globals = {};
    	$(function () {
-   		globals = {};
+   		
    		$( "input[type=submit], a, button" )
 			.button()
      		.click(function( event ) {
@@ -31,7 +32,7 @@
    	 	$.getScript('resources/scripts/board-cell.js');
    	 	$.getScript('resources/scripts/central-panel.js');
    		$.getScript('resources/scripts/game.js');   		 
-   		$.getScript('resources/scripts/main.js'); 
+   		/* $.getScript('resources/scripts/main.js');  */
    		$.getScript('//connect.facebook.net/en_UK/all.js', function(){
    		    FB.init({
    		      appId: '${fbAppId}',
@@ -41,6 +42,7 @@
    	</script>    
 </head>
 <body>	
+<script type="text/javascript" src='resources/scripts/main.js'></script>
 	<div id="fb-root"></div>
 	<div class="fb-like" data-href="https://apps.facebook.com/simple-games-dots/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>	
 	<div id="menu-panel" class="Panel">

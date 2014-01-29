@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -57,7 +58,7 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.GET)
-	public Collection<com.games.dots.ui.entities.Game> getGames(){
+	public @ResponseBody Collection<com.games.dots.ui.entities.Game> getGames(){
 		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();;
 		
 		for(Game game: m_games.getAllOpenGames()){

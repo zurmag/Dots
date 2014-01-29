@@ -32,7 +32,7 @@ function CentralPanel(panelDivName){
 	
 	this.showGames = function(){		
 		activeContainer.style.display='none';
-		activeContainer = divs['games-container']
+		activeContainer = divs['games-container'];
 		activeContainer.style.display='block';
 		
 	};
@@ -49,7 +49,6 @@ function CentralPanel(panelDivName){
 		var boardContainerDiv = document.createElement('div');
 		boardContainerDiv.style.display='none';
 		boardContainerDiv.id = "board-container";
-		boardContainerDiv.innerHTML="Board";
 		return boardContainerDiv;
 	}
 	

@@ -277,7 +277,7 @@ public class Game {
 	
 	public boolean isOpenForRegistartion() {
 		
-		return m_players.size() == m_maxNumberOfPlayers;
+		return m_players.size() < m_maxNumberOfPlayers;
 	}
 	
 	
