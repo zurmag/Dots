@@ -5,17 +5,18 @@ function game(size, location){
 	var boardLayer = null;
 	var board = [];
 	var boardColor = 'grey';
-	var gameLocation = '';
+	var m_gameLocation = '';
 	this.players = [];
 	var currentPlayerIndex = 0;
 	var pressedDot = null;
 	var stage = null;
 	
 	init(size, location);
+	addPlayerToGame();
 	
 	function init(size, location){
 		
-		gameLocation = location;
+		m_gameLocation = location;
 		var width = 0;
 		var height = 0;		
 		if (size == 'small'){
@@ -134,7 +135,7 @@ function game(size, location){
 			dot.setStroke('black');
 			dot.setStrokeWidth(1);			
 			cell.player = getCurrentPlayer();
-			post(gameLocation+'/players/' + getCurrentPlayer().id + '/moves',JSON.stringify(coordinates), function(data){
+			post(m_gameLocation+'/players/' + getCurrentPlayer().id + '/moves',JSON.stringify(coordinates), function(data){
 				if (data.newCycles.length > 0){
 					for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
 						var cycle = data.newCycles[cycleIndex];
@@ -172,5 +173,22 @@ function game(size, location){
 	
 	function getCurrentPlayer(){
 		return this.players[currentPlayerIndex];
-	}	
+	}
+	
+	function addPlayerToGame(){
+		FB.getLoginStatus(function(response) {
+			if (response.status === 'connected') {
+				var uid = response.authResponse.userID;
+				//var accessToken = response.authResponse.accessToken;
+				var player = new Player('red', uid);
+				put(m_gameLocation, JSON.stringify(player), function(){
+					console.debug('successfully added player ' + uid);
+				});
+		    } 
+			else {
+			    console.error("something went wrong :(");
+			}
+		});
+	}
+	
 }

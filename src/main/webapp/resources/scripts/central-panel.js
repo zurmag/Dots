@@ -35,7 +35,7 @@ function CentralPanel(panelDivName){
 		activeContainer.style.display='block';		
 		activeContainer.innerHTML = '';
 		activeContainer.appendChild(createGamesView(data));
-		$('td > button').click(function (){
+		$('div#games-container button').click(function (){
 			console.debug('click!');
 		});
 	};

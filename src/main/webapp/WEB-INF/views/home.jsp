@@ -31,7 +31,7 @@
    	    $.getScript('resources/scripts/player.js');
    	 	$.getScript('resources/scripts/board-cell.js');
    	 	/* $.getScript('resources/scripts/central-panel.js'); */
-   		$.getScript('resources/scripts/game.js');   		 
+   		/* $.getScript('resources/scripts/game.js'); */   		 
    		/* $.getScript('resources/scripts/main.js');  */
    		$.getScript('//connect.facebook.net/en_UK/all.js', function(){
    		    FB.init({
@@ -43,6 +43,7 @@
 </head>
 <body>	
 	<script type="text/javascript" src='resources/scripts/central-panel.js'></script>
+	<script type="text/javascript" src='resources/scripts/game.js'></script>
 	<script type="text/javascript" src='resources/scripts/main.js'></script>
 	<div id="fb-root"></div>
 	<div class="fb-like" data-href="https://apps.facebook.com/simple-games-dots/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>	
