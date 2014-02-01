@@ -6,6 +6,6 @@ import java.util.List;
 public class Game {
 	public String id;
 	public BoardSize size;
-	public List<User> users = new LinkedList<User>();
-	public int maxUserNumber;
+	public List<User> players = new LinkedList<User>();
+	public int maxPlayers;
 }

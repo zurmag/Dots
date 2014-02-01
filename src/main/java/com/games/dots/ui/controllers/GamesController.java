@@ -71,8 +71,9 @@ public class GamesController {
 	private static com.games.dots.ui.entities.Game toUiGame(Game game){
 		com.games.dots.ui.entities.Game retVal = new com.games.dots.ui.entities.Game();
 		retVal.id = game.id;
-		retVal.maxUserNumber = game.getMaxNumberOfPlayers();
-		retVal.users.addAll(game.getPlayers());
+		retVal.size = game.getBoardSize();
+		retVal.maxPlayers = game.getMaxNumberOfPlayers();
+		retVal.players.addAll(game.getPlayers());
 		return retVal;
 	}
 }

@@ -34,27 +34,27 @@ public class Game {
 	
 	private List<User> m_players = new ArrayList<User>();
 	private int m_maxNumberOfPlayers;
+	private BoardSize m_size;
 	public String id;
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
 	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
 	public Game (GameSettings settings){
-		BoardSize size;
 		m_maxNumberOfPlayers = settings.players;
 		try {
-			size = BoardSize.valueOf(settings.size);
+			m_size = BoardSize.valueOf(settings.size);
 		} catch (IllegalArgumentException e) {
 			m_logger.warn("Unknown size %s", settings.size);
-			size = BoardSize.Medium;			
+			m_size = BoardSize.Medium;			
 		}
-		initBoard(size);
+		initBoard();
 	}
 	
-	private void initBoard (BoardSize size){
+	private void initBoard (){
 		
 		//Create vertexes
-		for (int i = 0; i<size.value; i++){
-			for (int j = 0; j<size.value; j++){
+		for (int i = 0; i<m_size.value; i++){
+			for (int j = 0; j<m_size.value; j++){
 				Coordinates coordinate = new Coordinates(i, j);
 				m_board.addVertex(coordinate);
 			}
@@ -62,14 +62,14 @@ public class Game {
 		
 		
 		//Create adjacencies
-		for (int i = 0; i<size.value; i++){
-			for (int j = 0; j<size.value; j++){
+		for (int i = 0; i<m_size.value; i++){
+			for (int j = 0; j<m_size.value; j++){
 				Coordinates src = new Coordinates(i, j);
 				
 				for (int ii = -1; ii <= 1; ii++){
 					for (int jj = -1; jj<=1; jj++){
 						if ((ii != 0 || jj != 0) &&// not self 
-							 i + ii >=0 && j + jj >= 0 && i + ii < size.value && j + jj < size.value) {//within board
+							 i + ii >=0 && j + jj >= 0 && i + ii < m_size.value && j + jj < m_size.value) {//within board
 							Coordinates trg = new Coordinates(i+ii, j+jj);
 							if (!m_board.containsEdge(src, trg)){
 								//m_logger.debug(String.format("Adding edge from %s to %s", src, trg));
@@ -90,6 +90,10 @@ public class Game {
 	
 	public Collection<User> getPlayers(){
 		return m_players;
+	}
+	
+	public BoardSize getBoardSize(){
+		return m_size;
 	}
 	public Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
 

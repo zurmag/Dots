@@ -65,13 +65,16 @@ public class FacebookController {
 			@RequestParam(required = false) String error,
 			Locale locale
 			) throws URISyntaxException, IOException {
-		FacebookClient.AccessToken token = getFacebookUserToken(code, m_configurationManger.getFbCanvasUrl());
-		FacebookClient facebookClient = new DefaultFacebookClient(token.getAccessToken());
-        User fbuser = facebookClient.fetchObject("me", User.class);
-        com.games.dots.ui.entities.User user = new com.games.dots.ui.entities.User();
-        user.id = fbuser.getId();
-        user.setUserType(UserType.FBUser);
-        m_players.add(user);
+		if (code != null){
+			FacebookClient.AccessToken token = getFacebookUserToken(code, m_configurationManger.getFbCanvasUrl());
+			FacebookClient facebookClient = new DefaultFacebookClient(token.getAccessToken());
+			User fbuser = facebookClient.fetchObject("me", User.class);
+			com.games.dots.ui.entities.User user = new com.games.dots.ui.entities.User();
+	        user.id = fbuser.getId();
+	        user.setUserType(UserType.FBUser);
+	        m_players.add(user);
+		}
+        
 		
 		HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(new URI(m_configurationManger.getFbCanvasPage()));

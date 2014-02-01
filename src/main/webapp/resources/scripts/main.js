@@ -23,8 +23,9 @@ function onNewGame(){
 function onShowGames(){
 	$.getJSON('games/',function(data){
 		console.debug(data);
+		globals.centralPanel.showGames(data);		
 	});
-	globals.centralPanel.showGames();
+	
 }
 
 function addPlayerToGame(gameLocation){
@@ -42,6 +43,7 @@ function addPlayerToGame(gameLocation){
 		}
 	});
 }
+
 
 
 
