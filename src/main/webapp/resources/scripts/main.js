@@ -1,3 +1,5 @@
+
+globals.centralPanel = new CentralPanel("central-panel");
 function onProfile(){
 	globals.centralPanel.showProfile();
 }
@@ -5,7 +7,7 @@ function onProfile(){
 function onNewGame(){
 	
 	var gameSettings = {size: "Medium", players: 2};
-	if (globals.activeGame == null){
+	if (!globals.activeGame){
 		post('games' ,JSON.stringify(gameSettings), function (data, textStatus, request){
 			var location = request.getResponseHeader('location');
 			globals.activeGame = new game(gameSettings.size, location);		    	    
@@ -21,7 +23,10 @@ function onNewGame(){
 
 function onShowGames(){
 	$.getJSON('games/',function(data){
-		console.debug(data);
+		globals.games = {};
+		for (var i = 0; i< data.length; i++){
+			globals.games[data[i].id] = data[i]; 
+		}
 		globals.centralPanel.showGames(data);		
 	});
 	

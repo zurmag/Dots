@@ -12,7 +12,7 @@ function CentralPanel(panelDivName){
 	
 	divs['board-container'] = createBoardContainer();
 	panelDiv.appendChild(divs['board-container']);
-	
+	 
 		
 	divs['games-container'] = createGamesContainer();
 	panelDiv.appendChild(divs['games-container']);
@@ -36,7 +36,12 @@ function CentralPanel(panelDivName){
 		activeContainer.innerHTML = '';
 		activeContainer.appendChild(createGamesView(data));
 		$('div#games-container button').click(function (){
-			console.debug('click!');
+			gameObj = globals.games[this.id];
+			console.debug(gameObj);
+			if (!globals.activeGame){
+				globals.activeGame = new game(gameObj.size, "games/"+gameObj.id);
+				globals.activeGame.addPlayerToGame();
+			}
 		});
 	};
 	
