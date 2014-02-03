@@ -61,7 +61,7 @@ public class GamesController {
 	public @ResponseBody Collection<com.games.dots.ui.entities.Game> getGames(){
 		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();;
 		
-		for(Game game: m_games.getAllOpenGames()){
+		for(Game game: m_games.getAll()){
 			games.add(toUiGame(game));			
 		}
 		

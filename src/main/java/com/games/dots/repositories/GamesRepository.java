@@ -44,4 +44,9 @@ public class GamesRepository implements IRepository<Game> {
 		return openGames;		
 	}
 
+	public Collection<Game> getAll() {
+		
+		return storage.values();
+	}
+
 }

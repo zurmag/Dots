@@ -189,6 +189,7 @@ function game(size, location){
 			    console.error("something went wrong :(");
 			}
 		});
-	}
+	};
+	this.addPlayerToGame = addPlayerToGame;
 	
 }
