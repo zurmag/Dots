@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +35,8 @@ public class MovesController {
 	@Resource(name="playersRepository")
 	IRepository<User> players;
 	
-	@RequestMapping(value = "/games/{gameId}/players/{playerId}/moves", method = RequestMethod.POST)
+	@MessageMapping("/games/{gameId}/players/{playerId}/moves")
+    @SendTo("/topic/greetings")
 	public ResponseEntity<ActionList> PostMove( 
 			@RequestBody Coordinates coordinates, 
 			@PathVariable String gameId, 
@@ -53,9 +56,4 @@ public class MovesController {
 	    return new ResponseEntity<ActionList>(actionList, headers, HttpStatus.CREATED);
 	}
 	
-	@RequestMapping(value = "/games/{gameId}/moves/{moveId}", method = RequestMethod.GET)
-	public ResponseEntity<?> GetMove(){
-		
-		return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
-	}
 }
