@@ -5,7 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ActionList {
+public class MoveActionResponse {
+	public Move move;
+	public User activePlayer;
+	public String ErrorMessage;
 	public List<Coordinates[]> newCycles = new ArrayList<>();
 	public Set<Coordinates> newDeadDots = new HashSet<>();
 }

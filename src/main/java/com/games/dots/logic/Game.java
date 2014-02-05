@@ -21,7 +21,7 @@ import org.jgrapht.graph.WeightedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.games.dots.ui.entities.ActionList;
+import com.games.dots.ui.entities.MoveActionResponse;
 import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
@@ -34,6 +34,7 @@ public class Game {
 	
 	private List<User> m_players = new ArrayList<User>();
 	private int m_maxNumberOfPlayers;
+	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
 	public String id;
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
@@ -100,19 +101,24 @@ public class Game {
 	
 	
 	
-	public ActionList makeMove(Move move){
-		ActionList actionList = new ActionList();
+	public synchronized MoveActionResponse makeMove(Move move){
+		MoveActionResponse actionResponse = new MoveActionResponse();
+		actionResponse.move = move;
+		if (move.getPlayer() != m_players.get(m_currentPlayerIndex)){
+			actionResponse.ErrorMessage = "Not your turn please be patient";
+			return actionResponse;
+		}
 		m_moves.put(move.getCoordinates(), move);		
 		m_moves_board.addVertex(move);
 		
 		for (Coordinates[] cycle : m_cycles){
 			if (isDeadPoint(move, cycle)){
-				actionList.newCycles.add(cycle);
-				actionList.newDeadDots.add(move.getCoordinates());
+				actionResponse.newCycles.add(cycle);
+				actionResponse.newDeadDots.add(move.getCoordinates());
 				break;
 			}
 		}
-		if (actionList.newCycles.isEmpty()){			
+		if (actionResponse.newCycles.isEmpty()){			
 		
 			for (Coordinates[] cycle : createAndGetNewCycles(move)){			
 					
@@ -120,8 +126,8 @@ public class Game {
 				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
 				if (deadPoints.size() > 0){
 					
-					actionList.newDeadDots.addAll(deadPoints);
-					actionList.newCycles.add(cycle);
+					actionResponse.newDeadDots.addAll(deadPoints);
+					actionResponse.newCycles.add(cycle);
 								
 				}				
 			
@@ -129,12 +135,12 @@ public class Game {
 			}
 		}
 		
-		m_board.removeAllVertices(actionList.newDeadDots);
-		for (Coordinates coordinate: actionList.newDeadDots){
+		m_board.removeAllVertices(actionResponse.newDeadDots);
+		for (Coordinates coordinate: actionResponse.newDeadDots){
 			m_moves_board.removeVertex(m_moves.get(coordinate));						
 		}
-		
-		return actionList;		
+		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
+		return actionResponse;
 	}	
 	
 	private boolean isDeadPoint(Move move, Coordinates[] cycle) {

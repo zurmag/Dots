@@ -13,7 +13,7 @@
    	
    	<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
    	<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-   	<script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+   	<script src="https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js"></script>
 	<script src="resources/scripts/stomp.js"></script>
    	<script src="https://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.4.min.js" type="text/javascript"></script>
    	
