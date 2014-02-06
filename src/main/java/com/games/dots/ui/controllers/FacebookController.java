@@ -58,8 +58,7 @@ public class FacebookController {
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	
+	@RequestMapping(value = "/", method = RequestMethod.GET)	
 	public ResponseEntity<?> authorizationResult(
 			@RequestParam(required = false) String code, 
 			@RequestParam(required = false) String error,

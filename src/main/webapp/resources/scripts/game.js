@@ -1,4 +1,4 @@
-function game(size, location){
+function game(size, location, state){
 	
 	var offset = 10;
 	var distance = 20;
@@ -6,7 +6,7 @@ function game(size, location){
 	var board = [];
 	var boardColor = 'grey';
 	var m_gameLocation = '';
-	var m_game_id = '';
+	var m_gameId = '';
 	var players = [];
 	var currentPlayerIndex = 0;
 	var pressedDot = null;
@@ -58,7 +58,11 @@ function game(size, location){
 	    	setPointMouseUp(mousePos.x, mousePos.y);
 	    });
 	    
-	    addPlayerToGame();
+	    if (state != null){
+			restoreState(state);		
+		}else{
+			addPlayerToGame();
+		}
 	    
 	    connectGame();	    
 	}
@@ -158,35 +162,12 @@ function game(size, location){
 			
 			var actionUrl = '/action' + '/games/' + m_gameId + '/players/' + getCurrentPlayer().id + '/moves';			
 			m_stompClient.send(actionUrl, {}, JSON.stringify(coordinates));
-			
-			
-			
-				/*post(m_gameLocation+'/players/' + getCurrentPlayer().id + '/moves',JSON.stringify(coordinates), function(data){
-					if (data.newCycles.length > 0){
-						for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
-							var cycle = data.newCycles[cycleIndex];
-							cycle.push(cycle[0]);
-							for (var index = 0; index < cycle.length - 1; index++){
-								startPoint = board[cycle[index].x][cycle[index].y];
-								endPoint = board[cycle[index+1].x][cycle[index+1].y];
-								var line = new Kinetic.Line({
-									points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
-									strokeWidth: 1,
-									stroke: startPoint.player.color
-								});
-								boardLayer.add(line);
-								boardLayer.draw();
-							}
-						}
-					}
-					
-				});*/
-			
-			//switchPlayer();
 		}
 		else{//undo
-			dot = board[pressedDot.i][pressedDot.j].dot;
-			dot.setFill(boardColor);
+			coordinates = {x:pressedDot.i, y:pressedDot.j};
+			undoMove(coordinates);
+			/*dot = board[pressedDot.i][pressedDot.j].dot;
+			dot.setFill(boardColor);*/
 		}
 		pressedDot = null;
 		boardLayer.draw();
@@ -194,7 +175,36 @@ function game(size, location){
 	}
 	
 	function recieveResponse(message){
+		var data = JSON.parse(message.body);
+		if (data.errorMessage != null){
+			if (data.move != null){
+				undoMove(data.move.coordinates);
+			}
+			console.error(message);
+		}
+		if (data.newCycles.length > 0){
+			for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
+				var cycle = data.newCycles[cycleIndex];
+				cycle.push(cycle[0]);
+				for (var index = 0; index < cycle.length - 1; index++){
+					startPoint = board[cycle[index].x][cycle[index].y];
+					endPoint = board[cycle[index+1].x][cycle[index+1].y];
+					var line = new Kinetic.Line({
+						points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
+						strokeWidth: 1,
+						stroke: startPoint.player.color
+					});
+					boardLayer.add(line);
+					boardLayer.draw();
+				}
+			}
+		}
 		console.debug(message);
+	}
+	
+	function undoMove(coordinates){
+		dot = board[coordinates.x][coordinates.y].dot;
+		dot.setFill(boardColor);
 	}
 	
 	function switchPlayer(){
@@ -223,4 +233,8 @@ function game(size, location){
 	};
 	this.addPlayerToGame = addPlayerToGame;
 	
+	function restoreState(state){
+		console.debug(state);
+	}
 }
+

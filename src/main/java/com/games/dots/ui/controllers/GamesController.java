@@ -62,18 +62,11 @@ public class GamesController {
 		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();;
 		
 		for(Game game: m_games.getAll()){
-			games.add(toUiGame(game));			
+			games.add(new com.games.dots.ui.entities.Game(game));			
 		}
 		
 		return games;
 	}
 	
-	private static com.games.dots.ui.entities.Game toUiGame(Game game){
-		com.games.dots.ui.entities.Game retVal = new com.games.dots.ui.entities.Game();
-		retVal.id = game.id;
-		retVal.size = game.getBoardSize();
-		retVal.maxPlayers = game.getMaxNumberOfPlayers();
-		retVal.players.addAll(game.getPlayers());
-		return retVal;
-	}
+	
 }

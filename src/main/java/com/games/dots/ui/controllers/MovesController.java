@@ -36,6 +36,12 @@ public class MovesController {
 			@DestinationVariable String playerId){
 	    Game game = games.get(gameId);
 	    User player = players.get(playerId);
+	    if (player == null){
+	    	player = new User();
+	    	player.id = playerId;
+	    	player.userType = UserType.FBUser;
+	    }
+	    
 	    Move move = new Move(player, coordinates);
 	    
 	    MoveActionResponse actionList = game.makeMove(move); 

@@ -104,8 +104,8 @@ public class Game {
 	public synchronized MoveActionResponse makeMove(Move move){
 		MoveActionResponse actionResponse = new MoveActionResponse();
 		actionResponse.move = move;
-		if (move.getPlayer() != m_players.get(m_currentPlayerIndex)){
-			actionResponse.ErrorMessage = "Not your turn please be patient";
+		if (move.getPlayer().equals(m_players.get(m_currentPlayerIndex))){
+			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
 		m_moves.put(move.getCoordinates(), move);		
@@ -140,6 +140,7 @@ public class Game {
 			m_moves_board.removeVertex(m_moves.get(coordinate));						
 		}
 		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
+		actionResponse.activePlayer = m_players.get(m_currentPlayerIndex);
 		return actionResponse;
 	}	
 	
@@ -288,6 +289,14 @@ public class Game {
 	public boolean isOpenForRegistartion() {
 		
 		return m_players.size() < m_maxNumberOfPlayers;
+	}
+
+	public Collection<Move> getAllMoves() {
+		return m_moves.values();
+	}
+
+	public Collection<Coordinates[]> getAllCycles() {
+		return m_cycles;
 	}
 	
 	

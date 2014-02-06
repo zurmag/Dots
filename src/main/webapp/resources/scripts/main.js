@@ -32,10 +32,22 @@ function onShowGames(){
 	
 }
 
+setTimeout(init, 1000);
 
-
-
-
-
-      
-     
+function init(){
+	FB.getLoginStatus(function(response) {
+		if (response.status === 'connected') {
+			var uid = response.authResponse.userID;
+			//var accessToken = response.authResponse.accessToken;
+			$.getJSON('players/'+uid+'/activeGames?fullState=true', function(data){
+				if (data.length > 0){					
+					globals.activeGame = new game(data[0].size, 'games/' + data[0].id, data[0].state);
+					
+				}
+			});
+	    } 
+		else {
+		    console.error("something went wrong :(");
+		}
+});    
+}

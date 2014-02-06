@@ -1,5 +1,6 @@
 package com.games.dots.repositories;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,14 +9,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.games.dots.logic.Game;
+import com.games.dots.ui.entities.User;
 
 public class GamesRepository implements IRepository<Game> {
 
-	Map<String, Game> storage = new ConcurrentHashMap<String, Game>(); 
+	private Map<String, Game> m_storage = new ConcurrentHashMap<String, Game>(); 
 	
 	@Override
 	public Game get(String id) {
-		return storage.get(id);
+		return m_storage.get(id);
 	}
 
 	@Override
@@ -24,19 +26,19 @@ public class GamesRepository implements IRepository<Game> {
 			UUID id = UUID.randomUUID();
 			game.id = id.toString();
 		}
-		storage.put(game.id, game);
+		m_storage.put(game.id, game);
 		return game;
 	}
 
 	@Override
 	public void remove(String id) {
-		storage.remove(id);		
+		m_storage.remove(id);		
 	}
 
 	public Collection<Game> getAllOpenGames() {
 		List<Game> openGames = new LinkedList<Game>();
 		
-		for(Game game : storage.values()){
+		for(Game game : m_storage.values()){
 			if (game.isOpenForRegistartion()){
 				openGames.add(game);
 			}
@@ -46,7 +48,20 @@ public class GamesRepository implements IRepository<Game> {
 
 	public Collection<Game> getAll() {
 		
-		return storage.values();
+		return m_storage.values();
+	}
+
+	public Collection<Game> getAactiveGames(String playerId) {
+		ArrayList<Game> activeGames = new ArrayList<Game>();
+		for (Game game : m_storage.values()){
+			for (User user : game.getPlayers()){
+				if (user.id.equals(playerId)){
+					activeGames.add(game);
+					break;
+				}
+			}
+		}
+		return activeGames;
 	}
 
 }

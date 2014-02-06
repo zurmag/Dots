@@ -32,7 +32,7 @@
    		$.getScript('//connect.facebook.net/en_UK/all.js', function(){
    		    FB.init({
    		      appId: '${fbAppId}',
-   		    }); 		    
+   		    }); 	
    		});
    		
 		

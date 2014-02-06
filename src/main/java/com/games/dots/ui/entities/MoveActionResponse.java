@@ -8,7 +8,7 @@ import java.util.Set;
 public class MoveActionResponse {
 	public Move move;
 	public User activePlayer;
-	public String ErrorMessage;
+	public String errorMessage;
 	public List<Coordinates[]> newCycles = new ArrayList<>();
 	public Set<Coordinates> newDeadDots = new HashSet<>();
 }
