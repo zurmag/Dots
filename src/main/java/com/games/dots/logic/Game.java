@@ -33,6 +33,7 @@ public class Game {
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
 	private List<User> m_players = new ArrayList<User>();
+	private Map<String, User> m_playersMap = new HashMap<>();
 	private int m_maxNumberOfPlayers;
 	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
@@ -103,11 +104,14 @@ public class Game {
 	
 	public synchronized MoveActionResponse makeMove(Move move){
 		MoveActionResponse actionResponse = new MoveActionResponse();
+		move.setPlayer(m_playersMap.get(move.getPlayer().id));
+		
 		actionResponse.move = move;
-		if (move.getPlayer().equals(m_players.get(m_currentPlayerIndex))){
+		if (!move.getPlayer().equals(m_players.get(m_currentPlayerIndex))){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
+		
 		m_moves.put(move.getCoordinates(), move);		
 		m_moves_board.addVertex(move);
 		
@@ -277,8 +281,10 @@ public class Game {
 	}
 
 	public void addPlayer(User user) {
-		if (m_players.size() < m_maxNumberOfPlayers)
+		if (m_players.size() < m_maxNumberOfPlayers){
 			m_players.add(user);
+			m_playersMap.put(user.id, user);
+		}
 		else{
 			//TODO: Think about error
 		}
@@ -297,6 +303,10 @@ public class Game {
 
 	public Collection<Coordinates[]> getAllCycles() {
 		return m_cycles;
+	}
+
+	public User getActivePlayer() {
+		return m_players.get(m_currentPlayerIndex);
 	}
 	
 	

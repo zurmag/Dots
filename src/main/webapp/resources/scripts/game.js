@@ -4,11 +4,11 @@ function game(size, location, state){
 	var distance = 20;
 	var boardLayer = null;
 	var board = [];
-	var boardColor = 'grey';
+	var boardColor = "grey";
 	var m_gameLocation = '';
 	var m_gameId = '';
-	var players = [];
-	var currentPlayerIndex = 0;
+	var m_players = {};
+	var m_currentPlayer = null;
 	var pressedDot = null;
 	var stage = null;
 	var m_stompClient = false;
@@ -136,9 +136,14 @@ function game(size, location, state){
 			pressedDot = {};
 			pressedDot.i = i;
 			pressedDot.j = j;					
-			cell.dot.setFill(getCurrentPlayer().color);
-			boardLayer.draw();
+			cellMouseDown(i, j);
 		}		
+	}
+	
+	function cellMouseDown(i, j){
+		var cell = board[i][j];
+		cell.dot.setFill(m_currentPlayer.color);
+		boardLayer.draw();
 	}
 
 	function setPointMouseUp (x, y){
@@ -153,25 +158,29 @@ function game(size, location, state){
 		}
 		
 		if (i == pressedDot.i && j == pressedDot.j){
-			cell = board[i][j]; 
-			dot = board[i][j].dot;
-			dot.setRadius(3);
-			dot.setStroke('black');
-			dot.setStrokeWidth(1);			
-			cell.player = getCurrentPlayer();
+			cellMouseUp(i, j);		
+			cell.player = m_currentPlayer;
 			
-			var actionUrl = '/action' + '/games/' + m_gameId + '/players/' + getCurrentPlayer().id + '/moves';			
+			var actionUrl = '/action' + '/games/' + m_gameId + '/players/' + m_currentPlayer.id + '/moves';			
 			m_stompClient.send(actionUrl, {}, JSON.stringify(coordinates));
 		}
 		else{//undo
 			coordinates = {x:pressedDot.i, y:pressedDot.j};
 			undoMove(coordinates);
-			/*dot = board[pressedDot.i][pressedDot.j].dot;
-			dot.setFill(boardColor);*/
+			
 		}
 		pressedDot = null;
-		boardLayer.draw();
+		
 				
+	}
+	
+	function cellMouseUp(i, j){
+		cell = board[i][j]; 
+		dot = board[i][j].dot;
+		dot.setRadius(3);
+		dot.setStroke('black');
+		dot.setStrokeWidth(1);
+		boardLayer.draw();
 	}
 	
 	function recieveResponse(message){
@@ -198,6 +207,7 @@ function game(size, location, state){
 					boardLayer.draw();
 				}
 			}
+			m_currentPlayer = data.currentPlayer;
 		}
 		console.debug(message);
 	}
@@ -205,14 +215,7 @@ function game(size, location, state){
 	function undoMove(coordinates){
 		dot = board[coordinates.x][coordinates.y].dot;
 		dot.setFill(boardColor);
-	}
-	
-	function switchPlayer(){
-		currentPlayerIndex = ++currentPlayerIndex % this.players.length ;
-	}
-	
-	function getCurrentPlayer(){
-		return players[currentPlayerIndex];
+		boardLayer.draw();
 	}
 	
 	function addPlayerToGame(){
@@ -224,7 +227,8 @@ function game(size, location, state){
 				put(m_gameLocation, JSON.stringify(player), function(){
 					console.debug('successfully added player ' + uid);
 				});
-				players.push(player);
+				m_players[player.id] = player;
+				m_currentPlayer = player;
 		    } 
 			else {
 			    console.error("something went wrong :(");
@@ -234,7 +238,22 @@ function game(size, location, state){
 	this.addPlayerToGame = addPlayerToGame;
 	
 	function restoreState(state){
+		console.debug("state recieved");
 		console.debug(state);
+		m_currentPlayer = state.currentPlayer;
+		for (var i = 0 ; i < state.players.length; i++){
+			var player = new Player(state.players[0].color, state.players[0].id);
+			m_players[player.id] = player;
+		}
+		for (var i = 0; i < state.moves.length; i++){
+			var coordinates = state.moves[i].coordinates;
+			
+			m_currentPlayer = state.moves[i].player;
+			cellMouseDown(coordinates.x, coordinates.y);
+			cellMouseUp(coordinates.x, coordinates.y);
+		}
+		
+		
 	}
 }
 

@@ -37,6 +37,8 @@ public class PlayersController {
 				uiGame.state = new State();				
 				uiGame.state.moves.addAll(game.getAllMoves());
 				uiGame.state.cycles.addAll(game.getAllCycles());
+				uiGame.state.players.addAll(game.getPlayers());
+				uiGame.state.currentPlayer = game.getActivePlayer();
 			}
 		}
 		
