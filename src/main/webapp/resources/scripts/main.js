@@ -1,5 +1,5 @@
 
-globals.centralPanel = new CentralPanel("central-panel");
+
 function onProfile(){
 	globals.centralPanel.showProfile();
 }
@@ -8,10 +8,11 @@ function onNewGame(){
 	
 	var gameSettings = {size: "Medium", players: 2};
 	if (!globals.activeGame){
-		post('games' ,JSON.stringify(gameSettings), function (data, textStatus, request){
-			var location = request.getResponseHeader('location');
-			globals.activeGame = new game(gameSettings.size, location);		    	    
-		});		
+		globals.server.newGame(gameSettings, function (data, textStatus, request){
+			gameSettings.location = request.getResponseHeader('location');
+			gameSettings.id = request.getResponseHeader('location').split('/').pop();
+			globals.activeGame = new Game(gameSettings);
+		});				
 	}
 	else{
 		//TODO: replace it with user anouncement
@@ -27,7 +28,7 @@ function onShowGames(){
 		for (var i = 0; i< data.length; i++){
 			globals.games[data[i].id] = data[i]; 
 		}
-		globals.centralPanel.showGames(data);		
+		globals.centralPanel.showGames(data);
 	});
 	
 }
@@ -35,14 +36,16 @@ function onShowGames(){
 setTimeout(init, 1000);
 
 function init(){
+	globals.centralPanel = new CentralPanel("central-panel");
+	globals.server = new ServerProxy();
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {
 			var uid = response.authResponse.userID;
 			//var accessToken = response.authResponse.accessToken;
 			$.getJSON('players/'+uid+'/activeGames?fullState=true', function(data){
-				if (data.length > 0){					
-					globals.activeGame = new game(data[0].size, 'games/' + data[0].id, data[0].state);
-					
+				if (data.length > 0){			
+					var settings = {size: data[0].size, id: data[0].id};
+					globals.activeGame = new Game(settings, data[0].state);
 				}
 			});
 	    } 

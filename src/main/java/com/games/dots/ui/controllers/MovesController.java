@@ -44,7 +44,7 @@ public class MovesController {
 	    
 	    Move move = new Move(player, coordinates);
 	    
-	    MoveActionResponse actionList = game.makeMove(move); 
+	    GameStateChange actionList = game.makeMove(move); 
 	    m_template.convertAndSend("/sub/games/" + gameId, actionList);
 	    
 	}

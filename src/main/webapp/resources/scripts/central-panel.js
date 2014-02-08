@@ -39,9 +39,17 @@ function CentralPanel(panelDivName){
 			gameObj = globals.games[this.id];
 			console.debug(gameObj);
 			if (!globals.activeGame){
-				globals.activeGame = new game(gameObj.size, "games/"+gameObj.id);
-				globals.activeGame.addPlayerToGame();
+				globals.activeGame = new Game({
+					size: gameObj.size, 
+					location: "games/"+gameObj.id
+				});
+				globals.activeGame.addPlayerToGame('green');
+				onNewGame();
 			}
+			else{
+				console.debug('you are in active game!');
+			}
+			
 		});
 	};
 	

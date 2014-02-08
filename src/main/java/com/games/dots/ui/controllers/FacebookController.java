@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.games.dots.repositories.IRepository;
-import com.games.dots.ui.entities.MoveActionResponse;
+import com.games.dots.ui.entities.GameStateChange;
 import com.games.dots.ui.entities.UserType;
 import com.games.dots.utilities.ConfigurationManager;
 import com.restfb.DefaultFacebookClient;

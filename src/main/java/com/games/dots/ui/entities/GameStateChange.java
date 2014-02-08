@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MoveActionResponse {
+public class GameStateChange {
+	
 	public Move move;
-	public User activePlayer;
+	public User currentPlayer;
 	public String errorMessage;
 	public List<Coordinates[]> newCycles = new ArrayList<>();
 	public Set<Coordinates> newDeadDots = new HashSet<>();
+	public User newPlayer;
+	public User removedPlayer;
 }

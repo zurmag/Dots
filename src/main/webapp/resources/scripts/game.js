@@ -1,31 +1,27 @@
-function game(size, location, state){
+function Game(settings, state){
 	
 	var offset = 10;
 	var distance = 20;
 	var boardLayer = null;
 	var board = [];
 	var boardColor = "grey";
-	var m_gameLocation = '';
 	var m_gameId = '';
 	var m_players = {};
 	var m_currentPlayer = null;
 	var pressedDot = null;
 	var stage = null;
-	var m_stompClient = false;
 	
-	init(size, location);
+	init(settings);
 	
 	
-	function init(size, location){
-		
-		m_gameLocation = location;
-		m_gameId = location.split('/').pop();
+	function init(settings){
+		m_gameId = settings.id;
 		var width = 0;
 		var height = 0;		
-		if (size == 'small'){
+		if (settings.size == 'small'){
 			width = height = 10;
 		}
-		else if (size == 'big'){
+		else if (settings.size == 'big'){
 			width = height = 30;
 		}
 		else {//medium
@@ -61,25 +57,12 @@ function game(size, location, state){
 	    if (state != null){
 			restoreState(state);		
 		}else{
-			addPlayerToGame();
+			addPlayerToGame('red');
 		}
 	    
-	    connectGame();	    
+	    globals.server.onMove(m_gameId,recieveResponse);	    
 	}
 
-	function connectGame(){
-		var socket = new SockJS("/dots/ws");
-		m_stompClient = Stomp.over(socket);
-	    m_stompClient.connect(' ',' ', function(){
-	    	console.debug('game '+ m_gameId + ' successfuly connected');
-	    	m_stompClient.subscribe('/sub/games/' + m_gameId, recieveResponse);
-	    },function(error){
-	    	console.error('game '+ m_gameId + 'failed to connect');
-	    	console.error('error: '+ error);
-	    });
-	    
-	}
-	
 	function createBoardLayer(){
 		
 		var radius = 2;
@@ -136,11 +119,11 @@ function game(size, location, state){
 			pressedDot = {};
 			pressedDot.i = i;
 			pressedDot.j = j;					
-			cellMouseDown(i, j);
+			gMouseDown(i, j);
 		}		
 	}
 	
-	function cellMouseDown(i, j){
+	function gMouseDown(i, j){
 		var cell = board[i][j];
 		cell.dot.setFill(m_currentPlayer.color);
 		boardLayer.draw();
@@ -158,11 +141,9 @@ function game(size, location, state){
 		}
 		
 		if (i == pressedDot.i && j == pressedDot.j){
-			cellMouseUp(i, j);		
-			cell.player = m_currentPlayer;
-			
-			var actionUrl = '/action' + '/games/' + m_gameId + '/players/' + m_currentPlayer.id + '/moves';			
-			m_stompClient.send(actionUrl, {}, JSON.stringify(coordinates));
+			gMouseUp(i, j);		
+			board[i,j].player = m_currentPlayer;			
+			globals.server.makeMove(m_gameId, m_currentPlayer, coordinates);
 		}
 		else{//undo
 			coordinates = {x:pressedDot.i, y:pressedDot.j};
@@ -174,8 +155,7 @@ function game(size, location, state){
 				
 	}
 	
-	function cellMouseUp(i, j){
-		cell = board[i][j]; 
+	function gMouseUp(i, j){
 		dot = board[i][j].dot;
 		dot.setRadius(3);
 		dot.setStroke('black');
@@ -191,6 +171,13 @@ function game(size, location, state){
 			}
 			console.error(message);
 		}
+		if (data.currentPlayer)
+			m_currentPlayer = data.currentPlayer;
+		if (data.move != null){
+			restoreMove(data.move);
+		}
+		
+		
 		if (data.newCycles.length > 0){
 			for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
 				var cycle = data.newCycles[cycleIndex];
@@ -207,7 +194,7 @@ function game(size, location, state){
 					boardLayer.draw();
 				}
 			}
-			m_currentPlayer = data.currentPlayer;
+			
 		}
 		console.debug(message);
 	}
@@ -215,18 +202,21 @@ function game(size, location, state){
 	function undoMove(coordinates){
 		dot = board[coordinates.x][coordinates.y].dot;
 		dot.setFill(boardColor);
+		
+		dot.setRadius(3);
+		dot.setStroke('white');
+		dot.setStrokeWidth(1);
 		boardLayer.draw();
+		board[coordinates.x][coordinates.y].player = null;
 	}
 	
-	function addPlayerToGame(){
+	function addPlayerToGame(color){
 		FB.getLoginStatus(function(response) {
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
-				var player = new Player('red', uid);
-				put(m_gameLocation, JSON.stringify(player), function(){
-					console.debug('successfully added player ' + uid);
-				});
+				var player = new Player(color, uid);
+				globals.server.addPlayerToGame(player, m_gameId);				
 				m_players[player.id] = player;
 				m_currentPlayer = player;
 		    } 
@@ -234,7 +224,8 @@ function game(size, location, state){
 			    console.error("something went wrong :(");
 			}
 		});
-	};
+	}
+	
 	this.addPlayerToGame = addPlayerToGame;
 	
 	function restoreState(state){
@@ -246,14 +237,21 @@ function game(size, location, state){
 			m_players[player.id] = player;
 		}
 		for (var i = 0; i < state.moves.length; i++){
-			var coordinates = state.moves[i].coordinates;
 			
 			m_currentPlayer = state.moves[i].player;
-			cellMouseDown(coordinates.x, coordinates.y);
-			cellMouseUp(coordinates.x, coordinates.y);
+			restoreMove(state.moves[i]);			
 		}
 		
 		
 	}
+	
+	function restoreMove(move){
+		var coordinates = move.coordinates;
+		gMouseDown(coordinates.x, coordinates.y);
+		gMouseUp(coordinates.x, coordinates.y);
+		board[coordinates.x][coordinates.y].player = move.player;
+		
+	}
+	
 }
 

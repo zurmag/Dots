@@ -8,9 +8,11 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.GameStateChange;
 import com.games.dots.ui.entities.User;
 
 @Controller
@@ -33,6 +36,13 @@ public class GamesController {
 	@Resource(name="gamesRepository")
 	GamesRepository m_games;
 
+	private SimpMessagingTemplate m_template;
+	
+	@Autowired
+	public GamesController(SimpMessagingTemplate template){
+		this.m_template = template;
+	}
+	
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
 	public ResponseEntity<String> postGame(
 			@RequestBody GameSettings gameSettings, 
@@ -53,7 +63,9 @@ public class GamesController {
 			@PathVariable String id	, @RequestBody User user
 			){
 		logger.debug("addPlayerToGame");		
-		m_games.get(id).addPlayer(user);
+		
+		GameStateChange stateChange = m_games.get(id).addPlayer(user); 
+		m_template.convertAndSend("/sub/games/" + id, stateChange);
 		return new ResponseEntity<String>(id, HttpStatus.OK);
 	}
 	

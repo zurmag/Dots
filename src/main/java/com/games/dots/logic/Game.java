@@ -21,7 +21,7 @@ import org.jgrapht.graph.WeightedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.games.dots.ui.entities.MoveActionResponse;
+import com.games.dots.ui.entities.GameStateChange;
 import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
@@ -102,8 +102,8 @@ public class Game {
 	
 	
 	
-	public synchronized MoveActionResponse makeMove(Move move){
-		MoveActionResponse actionResponse = new MoveActionResponse();
+	public synchronized GameStateChange makeMove(Move move){
+		GameStateChange actionResponse = new GameStateChange();
 		move.setPlayer(m_playersMap.get(move.getPlayer().id));
 		
 		actionResponse.move = move;
@@ -144,7 +144,7 @@ public class Game {
 			m_moves_board.removeVertex(m_moves.get(coordinate));						
 		}
 		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
-		actionResponse.activePlayer = m_players.get(m_currentPlayerIndex);
+		actionResponse.currentPlayer = m_players.get(m_currentPlayerIndex);
 		return actionResponse;
 	}	
 	
@@ -280,14 +280,18 @@ public class Game {
 		
 	}
 
-	public void addPlayer(User user) {
+	public GameStateChange addPlayer(User user) {
+		GameStateChange stateChange = new GameStateChange();
 		if (m_players.size() < m_maxNumberOfPlayers){
 			m_players.add(user);
 			m_playersMap.put(user.id, user);
+			stateChange.newPlayer = user;
 		}
 		else{
 			//TODO: Think about error
 		}
+		
+		return stateChange;
 			
 		
 	}
