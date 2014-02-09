@@ -52,6 +52,8 @@ function ServerProxy(){
 				m_stompClient.subscribe(url, callBack);
 			}catch(e){
 				console.debug('failed to subscribe hope it will be better on reconnect');
+				m_stompClient.disconnect();
+				connect();
 			}
 		}
 		m_subscribtions[url] = callBack;

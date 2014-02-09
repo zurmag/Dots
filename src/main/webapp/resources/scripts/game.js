@@ -8,6 +8,7 @@ function Game(settings, state){
 	var m_gameId = '';
 	var m_players = {};
 	var m_currentPlayer = null;
+	var m_me = null;
 	var pressedDot = null;
 	var stage = null;
 	
@@ -54,13 +55,31 @@ function Game(settings, state){
 	    	setPointMouseUp(mousePos.x, mousePos.y);
 	    });
 	    
-	    if (state != null){
-			restoreState(state);		
-		}else{
-			addPlayerToGame(settings.color);
-		}
+	    FB.getLoginStatus(function(response) {
+			if (response.status === 'connected') {
+				var uid = response.authResponse.userID;
+				//var accessToken = response.authResponse.accessToken;
+				var player = new Player(settings.colorcolor, uid);
+								
+				m_players[player.id] = player;
+				m_currentPlayer = player;
+				m_me = player;
+				
+				if (state != null){
+					restoreState(state);		
+				}else{
+					addPlayerToGame();
+				}
+				
+		    } 
+			else {
+			    console.error("something went wrong :(");
+			}
+		});
 	    
-	    globals.server.onMove(m_gameId,recieveResponse);	    
+	    globals.server.onMove(m_gameId,recieveResponse);
+	    
+	    
 	}
 
 	function createBoardLayer(){
@@ -73,14 +92,11 @@ function Game(settings, state){
 
 		for (var xx = 0; xx < board.length; xx++){
 			for (var yy = 0; yy < board[xx].length; yy++){
-				if (board[xx][yy] != null){
-					color = board[xx][yy].color;
-					radius = 3;
-				}				
-				else {
-					radius = 2;
-					color = boardColor;
-				}
+				
+				
+				radius = 2;
+				color = boardColor;
+				
 				var circle = new Kinetic.Circle({
 			        x: offset + xx*distance,
 			        y: offset + yy*distance,
@@ -119,7 +135,7 @@ function Game(settings, state){
 			pressedDot = {};
 			pressedDot.i = i;
 			pressedDot.j = j;					
-			gMouseDown(i, j, m_currentPlayer.color);
+			gMouseDown(i, j, m_me.color);
 		}		
 	}
 	
@@ -143,7 +159,7 @@ function Game(settings, state){
 		if (i == pressedDot.i && j == pressedDot.j){
 			gMouseUp(i, j);		
 			board[i,j].player = m_currentPlayer;			
-			globals.server.makeMove(m_gameId, m_currentPlayer, coordinates);
+			globals.server.makeMove(m_gameId, m_me, coordinates);
 		}
 		else{//undo
 			coordinates = {x:pressedDot.i, y:pressedDot.j};
@@ -170,7 +186,9 @@ function Game(settings, state){
 				undoMove(data.move.coordinates);
 			}
 			console.error(message);
+			return;
 		}
+		
 		if (data.currentPlayer)
 			m_currentPlayer = data.currentPlayer;
 		if (data.move != null){
@@ -210,20 +228,9 @@ function Game(settings, state){
 		board[coordinates.x][coordinates.y].player = null;
 	}
 	
-	function addPlayerToGame(color){
-		FB.getLoginStatus(function(response) {
-			if (response.status === 'connected') {
-				var uid = response.authResponse.userID;
-				//var accessToken = response.authResponse.accessToken;
-				var player = new Player(color, uid);
-				globals.server.addPlayerToGame(player, m_gameId);				
-				m_players[player.id] = player;
-				m_currentPlayer = player;
-		    } 
-			else {
-			    console.error("something went wrong :(");
-			}
-		});
+	function addPlayerToGame(){
+		
+		globals.server.addPlayerToGame(m_me, m_gameId);
 	}
 	
 	this.addPlayerToGame = addPlayerToGame;
