@@ -49,7 +49,7 @@ function ServerProxy(){
 		var url = '/sub/games/' + gameId;
 		if (m_connected){
 			try{
-				m_stompClient.subscribe(url, callback);
+				m_stompClient.subscribe(url, callBack);
 			}catch(e){
 				console.debug('failed to subscribe hope it will be better on reconnect');
 			}

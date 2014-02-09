@@ -57,7 +57,7 @@ function Game(settings, state){
 	    if (state != null){
 			restoreState(state);		
 		}else{
-			addPlayerToGame('red');
+			addPlayerToGame(settings.color);
 		}
 	    
 	    globals.server.onMove(m_gameId,recieveResponse);	    
@@ -119,13 +119,13 @@ function Game(settings, state){
 			pressedDot = {};
 			pressedDot.i = i;
 			pressedDot.j = j;					
-			gMouseDown(i, j);
+			gMouseDown(i, j, m_currentPlayer.color);
 		}		
 	}
 	
-	function gMouseDown(i, j){
+	function gMouseDown(i, j, color){
 		var cell = board[i][j];
-		cell.dot.setFill(m_currentPlayer.color);
+		cell.dot.setFill(color);
 		boardLayer.draw();
 	}
 
@@ -247,7 +247,7 @@ function Game(settings, state){
 	
 	function restoreMove(move){
 		var coordinates = move.coordinates;
-		gMouseDown(coordinates.x, coordinates.y);
+		gMouseDown(coordinates.x, coordinates.y, move.player.color);
 		gMouseUp(coordinates.x, coordinates.y);
 		board[coordinates.x][coordinates.y].player = move.player;
 		

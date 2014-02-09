@@ -11,6 +11,7 @@ function onNewGame(){
 		globals.server.newGame(gameSettings, function (data, textStatus, request){
 			gameSettings.location = request.getResponseHeader('location');
 			gameSettings.id = request.getResponseHeader('location').split('/').pop();
+			gameSettings.color = 'red';
 			globals.activeGame = new Game(gameSettings);
 		});				
 	}

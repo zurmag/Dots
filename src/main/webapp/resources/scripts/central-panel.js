@@ -41,9 +41,9 @@ function CentralPanel(panelDivName){
 			if (!globals.activeGame){
 				globals.activeGame = new Game({
 					size: gameObj.size, 
-					location: "games/"+gameObj.id
+					id: gameObj.id,
+					color: 'green'
 				});
-				globals.activeGame.addPlayerToGame('green');
 				onNewGame();
 			}
 			else{
