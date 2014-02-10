@@ -59,7 +59,7 @@ function Game(settings, state){
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
-				var player = new Player(settings.colorcolor, uid);
+				var player = new Player(settings.color, uid);
 								
 				m_players[player.id] = player;
 				m_currentPlayer = player;
