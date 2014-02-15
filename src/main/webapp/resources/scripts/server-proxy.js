@@ -14,7 +14,7 @@ function ServerProxy(){
 	
 	function connect(){
 		console.debug(' connecting');
-		m_socket = new SockJS("/dots/ws");	
+		m_socket = new SockJS("ws");	
 		m_stompClient = Stomp.over(m_socket);
 		m_stompClient.connect(' ',' ', function(){
 	    	console.debug('successfuly connected');

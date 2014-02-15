@@ -33,19 +33,34 @@ public class MovesController {
 	public void PostMove( 
 			@Payload Coordinates coordinates, 
 			@DestinationVariable String gameId, 
-			@DestinationVariable String playerId){
-	    Game game = games.get(gameId);
-	    User player = players.get(playerId);
+			@DestinationVariable String playerId){    
+		GameStateChange response = null;
+		User player = players.get(playerId);
+	    
 	    if (player == null){
 	    	player = new User();
 	    	player.id = playerId;
 	    	player.userType = UserType.FBUser;
 	    }
-	    
-	    Move move = new Move(player, coordinates);
-	    
-	    GameStateChange actionList = game.makeMove(move); 
-	    m_template.convertAndSend("/sub/games/" + gameId, actionList);
+		Move move = new Move(player, coordinates);
+		Game game = games.get(gameId);
+		if (game == null){
+			response = new GameStateChange();
+			response.move = move;
+			response.errorMessage = "No game found for id: " + gameId;
+		}
+		else if (!game.isActive()){
+			response = new GameStateChange();
+			response.move = move;
+			response.errorMessage = "Game id: " + gameId + " is not active";			
+		}
+		else{
+		    
+		    
+		    		    
+		    response = game.makeMove(move);
+		}
+	    m_template.convertAndSend("/sub/games/" + gameId, response);
 	    
 	}
 	

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.WeightedGraph;
@@ -31,6 +32,7 @@ import com.games.dots.ui.entities.User;
 public class Game {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
+	ScheduledThreadPoolExecutor m_threadPool = new ScheduledThreadPoolExecutor(1);
 	
 	private List<User> m_players = new ArrayList<User>();
 	private Map<String, User> m_playersMap = new HashMap<>();
@@ -300,7 +302,12 @@ public class Game {
 		
 		return m_players.size() < m_maxNumberOfPlayers;
 	}
-
+	
+	public boolean isActive(){
+		//TODO add check for active players 
+		return !isOpenForRegistartion();
+	}
+	
 	public Collection<Move> getAllMoves() {
 		return m_moves.values();
 	}
@@ -311,10 +318,6 @@ public class Game {
 
 	public User getActivePlayer() {
 		return m_players.get(m_currentPlayerIndex);
-	}
-	
-	
-	
-	
+	}	
 	
 }
