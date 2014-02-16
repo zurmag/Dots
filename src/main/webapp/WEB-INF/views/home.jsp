@@ -32,30 +32,32 @@
    		$.getScript('//connect.facebook.net/en_UK/all.js', function(){
    		    FB.init({
    		      appId: '${fbAppId}',
-   		    }); 	
+   		    });
    		});
    		
 		
    	</script>    
 </head>
-<body>	
+<body>
 	
-	<div id="fb-root"></div>
-	<div class="fb-like" data-href="https://apps.facebook.com/simple-games-dots/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>	
+	<div id="fb-root"></div>	
+	<div class="fb-like" data-href="https://apps.facebook.com/simple-games-dots/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+	<div id="wrapper">
+	<img src="resources/images/Beta_Testing.jpeg" style="float: left; height: 30"/>	
 	<div id="menu-panel" class="Panel">
-	<button onclick='onProfile()'>Profile</button><Br/>
-	<button onclick='onNewGame()'>New Game</button><Br/>
-	<button onClick='onShowGames()'>Show games</button><Br/>
+		<button onclick='onProfile()'>Profile</button><Br/>
+		<button onclick='onNewGame()'>New Game</button><Br/>
+		<button onClick='onShowGames()'>Show games</button><Br/>
 	
 		
+	</div >
+	<div id="central-panel" class=Panel></div>
+	<div id="status-panel" class="Panel"></div>
 	</div>
-	<div id="central-panel" class=Panel>		
-	</div>
-	<div id="players-panel" class="Panel"></div>
-	
 	<script type="text/javascript" src='resources/scripts/player.js'></script>
 	<script type="text/javascript" src='resources/scripts/board-cell.js'></script>
 	<script type="text/javascript" src='resources/scripts/central-panel.js'></script>
+	<script type="text/javascript" src='resources/scripts/status-panel.js'></script>
 	<script type="text/javascript" src='resources/scripts/game.js'></script>
 	<script type="text/javascript" src='resources/scripts/main.js'></script>
 </body>

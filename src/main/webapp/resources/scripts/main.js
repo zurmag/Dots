@@ -21,6 +21,8 @@ function onNewGame(){
 	}
 	
 	globals.centralPanel.showBoard();
+	globals.statusPanel.showGameStatus(globals.activeGame);
+	
 }
 
 function onShowGames(){
@@ -38,6 +40,7 @@ setTimeout(init, 1000);
 
 function init(){
 	globals.centralPanel = new CentralPanel("central-panel");
+	globals.statusPanel = new GameStatusPanel('status-panel');
 	globals.server = new ServerProxy();
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {

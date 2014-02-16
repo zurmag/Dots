@@ -7,11 +7,11 @@ function Game(settings, state){
 	var boardColor = "grey";
 	var m_gameId = '';
 	var m_players = {};
-	var m_currentPlayer = null;
+	var m_activePlayer = null;
 	var m_me = null;
 	var pressedDot = null;
 	var stage = null;
-	
+	var self = this;
 	init(settings);
 	
 	
@@ -62,7 +62,7 @@ function Game(settings, state){
 				var player = new Player(settings.color, uid);
 								
 				m_players[player.id] = player;
-				m_currentPlayer = player;
+				m_activePlayer = player;
 				m_me = player;
 				
 				if (state != null){
@@ -158,7 +158,7 @@ function Game(settings, state){
 		
 		if (i == pressedDot.i && j == pressedDot.j){
 			gMouseUp(i, j);		
-			board[i,j].player = m_currentPlayer;			
+			board[i,j].player = m_activePlayer;			
 			globals.server.makeMove(m_gameId, m_me, coordinates);
 		}
 		else{//undo
@@ -190,7 +190,8 @@ function Game(settings, state){
 		}
 		
 		if (data.currentPlayer)
-			m_currentPlayer = data.currentPlayer;
+			
+			m_activePlayer = new Player(data.currentPlayer.color, data.currentPlayer.id);
 		if (data.move != null){
 			restoreMove(data.move);
 		}
@@ -214,6 +215,7 @@ function Game(settings, state){
 			}
 			
 		}
+		globals.statusPanel.showGameStatus(self);
 		console.debug(message);
 	}
 	
@@ -235,17 +237,21 @@ function Game(settings, state){
 	
 	this.addPlayerToGame = addPlayerToGame;
 	
+	this.getActivePlayer = function getActivePlayer(){
+		return m_activePlayer;
+	};
+	
 	function restoreState(state){
 		console.debug("state recieved");
 		console.debug(state);
-		m_currentPlayer = state.currentPlayer;
+		m_activePlayer = new Player(state.currentPlayer.color, state.currentPlayer.id);
 		for (var i = 0 ; i < state.players.length; i++){
 			var player = new Player(state.players[0].color, state.players[0].id);
 			m_players[player.id] = player;
 		}
 		for (var i = 0; i < state.moves.length; i++){
 			
-			m_currentPlayer = state.moves[i].player;
+			m_activePlayer = new Player(state.moves[i].player.color, state.moves[i].player.id);state.moves[i].player;
 			restoreMove(state.moves[i]);			
 		}
 		
@@ -259,6 +265,8 @@ function Game(settings, state){
 		board[coordinates.x][coordinates.y].player = move.player;
 		
 	}
+	
+	
 	
 }
 
