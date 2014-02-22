@@ -1,6 +1,6 @@
 function Game(settings, state){
 	
-	var offset = 10;
+	var offset = 30;
 	var distance = 20;
 	var boardLayer = null;
 	var board = [];
@@ -36,10 +36,12 @@ function Game(settings, state){
 			};
 		};
 
+		var widthPx = offset * 2 + (width-1) * distance;
+		
 		stage = new Kinetic.Stage({
 		       container: 'board-container',
-		       width: 578,
-		       height: 578
+		       width: widthPx,
+		       height: widthPx
 		});
 		
 		boardLayer = createBoardLayer(width, height);
@@ -73,7 +75,7 @@ function Game(settings, state){
 				
 		    } 
 			else {
-			    console.error("something went wrong :(");
+				announce('error', "something went wrong :(");
 			}
 		});
 	    
@@ -185,12 +187,12 @@ function Game(settings, state){
 			if (data.move != null){
 				undoMove(data.move.coordinates);
 			}
-			console.error(message);
+			announce('error', data.errorMessage);
 			return;
 		}
 		
 		if (data.currentPlayer)
-			
+			announce('info', 'You turn!');
 			m_activePlayer = new Player(data.currentPlayer.color, data.currentPlayer.id);
 		if (data.move != null){
 			restoreMove(data.move);
@@ -215,7 +217,7 @@ function Game(settings, state){
 			}
 			
 		}
-		globals.statusPanel.showGameStatus(self);
+		globals.statusPanel.showActiveGameStatus(self);
 		console.debug(message);
 	}
 	

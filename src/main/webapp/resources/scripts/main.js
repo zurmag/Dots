@@ -2,10 +2,12 @@
 
 function onProfile(){
 	globals.centralPanel.showProfile();
+	globals.statusPanel.hideActiveGameStatus();
+	announce('info', 'Your game profile will be here');
 }
 
 function onNewGame(){
-	
+	announce('info', 'Your game');
 	var gameSettings = {size: "Medium", players: 2};
 	if (!globals.activeGame){
 		globals.server.newGame(gameSettings, function (data, textStatus, request){
@@ -16,24 +18,35 @@ function onNewGame(){
 		});				
 	}
 	else{
-		//TODO: replace it with user anouncement
-		console.debug("you are currently in active game. Multiple games are not supported yet");
+		//TODO: replace it with user announcement
+		announce('info', 'you are currently in active game.');
 	}
 	
 	globals.centralPanel.showBoard();
-	globals.statusPanel.showGameStatus(globals.activeGame);
+	globals.statusPanel.showActiveGameStatus(globals.activeGame);
+	$("#first-menu").hide();
+	$("#game-menu").show();
 	
 }
 
 function onShowGames(){
+	announce('info', 'Games to play');
 	$.getJSON('games/',function(data){
 		globals.games = {};
 		for (var i = 0; i< data.length; i++){
 			globals.games[data[i].id] = data[i]; 
 		}
 		globals.centralPanel.showGames(data);
+		globals.statusPanel.hideActiveGameStatus();
 	});
 	
+}
+
+function onPauseResume(){
+	announce('info','Unimplemented yet');
+	$("#pause-resume span").text(function(i, text){
+        return text === "Pause" ? "Resume" : "Pause";
+	});
 }
 
 setTimeout(init, 1000);
@@ -54,7 +67,24 @@ function init(){
 			});
 	    } 
 		else {
-		    console.error("something went wrong :(");
+		    announce('error', "something went wrong :(");
 		}
-});    
+	});    
+}
+
+function announce(level, text){
+	var classes = $('#announcement-bar').attr('class');
+	var bar = $('#announcement-bar');
+	bar.removeClass(classes);
+	if (level == "info"){		
+		bar.addClass('info-announcement');			
+	}
+	if (level == "error"){
+		bar.addClass('error-announcement');
+	}
+	bar.html(text);
+}
+
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }

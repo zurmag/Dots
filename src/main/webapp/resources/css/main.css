@@ -1,7 +1,19 @@
 .Panel{
    float: left;
+   
 }
 button{
 	width: 130px;
 	font-size: 0.9em ! important;
-} 
+}
+#announcement-bar{
+	text-align: center;
+	font-size: larger;
+	background-color: azure;
+}
+.error-announcement{
+	color: Red;
+}
+.info-announcement{
+	color: Blue;
+}

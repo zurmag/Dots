@@ -3,7 +3,7 @@ function GameStatusPanel(panelDivName){
 	var m_panelDiv = document.getElementById(panelDivName);
 	
 	
-	this.showGameStatus = function showGameStatus(game){
+	this.showActiveGameStatus = function showActiveGameStatus(game){
 		var img = false;
 		if ($('img#activ-player-img').length < 1){
 			var activePlayerDiv = createOrGetElement('div', 'active-player');
@@ -21,7 +21,10 @@ function GameStatusPanel(panelDivName){
 		
 	};
 	
-	
+	this.hideActiveGameStatus = function hideActiveGameStatus(){
+		var activePlayerDiv = createOrGetElement('div', 'active-player');
+		activePlayerDiv.style.display='none';
+	};
 	
 	function createOrGetElement(el, id){
 		var querry = $(el + '#' + id);

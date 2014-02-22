@@ -47,12 +47,12 @@ public class MovesController {
 		if (game == null){
 			response = new GameStateChange();
 			response.move = move;
-			response.errorMessage = "No game found for id: " + gameId;
+			response.errorMessage = "No game found";
 		}
 		else if (!game.isActive()){
 			response = new GameStateChange();
 			response.move = move;
-			response.errorMessage = "Game id: " + gameId + " is not active";			
+			response.errorMessage = "Game is not active please wait for other players";			
 		}
 		else{
 		    

@@ -25,7 +25,7 @@ function ServerProxy(){
 	    	m_connected = true;
 	    	
 	    },function(error){	    	
-	    	console.error('disconnected');
+	    	announce('error', 'disconnected');
 	    	setTimeout(connect, 1000);
 	    });
 	}
@@ -68,7 +68,7 @@ function ServerProxy(){
 			  contentType:"application/json; charset=utf-8",
 			  success: success,
 			  error: function (data, textStatus, request){
-				  console.error(textStatus);
+				  announce('error', textStatus);
 			  }
 		});
 	}
@@ -81,7 +81,7 @@ function ServerProxy(){
 			  contentType:"application/json; charset=utf-8",
 			  success: success,
 			  error: function (data, textStatus, request){
-				  console.error(textStatus);
+				  announce('error', textStatus);
 			  }
 		});
 	}

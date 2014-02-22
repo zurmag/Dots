@@ -47,7 +47,7 @@ function CentralPanel(panelDivName){
 				onNewGame();
 			}
 			else{
-				console.debug('you are in active game!');
+				announce('info', 'you are in active game!');
 			}
 			
 		});

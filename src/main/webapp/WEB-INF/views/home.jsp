@@ -43,16 +43,23 @@
 	<div id="fb-root"></div>	
 	<div class="fb-like" data-href="https://apps.facebook.com/simple-games-dots/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
 	<div id="wrapper">
-	<img src="resources/images/Beta_Testing.jpeg" style="float: left; height: 30"/>	
-	<div id="menu-panel" class="Panel">
-		<button onclick='onProfile()'>Profile</button><Br/>
-		<button onclick='onNewGame()'>New Game</button><Br/>
-		<button onClick='onShowGames()'>Show games</button><Br/>
-	
-		
-	</div >
-	<div id="central-panel" class=Panel></div>
-	<div id="status-panel" class="Panel"></div>
+		<img src="resources/images/Beta_Testing.jpeg" style="float: left; height: 30"/>	
+		<div id="menu-panel" class="Panel" style='width: 132px'>
+		<div id="first-menu">
+			<button onclick='onProfile()'>Profile</button><Br/>
+			<button onclick='onNewGame()'>New Game</button><Br/>
+			<button onClick='onShowGames()'>Show games</button><Br/>
+		</div>
+		<div id='game-menu' style="display:none">
+			<button id='pause-resume' onClick='onPauseResume()'>Pause</button>
+			<button onClick='disconnectGame'>Disconnect</button>
+		</div>
+			
+		</div >
+		<div id="central-panel" class=Panel>
+			<div id="announcement-bar" class="error-announcement">Welcome</div>
+		</div>
+		<div id="status-panel" class="Panel"></div>
 	</div>
 	<script type="text/javascript" src='resources/scripts/player.js'></script>
 	<script type="text/javascript" src='resources/scripts/board-cell.js'></script>
