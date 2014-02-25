@@ -15,17 +15,16 @@ function onNewGame(){
 			gameSettings.id = request.getResponseHeader('location').split('/').pop();
 			gameSettings.color = 'red';
 			globals.activeGame = new Game(gameSettings);
-		});				
+			globals.statusPanel.showActiveGameStatus(globals.activeGame);
+		});
 	}
 	else{
-		//TODO: replace it with user announcement
 		announce('info', 'you are currently in active game.');
+		globals.statusPanel.showActiveGameStatus(globals.activeGame);
 	}
 	
-	globals.centralPanel.showBoard();
-	globals.statusPanel.showActiveGameStatus(globals.activeGame);
-	$("#first-menu").hide();
-	$("#game-menu").show();
+	globals.centralPanel.showBoard();	
+	globals.menuPanel.onGameStart();
 	
 }
 
@@ -49,11 +48,17 @@ function onPauseResume(){
 	});
 }
 
+function disconnectGame(){
+	announce('info', 'Disconnecting from game...');
+	globals.activeGame.disconnect();
+}
+
 setTimeout(init, 1000);
 
 function init(){
 	globals.centralPanel = new CentralPanel("central-panel");
 	globals.statusPanel = new GameStatusPanel('status-panel');
+	globals.menuPanel = new MenuPanel();
 	globals.server = new ServerProxy();
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {

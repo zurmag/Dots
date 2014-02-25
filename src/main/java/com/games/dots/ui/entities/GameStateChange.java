@@ -14,4 +14,5 @@ public class GameStateChange {
 	public Set<Coordinates> newDeadDots = new HashSet<>();
 	public User newPlayer;
 	public User removedPlayer;
+	public String newState;
 }

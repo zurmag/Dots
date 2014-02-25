@@ -45,19 +45,23 @@
 	<div id="wrapper">
 		<img src="resources/images/Beta_Testing.jpeg" style="float: left; height: 30"/>	
 		<div id="menu-panel" class="Panel" style='width: 132px'>
-		<div id="first-menu">
-			<button onclick='onProfile()'>Profile</button><Br/>
-			<button onclick='onNewGame()'>New Game</button><Br/>
-			<button onClick='onShowGames()'>Show games</button><Br/>
-		</div>
-		<div id='game-menu' style="display:none">
-			<button id='pause-resume' onClick='onPauseResume()'>Pause</button>
-			<button onClick='disconnectGame'>Disconnect</button>
-		</div>
+			<div id="first-menu">
+				<button onclick='onProfile()'>Profile</button>
+				<button onclick='onNewGame()'>New Game</button>
+				<button onClick='onShowGames()'>Show games</button>
+			</div>
+			<div id='active-game-menu' style="display:none">
+				<button id='pause-resume' onClick='onPauseResume()'>Pause</button>
+				<button onClick='disconnectGame()'>Disconnect</button>
+			</div>
 			
+			<div id='after-game-menu' style="display:none">
+				<button id='return-button' onClick='globals.menuPanel.returnToMainMenu()'>Main menu</button>
+			</div>	
+				
 		</div >
 		<div id="central-panel" class=Panel>
-			<div id="announcement-bar" class="error-announcement">Welcome</div>
+			<div id="announcement-bar" class="info-announcement">Welcome</div>
 		</div>
 		<div id="status-panel" class="Panel"></div>
 	</div>
@@ -65,6 +69,7 @@
 	<script type="text/javascript" src='resources/scripts/board-cell.js'></script>
 	<script type="text/javascript" src='resources/scripts/central-panel.js'></script>
 	<script type="text/javascript" src='resources/scripts/status-panel.js'></script>
+	<script type="text/javascript" src='resources/scripts/menu-panel.js'></script>
 	<script type="text/javascript" src='resources/scripts/game.js'></script>
 	<script type="text/javascript" src='resources/scripts/main.js'></script>
 </body>

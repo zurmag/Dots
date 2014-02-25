@@ -11,10 +11,28 @@ function Game(settings, state){
 	var m_me = null;
 	var pressedDot = null;
 	var stage = null;
-	var self = this;
+	var self = this;	
+	
+	//public
+	this.addPlayerToGame = function addPlayerToGame(){
+		
+		globals.server.addPlayerToGame(m_me, m_gameId);
+	};
+	
+	this.getActivePlayer = function getActivePlayer(){
+		return m_activePlayer;
+	};	
+	
+	this.disconnect = function disconnect(){
+		globals.server.disconnectGame(m_me.id, m_gameId, function(){
+			announce('info', 'Game completed. You won!');
+		});
+		globals.activeGame = false;
+	};
+	
 	init(settings);
 	
-	
+	//private
 	function init(settings){
 		m_gameId = settings.id;
 		var width = 0;
@@ -70,7 +88,7 @@ function Game(settings, state){
 				if (state != null){
 					restoreState(state);		
 				}else{
-					addPlayerToGame();
+					self.addPlayerToGame();
 				}
 				
 		    } 
@@ -127,7 +145,6 @@ function Game(settings, state){
 	    return layer;
 	}
 	
-	//privates
 	function setPointMouseDown (x, y){
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
@@ -179,47 +196,7 @@ function Game(settings, state){
 		dot.setStroke('black');
 		dot.setStrokeWidth(1);
 		boardLayer.draw();
-	}
-	
-	function recieveResponse(message){
-		var data = JSON.parse(message.body);
-		if (data.errorMessage != null){
-			if (data.move != null){
-				undoMove(data.move.coordinates);
-			}
-			announce('error', data.errorMessage);
-			return;
-		}
-		
-		if (data.currentPlayer)
-			announce('info', 'You turn!');
-			m_activePlayer = new Player(data.currentPlayer.color, data.currentPlayer.id);
-		if (data.move != null){
-			restoreMove(data.move);
-		}
-		
-		
-		if (data.newCycles.length > 0){
-			for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
-				var cycle = data.newCycles[cycleIndex];
-				cycle.push(cycle[0]);
-				for (var index = 0; index < cycle.length - 1; index++){
-					startPoint = board[cycle[index].x][cycle[index].y];
-					endPoint = board[cycle[index+1].x][cycle[index+1].y];
-					var line = new Kinetic.Line({
-						points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
-						strokeWidth: 1,
-						stroke: startPoint.player.color
-					});
-					boardLayer.add(line);
-					boardLayer.draw();
-				}
-			}
-			
-		}
-		globals.statusPanel.showActiveGameStatus(self);
-		console.debug(message);
-	}
+	}	
 	
 	function undoMove(coordinates){
 		dot = board[coordinates.x][coordinates.y].dot;
@@ -230,18 +207,7 @@ function Game(settings, state){
 		dot.setStrokeWidth(1);
 		boardLayer.draw();
 		board[coordinates.x][coordinates.y].player = null;
-	}
-	
-	function addPlayerToGame(){
-		
-		globals.server.addPlayerToGame(m_me, m_gameId);
-	}
-	
-	this.addPlayerToGame = addPlayerToGame;
-	
-	this.getActivePlayer = function getActivePlayer(){
-		return m_activePlayer;
-	};
+	}	
 	
 	function restoreState(state){
 		console.debug("state recieved");
@@ -266,6 +232,68 @@ function Game(settings, state){
 		gMouseUp(coordinates.x, coordinates.y);
 		board[coordinates.x][coordinates.y].player = move.player;
 		
+	}
+	
+	function endGame(){
+		globals.menuPanel.onGameEnd();
+	}
+	
+	function activate(){
+		
+	}
+	
+	//callback
+	function recieveResponse(message){
+		var data = JSON.parse(message.body);
+		if (data.errorMessage != null){
+			if (data.move != null){
+				undoMove(data.move.coordinates);
+			}
+			announce('error', data.errorMessage);
+			return;
+		}
+		
+		if (data.newState){
+			if (data.newState == 'closed'){
+				endGame();
+				
+			}
+			else if (data.newState == 'active'){
+				activate();
+			}
+			else{
+				console.error('unknown state received: '+ data.newState );
+			}
+		}
+		
+		if (data.currentPlayer){
+			announce('info', 'Your turn!');
+			m_activePlayer = new Player(data.currentPlayer.color, data.currentPlayer.id);
+		}
+		if (data.move != null){
+			restoreMove(data.move);
+		}
+				
+		if (data.newCycles.length > 0){
+			for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
+				var cycle = data.newCycles[cycleIndex];
+				cycle.push(cycle[0]);
+				for (var index = 0; index < cycle.length - 1; index++){
+					startPoint = board[cycle[index].x][cycle[index].y];
+					endPoint = board[cycle[index+1].x][cycle[index+1].y];
+					var line = new Kinetic.Line({
+						points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
+						strokeWidth: 1,
+						stroke: startPoint.player.color
+					});
+					boardLayer.add(line);
+					boardLayer.draw();
+				}
+			}
+			
+		}
+		globals.statusPanel.showActiveGameStatus(self);
+		console.debug(message);
 	}
 	
 	

@@ -60,6 +60,27 @@ function ServerProxy(){
 			
 	};
 	
+	this.disconnectGame = function disconnectGame(playerId, gameId, success){
+		var url = 'games/' + gameId + '/players/' + playerId;
+		delete m_subscribtions[url];
+		$.ajax({
+			url:url,
+			type:"DELETE",
+			dataType : 'html',
+			success : success
+		});
+		
+		var url = '/sub/games/' + gameId;
+		if (m_connected){
+			try{
+				m_stompClient.unsubscribe(url, callBack);
+			}catch(e){
+				console.debug('failed to unsubscribe hope it will be better on reconnect');
+			}			
+		}
+		
+	}
+	
 	function post(url, data, success){
 		$.ajax({
 			  url:url,
@@ -84,7 +105,9 @@ function ServerProxy(){
 				  announce('error', textStatus);
 			  }
 		});
-	}
+	};
+	
+	
 
 }
 

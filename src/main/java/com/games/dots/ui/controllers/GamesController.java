@@ -62,7 +62,24 @@ public class GamesController {
 		
 		GameStateChange stateChange = m_games.get(id).addPlayer(user); 
 		m_template.convertAndSend("/sub/games/" + id, stateChange);
-		return new ResponseEntity<String>(id, HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/games/{gameId}/players/{userId}", method = RequestMethod.DELETE)
+	public ResponseEntity<?> removePlayerFromGame(
+			@PathVariable String gameId	, @PathVariable String userId
+			){
+		logger.debug("addPlayerToGame");		
+		
+		GameStateChange stateChange = m_games.get(gameId).removePlayer(userId);
+		if (stateChange != null) {
+			m_template.convertAndSend("/sub/games/" + gameId, stateChange);
+			if (stateChange.newState.equals("closed")) {
+				m_games.remove(gameId);
+			}
+		}
+		
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.GET)

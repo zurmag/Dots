@@ -109,7 +109,7 @@ public class Game {
 		move.setPlayer(m_playersMap.get(move.getPlayer().id));
 		
 		actionResponse.move = move;
-		if (!move.getPlayer().equals(m_players.get(m_currentPlayerIndex))){
+		if (!move.getPlayer().equals(getActivePlayer())){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
@@ -145,8 +145,8 @@ public class Game {
 		for (Coordinates coordinate: actionResponse.newDeadDots){
 			m_moves_board.removeVertex(m_moves.get(coordinate));						
 		}
-		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
-		actionResponse.currentPlayer = m_players.get(m_currentPlayerIndex);
+		nextTurn();
+		actionResponse.currentPlayer = getActivePlayer();
 		return actionResponse;
 	}	
 	
@@ -293,11 +293,40 @@ public class Game {
 			//TODO: Think about error
 		}
 		
+		if (m_players.size() == m_maxNumberOfPlayers)
+			stateChange.newState = "active";
 		return stateChange;
 			
 		
 	}
 	
+	public GameStateChange removePlayer(String userId) {
+		GameStateChange stateChange = new GameStateChange();
+		if (!m_playersMap.containsKey(userId)) 
+			return null;
+		if (m_players.size() == 1) {
+			return close();
+		}
+		
+		User user = m_playersMap.get(userId);
+		User activePlayer = getActivePlayer();
+		
+		if (user.equals(activePlayer)) {
+			nextTurn();activePlayer = getActivePlayer();
+		}
+		m_players.remove(user);			
+		m_playersMap.remove(userId);
+		m_currentPlayerIndex = m_players.indexOf(activePlayer);
+		stateChange.removedPlayer = user;
+		return stateChange;
+	}
+	
+	public GameStateChange close() {
+		GameStateChange stateChange = new GameStateChange();
+		stateChange.newState = "closed";
+		return stateChange;
+	}
+
 	public boolean isOpenForRegistartion() {
 		
 		return m_players.size() < m_maxNumberOfPlayers;
@@ -318,6 +347,11 @@ public class Game {
 
 	public User getActivePlayer() {
 		return m_players.get(m_currentPlayerIndex);
-	}	
+	}
+	
+	public void nextTurn() {
+		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
+	}
+	
 	
 }
