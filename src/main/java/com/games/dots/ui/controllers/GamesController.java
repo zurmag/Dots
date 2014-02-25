@@ -23,6 +23,7 @@ import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.GameStateChange;
 import com.games.dots.ui.entities.User;
+import com.games.dots.ui.entities.UserType;
 
 @Controller
 public class GamesController {
@@ -59,7 +60,9 @@ public class GamesController {
 			@PathVariable String id	, @RequestBody User user
 			){
 		logger.debug("addPlayerToGame");		
-		
+		if (user.avatarUrl == null || user.avatarUrl.isEmpty()){
+			user.avatarUrl = "https://graph.facebook.com/" + user.id + "/picture";
+		}
 		GameStateChange stateChange = m_games.get(id).addPlayer(user); 
 		m_template.convertAndSend("/sub/games/" + id, stateChange);
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -74,7 +77,7 @@ public class GamesController {
 		GameStateChange stateChange = m_games.get(gameId).removePlayer(userId);
 		if (stateChange != null) {
 			m_template.convertAndSend("/sub/games/" + gameId, stateChange);
-			if (stateChange.newState.equals("closed")) {
+			if ("closed".equals(stateChange.newState)) {
 				m_games.remove(gameId);
 			}
 		}
@@ -84,7 +87,7 @@ public class GamesController {
 	
 	@RequestMapping(value = "/games", method = RequestMethod.GET)
 	public @ResponseBody Collection<com.games.dots.ui.entities.Game> getGames(){
-		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();;
+		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();
 		
 		for(Game game: m_games.getAll()){
 			games.add(new com.games.dots.ui.entities.Game(game));			

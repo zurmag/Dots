@@ -18,8 +18,8 @@ function onNewGame(){
 			globals.statusPanel.showActiveGameStatus(globals.activeGame);
 		});
 	}
-	else{
-		announce('info', 'you are currently in active game.');
+	else{		
+		announce('info', 'Welcome back');
 		globals.statusPanel.showActiveGameStatus(globals.activeGame);
 	}
 	
@@ -68,6 +68,7 @@ function init(){
 				if (data.length > 0){			
 					var settings = {size: data[0].size, id: data[0].id};
 					globals.activeGame = new Game(settings, data[0].state);
+					onNewGame();
 				}
 			});
 	    } 

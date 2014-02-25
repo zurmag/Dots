@@ -117,8 +117,7 @@ public class FacebookController {
                 //this is guest, create authorization url that will be passed to javascript
                 //note that redirect_uri (page the user will be forwarded to after authorization) is set to fbCanvasUrl
                 mav.addObject("redirectUrl", "https://www.facebook.com/dialog/oauth?client_id=" + m_configurationManger.getFbAppId() + 
-                        "&redirect_uri=" + URLEncoder.encode(m_configurationManger.getFbCanvasUrl(), "UTF-8") + 
-                        "&scope=");
+                        "&redirect_uri=" + URLEncoder.encode(m_configurationManger.getFbCanvasUrl(), "UTF-8"));
             } else {
                 //this is authorized user, get their info from Graph API using received access token
                 String accessToken = data.get("oauth_token");

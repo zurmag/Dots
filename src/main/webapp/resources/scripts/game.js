@@ -223,6 +223,7 @@ function Game(settings, state){
 			restoreMove(state.moves[i]);			
 		}
 		
+		drawCycles(state.cycles);
 		
 	}
 	
@@ -232,6 +233,23 @@ function Game(settings, state){
 		gMouseUp(coordinates.x, coordinates.y);
 		board[coordinates.x][coordinates.y].player = move.player;
 		
+	}
+	function drawCycles(cycles){
+		for (var cycleIndex = 0; cycleIndex < cycles.length; cycleIndex++){
+			var cycle = cycles[cycleIndex];
+			cycle.push(cycle[0]);
+			for (var index = 0; index < cycle.length - 1; index++){
+				startPoint = board[cycle[index].x][cycle[index].y];
+				endPoint = board[cycle[index+1].x][cycle[index+1].y];
+				var line = new Kinetic.Line({
+					points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
+					strokeWidth: 1,
+					stroke: startPoint.player.color
+				});
+				boardLayer.add(line);
+				boardLayer.draw();
+			}
+		}
 	}
 	
 	function endGame(){
@@ -247,9 +265,14 @@ function Game(settings, state){
 		var data = JSON.parse(message.body);
 		if (data.errorMessage != null){
 			if (data.move != null){
-				undoMove(data.move.coordinates);
+				if(data.move.player.id == m_me.id){
+					undoMove(data.move.coordinates);
+					announce('error', data.errorMessage);
+				}
+				//else not my fault
+			}else{
+				announce('error', data.errorMessage);
 			}
-			announce('error', data.errorMessage);
 			return;
 		}
 		
@@ -267,7 +290,13 @@ function Game(settings, state){
 		}
 		
 		if (data.currentPlayer){
-			announce('info', 'Your turn!');
+			if (data.currentPlayer.id == m_me.id){
+				announce('info', 'Your turn!');
+				
+			}
+			else{
+				announce('info', data.currentPlayer.color +'s turn');
+			}
 			m_activePlayer = new Player(data.currentPlayer.color, data.currentPlayer.id);
 		}
 		if (data.move != null){
@@ -275,21 +304,7 @@ function Game(settings, state){
 		}
 				
 		if (data.newCycles.length > 0){
-			for (var cycleIndex = 0; cycleIndex < data.newCycles.length; cycleIndex++){
-				var cycle = data.newCycles[cycleIndex];
-				cycle.push(cycle[0]);
-				for (var index = 0; index < cycle.length - 1; index++){
-					startPoint = board[cycle[index].x][cycle[index].y];
-					endPoint = board[cycle[index+1].x][cycle[index+1].y];
-					var line = new Kinetic.Line({
-						points: [startPoint.getRealCoordinate(), endPoint.getRealCoordinate()],
-						strokeWidth: 1,
-						stroke: startPoint.player.color
-					});
-					boardLayer.add(line);
-					boardLayer.draw();
-				}
-			}
+			drawCycles(data.newCycles);
 			
 		}
 		globals.statusPanel.showActiveGameStatus(self);

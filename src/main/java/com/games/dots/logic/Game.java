@@ -43,6 +43,7 @@ public class Game {
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
 	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
+	List<Coordinates[]> m_emptyCycles = new LinkedList<Coordinates[]>();
 	public Game (GameSettings settings){
 		m_maxNumberOfPlayers = settings.players;
 		try {
@@ -117,28 +118,32 @@ public class Game {
 		m_moves.put(move.getCoordinates(), move);		
 		m_moves_board.addVertex(move);
 		
-		for (Coordinates[] cycle : m_cycles){
+		//checking for stepping into cycle
+		for (int i = 0; i< m_emptyCycles.size();i++){
+			Coordinates[] cycle = m_emptyCycles.get(i);
 			if (isDeadPoint(move, cycle)){
 				actionResponse.newCycles.add(cycle);
 				actionResponse.newDeadDots.add(move.getCoordinates());
+				m_emptyCycles.remove(i);
+				m_cycles.add(cycle);
 				break;
 			}
 		}
-		if (actionResponse.newCycles.isEmpty()){			
+		//have not stepped into enemy cycle
+		if (actionResponse.newCycles.isEmpty()){
 		
-			for (Coordinates[] cycle : createAndGetNewCycles(move)){			
-					
-				m_cycles.add(cycle);			
+			for (Coordinates[] cycle : createAndGetNewCycles(move)){							
 				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
-				if (deadPoints.size() > 0){
-					
+				if (deadPoints.size() > 0){					
 					actionResponse.newDeadDots.addAll(deadPoints);
 					actionResponse.newCycles.add(cycle);
-								
+					m_cycles.add(cycle);				
+				}
+				else{
+					m_emptyCycles.add(cycle);
 				}				
-			
-				
 			}
+			
 		}
 		
 		m_board.removeAllVertices(actionResponse.newDeadDots);

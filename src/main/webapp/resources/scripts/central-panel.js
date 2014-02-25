@@ -111,12 +111,13 @@ function CentralPanel(panelDivName){
 			tr.appendChild(td);
 			td = document.createElement('td');td.innerHTML=data.size;tr.appendChild(td);
 			td = document.createElement('td');td.innerHTML=data.maxPlayers;tr.appendChild(td);
-			var connectedPlayers = "";
+			var connectedPlayers = document.createElement('div');
 			for(var i = 0;i < data.players.length;i++){
-				connectedPlayers += data.players[i].id;
-				connectedPlayers += " ";
+				var img = document.createElement('img');
+				img.src = data.players[i].avatarUrl;
+				connectedPlayers.appendChild(img);
 			}
-			td = document.createElement('td');td.innerHTML=connectedPlayers;tr.appendChild(td);
+			td = document.createElement('td');td.appendChild(connectedPlayers);tr.appendChild(td);
 			return tr;
 		}		
 		
