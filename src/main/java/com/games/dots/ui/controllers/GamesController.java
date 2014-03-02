@@ -21,9 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameSettings;
-import com.games.dots.ui.entities.GameStateChange;
+import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.User;
-import com.games.dots.ui.entities.UserType;
 
 @Controller
 public class GamesController {
@@ -63,7 +62,7 @@ public class GamesController {
 		if (user.avatarUrl == null || user.avatarUrl.isEmpty()){
 			user.avatarUrl = "https://graph.facebook.com/" + user.id + "/picture";
 		}
-		GameStateChange stateChange = m_games.get(id).addPlayer(user); 
+		GameMessage stateChange = m_games.get(id).addPlayer(user); 
 		m_template.convertAndSend("/sub/games/" + id, stateChange);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -74,10 +73,10 @@ public class GamesController {
 			){
 		logger.debug("addPlayerToGame");		
 		
-		GameStateChange stateChange = m_games.get(gameId).removePlayer(userId);
+		GameMessage stateChange = m_games.get(gameId).removePlayer(userId);
 		if (stateChange != null) {
 			m_template.convertAndSend("/sub/games/" + gameId, stateChange);
-			if ("closed".equals(stateChange.newState)) {
+			if ("closed".equals(stateChange.newState.state)) {
 				m_games.remove(gameId);
 			}
 		}

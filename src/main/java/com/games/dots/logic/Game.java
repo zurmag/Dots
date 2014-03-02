@@ -22,7 +22,7 @@ import org.jgrapht.graph.WeightedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.games.dots.ui.entities.GameStateChange;
+import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
@@ -32,7 +32,6 @@ import com.games.dots.ui.entities.User;
 public class Game {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
-	ScheduledThreadPoolExecutor m_threadPool = new ScheduledThreadPoolExecutor(1);
 	
 	private List<User> m_players = new ArrayList<User>();
 	private Map<String, User> m_playersMap = new HashMap<>();
@@ -40,6 +39,7 @@ public class Game {
 	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
 	public String id;
+	public String m_state = "waiting";
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
 	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
@@ -105,8 +105,8 @@ public class Game {
 	
 	
 	
-	public synchronized GameStateChange makeMove(Move move){
-		GameStateChange actionResponse = new GameStateChange();
+	public synchronized GameMessage makeMove(Move move){
+		GameMessage actionResponse = new GameMessage();
 		move.setPlayer(m_playersMap.get(move.getPlayer().id));
 		
 		actionResponse.move = move;
@@ -151,7 +151,7 @@ public class Game {
 			m_moves_board.removeVertex(m_moves.get(coordinate));						
 		}
 		nextTurn();
-		actionResponse.currentPlayer = getActivePlayer();
+		actionResponse.newState.activePlayer = getActivePlayer();
 		return actionResponse;
 	}	
 	
@@ -287,26 +287,28 @@ public class Game {
 		
 	}
 
-	public GameStateChange addPlayer(User user) {
-		GameStateChange stateChange = new GameStateChange();
+	public GameMessage addPlayer(User user) {
+		GameMessage stateChange = new GameMessage();
 		if (m_players.size() < m_maxNumberOfPlayers){
 			m_players.add(user);
 			m_playersMap.put(user.id, user);
-			stateChange.newPlayer = user;
+			stateChange.newState.newPlayer = user;
 		}
 		else{
 			//TODO: Think about error
 		}
 		
-		if (m_players.size() == m_maxNumberOfPlayers)
-			stateChange.newState = "active";
+		if (m_players.size() == m_maxNumberOfPlayers){
+			stateChange.newState.state = "active";
+			m_state = "active";
+		}
 		return stateChange;
 			
 		
 	}
 	
-	public GameStateChange removePlayer(String userId) {
-		GameStateChange stateChange = new GameStateChange();
+	public GameMessage removePlayer(String userId) {
+		GameMessage stateChange = new GameMessage();
 		if (!m_playersMap.containsKey(userId)) 
 			return null;
 		if (m_players.size() == 1) {
@@ -322,13 +324,19 @@ public class Game {
 		m_players.remove(user);			
 		m_playersMap.remove(userId);
 		m_currentPlayerIndex = m_players.indexOf(activePlayer);
-		stateChange.removedPlayer = user;
+		if (m_players.size() == 1){
+			return close();
+		}
+		
+		stateChange.newState.removedPlayer = user;
+		stateChange.newState.state = m_state = "waiting";
+		
 		return stateChange;
 	}
 	
-	public GameStateChange close() {
-		GameStateChange stateChange = new GameStateChange();
-		stateChange.newState = "closed";
+	public GameMessage close() {
+		GameMessage stateChange = new GameMessage();
+		stateChange.newState.state = "closed";
 		return stateChange;
 	}
 
@@ -356,6 +364,11 @@ public class Game {
 	
 	public void nextTurn() {
 		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
+	}
+
+	public String getState() {
+		// TODO Auto-generated method stub
+		return m_state;
 	}
 	
 	

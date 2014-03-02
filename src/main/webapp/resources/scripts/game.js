@@ -1,17 +1,26 @@
 function Game(settings, state){
 	
+	var self = this;
+	//board params
 	var offset = 30;
 	var distance = 20;
 	var boardLayer = null;
 	var board = [];
 	var boardColor = "grey";
+	var stage = null;
+	
+	//game params
+	var m_state = 'waiting';
 	var m_gameId = '';
 	var m_players = {};
 	var m_activePlayer = null;
 	var m_me = null;
-	var pressedDot = null;
-	var stage = null;
-	var self = this;	
+	var m_pressedDot = null;
+	
+	//events
+	self.onScoreChange = function(sores){
+		console.debug(sores);
+	};
 	
 	//public
 	this.addPlayerToGame = function addPlayerToGame(){
@@ -75,11 +84,12 @@ function Game(settings, state){
 	    	setPointMouseUp(mousePos.x, mousePos.y);
 	    });
 	    
+	    m_me = {color: settings.color};
 	    FB.getLoginStatus(function(response) {
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
-				var player = new Player(settings.color, uid);
+				var player = new Player(m_me.color, uid);
 								
 				m_players[player.id] = player;
 				m_activePlayer = player;
@@ -89,6 +99,7 @@ function Game(settings, state){
 					restoreState(state);		
 				}else{
 					self.addPlayerToGame();
+					announce('info', 'Waiting for other players...');
 				}
 				
 		    } 
@@ -97,7 +108,7 @@ function Game(settings, state){
 			}
 		});
 	    
-	    globals.server.onMove(m_gameId,recieveResponse);
+	    globals.server.onMove(m_gameId,recieveMessage);
 	    
 	    
 	}
@@ -146,14 +157,20 @@ function Game(settings, state){
 	}
 	
 	function setPointMouseDown (x, y){
+		if (m_state == 'closed'){
+			return;
+		}else if (m_state == 'waiting'){
+			announce('info', 'Please wait for other players');
+			return;
+		}
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
 		var cell = board[i][j];
 
 		if (cell.player == null){//valid cell
-			pressedDot = {};
-			pressedDot.i = i;
-			pressedDot.j = j;					
+			m_pressedDot = {};
+			m_pressedDot.i = i;
+			m_pressedDot.j = j;					
 			gMouseDown(i, j, m_me.color);
 		}		
 	}
@@ -165,27 +182,33 @@ function Game(settings, state){
 	}
 
 	function setPointMouseUp (x, y){
+		if (m_state == 'closed'){
+			return;
+		}else if (m_state == 'waiting'){
+			announce('info', 'Please wait for other players');
+			return;
+		}
 		var i = Math.round(Math.abs((x-offset)/distance));
 		var j = Math.round(Math.abs((y-offset)/distance));
 		var coordinates = {};
 		coordinates.x = i;
 		coordinates.y = j;
-		if (pressedDot == null)//invalid point pressed
+		if (m_pressedDot == null)//invalid point pressed
 		{
 			return;
 		}
 		
-		if (i == pressedDot.i && j == pressedDot.j){
+		if (i == m_pressedDot.i && j == m_pressedDot.j){
 			gMouseUp(i, j);		
 			board[i,j].player = m_activePlayer;			
 			globals.server.makeMove(m_gameId, m_me, coordinates);
 		}
 		else{//undo
-			coordinates = {x:pressedDot.i, y:pressedDot.j};
+			coordinates = {x:m_pressedDot.i, y:m_pressedDot.j};
 			undoMove(coordinates);
 			
 		}
-		pressedDot = null;
+		m_pressedDot = null;
 		
 				
 	}
@@ -212,17 +235,20 @@ function Game(settings, state){
 	function restoreState(state){
 		console.debug("state recieved");
 		console.debug(state);
-		m_activePlayer = new Player(state.currentPlayer.color, state.currentPlayer.id);
+		
 		for (var i = 0 ; i < state.players.length; i++){
 			var player = new Player(state.players[0].color, state.players[0].id);
 			m_players[player.id] = player;
+			if (m_me.id == player.id){
+				m_me = player;
+			}
 		}
 		for (var i = 0; i < state.moves.length; i++){
 			
 			m_activePlayer = new Player(state.moves[i].player.color, state.moves[i].player.id);state.moves[i].player;
 			restoreMove(state.moves[i]);			
 		}
-		
+		m_activePlayer = new Player(state.activePlayer.color, state.activePlayer.id);
 		drawCycles(state.cycles);
 		
 	}
@@ -261,44 +287,18 @@ function Game(settings, state){
 	}
 	
 	//callback
-	function recieveResponse(message){
+	function recieveMessage(message){
 		var data = JSON.parse(message.body);
+		
 		if (data.errorMessage != null){
-			if (data.move != null){
-				if(data.move.player.id == m_me.id){
-					undoMove(data.move.coordinates);
-					announce('error', data.errorMessage);
-				}
-				//else not my fault
-			}else{
-				announce('error', data.errorMessage);
-			}
+			errorHandler(data);
 			return;
 		}
-		
-		if (data.newState){
-			if (data.newState == 'closed'){
-				endGame();
 				
-			}
-			else if (data.newState == 'active'){
-				activate();
-			}
-			else{
-				console.error('unknown state received: '+ data.newState );
-			}
+		if (data.newState != null){
+			stateChangeHandler(data.newState);
 		}
 		
-		if (data.currentPlayer){
-			if (data.currentPlayer.id == m_me.id){
-				announce('info', 'Your turn!');
-				
-			}
-			else{
-				announce('info', data.currentPlayer.color +'s turn');
-			}
-			m_activePlayer = new Player(data.currentPlayer.color, data.currentPlayer.id);
-		}
 		if (data.move != null){
 			restoreMove(data.move);
 		}
@@ -307,11 +307,55 @@ function Game(settings, state){
 			drawCycles(data.newCycles);
 			
 		}
+		
+		if (data.scoreChange != undefined && data.scoreChange.length > 0){
+			self.onScoreChange(data.scoreChange);
+		}
 		globals.statusPanel.showActiveGameStatus(self);
 		console.debug(message);
 	}
 	
+	function errorHandler(message){
+		if (message.move != null){
+			if(message.move.player.id == m_me.id){
+				undoMove(message.move.coordinates);
+				announce('error', message.errorMessage);
+			}
+			//else not my fault
+		}else{
+			announce('error', message.errorMessage);
+		}
+	}
 	
+	function stateChangeHandler(newState){
+		m_state = newState.state;
+		if (m_state){
+			if (m_state == 'closed'){
+				endGame();
+			}
+			else if (m_state == 'active'){
+				activate();
+			}
+			else if(m_state == 'waiting'){
+				announce('info', 'Waiting...');
+			}
+			else{
+				console.error('unknown state received: '+ newState.newState );
+			}
+			
+			
+		}
+		
+		if (newState.activePlayer){
+			if (newState.activePlayer.id == m_me.id){
+				announce('info', 'Your turn!');				
+			}
+			else{
+				announce('info', newState.activePlayer.color +'s turn');
+			}
+			m_activePlayer = new Player(newState.activePlayer.color, newState.activePlayer.id);
+		}
+	}
 	
 }
 

@@ -34,7 +34,7 @@ public class MovesController {
 			@Payload Coordinates coordinates, 
 			@DestinationVariable String gameId, 
 			@DestinationVariable String playerId){    
-		GameStateChange response = null;
+		GameMessage response = null;
 		User player = players.get(playerId);
 	    
 	    if (player == null){
@@ -45,20 +45,19 @@ public class MovesController {
 		Move move = new Move(player, coordinates);
 		Game game = games.get(gameId);
 		if (game == null){
-			response = new GameStateChange();
+			response = new GameMessage();
 			response.move = move;
 			response.errorMessage = "No game found";
 		}
 		else if (!game.isActive()){
-			response = new GameStateChange();
+			response = new GameMessage();
 			response.move = move;
 			response.errorMessage = "Game is not active please wait for other players";			
 		}
 		else{
-		    
-		    
-		    		    
-		    response = game.makeMove(move);
+			response = game.makeMove(move);
+			ScoreChange sc = new ScoreChange();sc.player = player;sc.score = 100;
+			response.scoreChange.add(sc);
 		}
 	    m_template.convertAndSend("/sub/games/" + gameId, response);
 	    

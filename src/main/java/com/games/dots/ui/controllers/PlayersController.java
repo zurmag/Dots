@@ -34,11 +34,12 @@ public class PlayersController {
 			com.games.dots.ui.entities.Game uiGame = new com.games.dots.ui.entities.Game(game);
 			games.add(uiGame);
 			if (fullState){
-				uiGame.state = new State();				
+				uiGame.state = new State();
+				uiGame.state.state = game.getState();
 				uiGame.state.moves.addAll(game.getAllMoves());
 				uiGame.state.cycles.addAll(game.getAllCycles());
 				uiGame.state.players.addAll(game.getPlayers());
-				uiGame.state.currentPlayer = game.getActivePlayer();
+				uiGame.state.activePlayer = game.getActivePlayer();
 			}
 		}
 		

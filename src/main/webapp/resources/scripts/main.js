@@ -15,14 +15,13 @@ function onNewGame(){
 			gameSettings.id = request.getResponseHeader('location').split('/').pop();
 			gameSettings.color = 'red';
 			globals.activeGame = new Game(gameSettings);
-			globals.statusPanel.showActiveGameStatus(globals.activeGame);
 		});
 	}
 	else{		
 		announce('info', 'Welcome back');
-		globals.statusPanel.showActiveGameStatus(globals.activeGame);
+		
 	}
-	
+	globals.statusPanel.showActiveGameStatus(globals.activeGame);
 	globals.centralPanel.showBoard();	
 	globals.menuPanel.onGameStart();
 	

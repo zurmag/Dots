@@ -8,8 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.games.dots.logic.Game;
-import com.games.dots.ui.entities.GameStateChange;
-import com.games.dots.ui.entities.BoardSize;
+import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
@@ -61,7 +60,7 @@ public class GameTests {
 		
 		//Act			
 		smallGame.makeMove(moves[0]);smallGame.makeMove(moves[1]);smallGame.makeMove(moves[2]);smallGame.makeMove(moves[3]);
-		GameStateChange actionList = smallGame.makeMove(moves[4]);
+		GameMessage actionList = smallGame.makeMove(moves[4]);
 		
 		//Assert		
 		assertEquals(1, actionList.newCycles.size());
@@ -106,7 +105,7 @@ public class GameTests {
 		}		
 		
 		//Act
-		GameStateChange actionList = null;
+		GameMessage actionList = null;
 		for(Move m : player1Moves){
 			actionList = smallGame.makeMove(m);
 		}
