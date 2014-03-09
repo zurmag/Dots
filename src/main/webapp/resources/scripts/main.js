@@ -1,4 +1,4 @@
-
+ 
 
 function onProfile(){
 	globals.centralPanel.showProfile();
@@ -15,15 +15,18 @@ function onNewGame(){
 			gameSettings.id = request.getResponseHeader('location').split('/').pop();
 			gameSettings.color = 'red';
 			globals.activeGame = new Game(gameSettings);
+			globals.statusPanel.showActiveGameStatus(globals.activeGame);
+			globals.centralPanel.showBoard();	
+			globals.menuPanel.onGameStart();
 		});
 	}
-	else{		
-		announce('info', 'Welcome back');
-		
+	else{
+		globals.statusPanel.showActiveGameStatus(globals.activeGame);
+		globals.centralPanel.showBoard();	
+		globals.menuPanel.onGameStart();
 	}
-	globals.statusPanel.showActiveGameStatus(globals.activeGame);
-	globals.centralPanel.showBoard();	
-	globals.menuPanel.onGameStart();
+	
+	
 	
 }
 
@@ -65,9 +68,10 @@ function init(){
 			//var accessToken = response.authResponse.accessToken;
 			$.getJSON('players/'+uid+'/activeGames?fullState=true', function(data){
 				if (data.length > 0){			
-					var settings = {size: data[0].size, id: data[0].id};
+					var settings = {size: data[0].size, id: data[0].id, state: data[0].state.state};
 					globals.activeGame = new Game(settings, data[0].state);
 					onNewGame();
+					announce('info', 'Welcome back');
 				}
 			});
 	    } 

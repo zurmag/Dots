@@ -45,6 +45,7 @@ function CentralPanel(panelDivName){
 					color: 'green'
 				});
 				onNewGame();
+				announce('info', 'Welcome');
 			}
 			else{
 				announce('info', 'you are in active game!');

@@ -55,7 +55,11 @@ function Game(settings, state){
 		else {//medium
 			width = height = 20;
 		}
-
+		
+		if (settings.state){
+			m_state = settings.state;
+		}
+		
 		for (var x = 0; x < width; x++) {
 			board[x] = [];
 			for (var y = 0; y < height; y++) {
@@ -280,10 +284,11 @@ function Game(settings, state){
 	
 	function endGame(){
 		globals.menuPanel.onGameEnd();
+		globals.activeGame = false;
 	}
 	
 	function activate(){
-		
+		announce('info', 'Start playing');
 	}
 	
 	//callback
@@ -304,8 +309,7 @@ function Game(settings, state){
 		}
 				
 		if (data.newCycles.length > 0){
-			drawCycles(data.newCycles);
-			
+			drawCycles(data.newCycles);			
 		}
 		
 		if (data.scoreChange != undefined && data.scoreChange.length > 0){

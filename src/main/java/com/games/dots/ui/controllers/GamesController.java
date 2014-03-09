@@ -73,11 +73,15 @@ public class GamesController {
 			){
 		logger.debug("addPlayerToGame");		
 		
-		GameMessage stateChange = m_games.get(gameId).removePlayer(userId);
-		if (stateChange != null) {
-			m_template.convertAndSend("/sub/games/" + gameId, stateChange);
-			if ("closed".equals(stateChange.newState.state)) {
-				m_games.remove(gameId);
+		Game game = m_games.get(gameId);
+		if (game != null){
+			GameMessage stateChange = game.removePlayer(userId);
+		
+			if (stateChange != null) {
+				m_template.convertAndSend("/sub/games/" + gameId, stateChange);
+				if ("closed".equals(stateChange.newState.state)) {
+					m_games.remove(gameId);
+				}
 			}
 		}
 		
