@@ -27,6 +27,7 @@ import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
+import com.games.dots.ui.entities.ScoreChange;
 import com.games.dots.ui.entities.User;
 
 public class Game {
@@ -35,11 +36,13 @@ public class Game {
 	
 	private List<User> m_players = new ArrayList<User>();
 	private Map<String, User> m_playersMap = new HashMap<>();
+	private Map<String, Integer> m_scores = new HashMap<>();
 	private int m_maxNumberOfPlayers;
 	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
 	public String id;
 	public String m_state = "waiting";
+	private Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
 	SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
 	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
@@ -100,9 +103,57 @@ public class Game {
 	public BoardSize getBoardSize(){
 		return m_size;
 	}
-	public Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
-
 	
+	
+
+	public GameMessage addPlayer(User user) {
+		GameMessage stateChange = new GameMessage();
+		if (m_players.size() < m_maxNumberOfPlayers){
+			m_players.add(user);
+			m_playersMap.put(user.id, user);
+			m_scores.put(user.id, 0);
+			stateChange.newState.newPlayer = user;
+		}
+		else{
+			//TODO: Think about error
+		}
+		
+		if (m_players.size() == m_maxNumberOfPlayers){
+			stateChange.newState.state = "active";
+			m_state = "active";
+		}
+		
+		return stateChange;
+			
+		
+	}
+	
+	public GameMessage removePlayer(String userId) {
+		GameMessage stateChange = new GameMessage();
+		if (!m_playersMap.containsKey(userId)) 
+			return null;
+		if (m_players.size() == 1) {
+			return close();
+		}
+		
+		User user = m_playersMap.get(userId);
+		User activePlayer = getActivePlayer();
+		
+		if (user.equals(activePlayer)) {
+			nextTurn();activePlayer = getActivePlayer();
+		}
+		m_players.remove(user);			
+		m_playersMap.remove(userId);
+		m_currentPlayerIndex = m_players.indexOf(activePlayer);
+		if (m_players.size() == 1){
+			return close();
+		}
+		
+		stateChange.newState.removedPlayer = user;
+		stateChange.newState.state = m_state = "waiting";
+		
+		return stateChange;
+	}
 	
 	
 	public synchronized GameMessage makeMove(Move move){
@@ -137,7 +188,13 @@ public class Game {
 				if (deadPoints.size() > 0){					
 					actionResponse.newDeadDots.addAll(deadPoints);
 					actionResponse.newCycles.add(cycle);
-					m_cycles.add(cycle);				
+					m_cycles.add(cycle);
+					int newScore = m_scores.get(move.getPlayer().id) + deadPoints.size();					
+					m_scores.put(move.getPlayer().id, newScore);
+					ScoreChange scoreChange = new ScoreChange();
+					scoreChange.player = move.getPlayer();
+					scoreChange.score = newScore;
+					actionResponse.scoreChange.add(scoreChange);
 				}
 				else{
 					m_emptyCycles.add(cycle);
@@ -287,52 +344,7 @@ public class Game {
 		
 	}
 
-	public GameMessage addPlayer(User user) {
-		GameMessage stateChange = new GameMessage();
-		if (m_players.size() < m_maxNumberOfPlayers){
-			m_players.add(user);
-			m_playersMap.put(user.id, user);
-			stateChange.newState.newPlayer = user;
-		}
-		else{
-			//TODO: Think about error
-		}
-		
-		if (m_players.size() == m_maxNumberOfPlayers){
-			stateChange.newState.state = "active";
-			m_state = "active";
-		}
-		return stateChange;
-			
-		
-	}
 	
-	public GameMessage removePlayer(String userId) {
-		GameMessage stateChange = new GameMessage();
-		if (!m_playersMap.containsKey(userId)) 
-			return null;
-		if (m_players.size() == 1) {
-			return close();
-		}
-		
-		User user = m_playersMap.get(userId);
-		User activePlayer = getActivePlayer();
-		
-		if (user.equals(activePlayer)) {
-			nextTurn();activePlayer = getActivePlayer();
-		}
-		m_players.remove(user);			
-		m_playersMap.remove(userId);
-		m_currentPlayerIndex = m_players.indexOf(activePlayer);
-		if (m_players.size() == 1){
-			return close();
-		}
-		
-		stateChange.newState.removedPlayer = user;
-		stateChange.newState.state = m_state = "waiting";
-		
-		return stateChange;
-	}
 	
 	public GameMessage close() {
 		GameMessage stateChange = new GameMessage();
@@ -367,7 +379,6 @@ public class Game {
 	}
 
 	public String getState() {
-		// TODO Auto-generated method stub
 		return m_state;
 	}
 	
