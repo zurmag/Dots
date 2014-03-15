@@ -99,5 +99,11 @@ public class GamesController {
 		return games;
 	}
 	
-	
+	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.GET)
+	public @ResponseBody Collection<com.games.dots.ui.entities.User> getGamePlayers(
+			@PathVariable String gameId){
+				
+		return m_games.get(gameId).getPlayers();
+		
+	}
 }

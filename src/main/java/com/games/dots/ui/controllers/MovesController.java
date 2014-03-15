@@ -56,8 +56,6 @@ public class MovesController {
 		}
 		else{
 			response = game.makeMove(move);
-			ScoreChange sc = new ScoreChange();sc.player = player;sc.score = 100;
-			response.scoreChange.add(sc);
 		}
 	    m_template.convertAndSend("/sub/games/" + gameId, response);
 	    

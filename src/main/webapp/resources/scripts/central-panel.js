@@ -37,14 +37,13 @@ function CentralPanel(panelDivName){
 		activeContainer.appendChild(createGamesView(data));
 		$('div#games-container button').click(function (){
 			gameObj = globals.games[this.id];
-			console.debug(gameObj);
 			if (!globals.activeGame){
 				globals.activeGame = new Game({
 					size: gameObj.size, 
 					id: gameObj.id,
 					color: 'green'
 				});
-				onNewGame();
+				joinGame(gameObj.id);
 				announce('info', 'Welcome');
 			}
 			else{

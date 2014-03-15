@@ -79,7 +79,12 @@ function ServerProxy(){
 			}			
 		}
 		
-	}
+	};
+	
+	this.getPlayers = function getPlayers(gameId, success){
+		var url = 'games/' + gameId + '/players';
+		$.get(url, success);
+	};
 	
 	function post(url, data, success){
 		$.ajax({

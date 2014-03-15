@@ -40,6 +40,7 @@ public class PlayersController {
 				uiGame.state.cycles.addAll(game.getAllCycles());
 				uiGame.state.players.addAll(game.getPlayers());
 				uiGame.state.activePlayer = game.getActivePlayer();
+				uiGame.state.score = game.getScore();
 			}
 		}
 		

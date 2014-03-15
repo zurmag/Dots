@@ -18,19 +18,24 @@ function Game(settings, state){
 	var m_pressedDot = null;
 	
 	//events
-	self.onScoreChange = function(sores){
-		console.debug(sores);
+	self.onScoreChange = function(scores){
+		globals.statusPanel.scoreChange(scores);
 	};
 	
 	//public
-	this.addPlayerToGame = function addPlayerToGame(){
-		
-		globals.server.addPlayerToGame(m_me, m_gameId);
+	this.addPlayer = function addPlayer(player){
+		m_players[player.id] = player;
 	};
 	
 	this.getActivePlayer = function getActivePlayer(){
 		return m_activePlayer;
-	};	
+	};
+	
+	this.getPlayers = function(){
+		var keys = Object.keys(m_players);
+		var values = keys.map(function(k) { return m_players[k]; });
+		return values;
+	};
 	
 	this.disconnect = function disconnect(){
 		globals.server.disconnectGame(m_me.id, m_gameId, function(){
@@ -102,7 +107,7 @@ function Game(settings, state){
 				if (state != null){
 					restoreState(state);		
 				}else{
-					self.addPlayerToGame();
+					globals.server.addPlayerToGame(m_me, m_gameId);
 					announce('info', 'Waiting for other players...');
 				}
 				
@@ -241,7 +246,7 @@ function Game(settings, state){
 		console.debug(state);
 		
 		for (var i = 0 ; i < state.players.length; i++){
-			var player = new Player(state.players[0].color, state.players[0].id);
+			var player = new Player(state.players[i].color, state.players[i].id);
 			m_players[player.id] = player;
 			if (m_me.id == player.id){
 				m_me = player;
@@ -254,6 +259,9 @@ function Game(settings, state){
 		}
 		m_activePlayer = new Player(state.activePlayer.color, state.activePlayer.id);
 		drawCycles(state.cycles);
+		
+		globals.statusPanel.showActiveGameStatus(self);
+		self.onScoreChange(state.score);
 		
 	}
 	
@@ -309,13 +317,12 @@ function Game(settings, state){
 		}
 				
 		if (data.newCycles.length > 0){
-			drawCycles(data.newCycles);			
-		}
+			drawCycles(data.newCycles);
+		}		
 		
-		if (data.scoreChange != undefined && data.scoreChange.length > 0){
+		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
 			self.onScoreChange(data.scoreChange);
 		}
-		globals.statusPanel.showActiveGameStatus(self);
 		console.debug(message);
 	}
 	
@@ -345,9 +352,7 @@ function Game(settings, state){
 			}
 			else{
 				console.error('unknown state received: '+ newState.newState );
-			}
-			
-			
+			}			
 		}
 		
 		if (newState.activePlayer){
@@ -358,6 +363,12 @@ function Game(settings, state){
 				announce('info', newState.activePlayer.color +'s turn');
 			}
 			m_activePlayer = new Player(newState.activePlayer.color, newState.activePlayer.id);
+		}
+		
+		if (newState.newPlayer){
+			var player = new Player(newState.newPlayer.color, newState.newPlayer.id);
+			m_players[newState.newPlayer.id] = player;
+			globals.statusPanel.addPlayer(player);
 		}
 	}
 	

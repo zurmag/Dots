@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.WeightedGraph;
@@ -27,7 +26,6 @@ import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
-import com.games.dots.ui.entities.ScoreChange;
 import com.games.dots.ui.entities.User;
 
 public class Game {
@@ -104,7 +102,9 @@ public class Game {
 		return m_size;
 	}
 	
-	
+	public Map<String, Integer> getScore(){
+		return m_scores;
+	}
 
 	public GameMessage addPlayer(User user) {
 		GameMessage stateChange = new GameMessage();
@@ -191,10 +191,9 @@ public class Game {
 					m_cycles.add(cycle);
 					int newScore = m_scores.get(move.getPlayer().id) + deadPoints.size();					
 					m_scores.put(move.getPlayer().id, newScore);
-					ScoreChange scoreChange = new ScoreChange();
-					scoreChange.player = move.getPlayer();
-					scoreChange.score = newScore;
-					actionResponse.scoreChange.add(scoreChange);
+					Map<String, Integer> scoreChange = new HashMap<>();
+					actionResponse.scoreChange.put(move.getPlayer().id, newScore);
+					
 				}
 				else{
 					m_emptyCycles.add(cycle);

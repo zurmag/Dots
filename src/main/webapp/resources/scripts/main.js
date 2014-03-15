@@ -9,26 +9,34 @@ function onProfile(){
 function onNewGame(){
 	announce('info', 'Your game');
 	var gameSettings = {size: "Medium", players: 2};
-	if (!globals.activeGame){
-		globals.server.newGame(gameSettings, function (data, textStatus, request){
-			gameSettings.location = request.getResponseHeader('location');
-			gameSettings.id = request.getResponseHeader('location').split('/').pop();
-			gameSettings.color = 'red';
-			globals.activeGame = new Game(gameSettings);
-			globals.statusPanel.showActiveGameStatus(globals.activeGame);
-			globals.centralPanel.showBoard();	
-			globals.menuPanel.onGameStart();
-		});
-	}
-	else{
-		globals.statusPanel.showActiveGameStatus(globals.activeGame);
-		globals.centralPanel.showBoard();	
-		globals.menuPanel.onGameStart();
-	}
 	
-	
+	globals.server.newGame(gameSettings, function (data, textStatus, request){
+		gameSettings.location = request.getResponseHeader('location');
+		gameSettings.id = request.getResponseHeader('location').split('/').pop();
+		gameSettings.color = 'red';
+		globals.activeGame = new Game(gameSettings);
+		showActiveGame();
+	});
 	
 }
+
+
+function joinGame(gameId){
+	
+	globals.server.getPlayers(gameId, function(data){
+		for (var i=0;i<data.length;i++){
+			globals.activeGame.addPlayer(data[i]);
+		}
+		showActiveGame();
+	});
+}
+
+function showActiveGame(){
+	globals.statusPanel.showActiveGameStatus(globals.activeGame);
+	globals.centralPanel.showBoard();	
+	globals.menuPanel.onGameStart();
+}
+
 
 function onShowGames(){
 	announce('info', 'Games to play');
