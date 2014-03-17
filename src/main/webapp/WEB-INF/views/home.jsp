@@ -52,7 +52,7 @@
 			</div>
 			<div id='active-game-menu' style="display:none">
 				<button id='pause-resume' onClick='onPauseResume()'>Pause</button>
-				<button onClick='disconnectGame()'>Disconnect</button>
+				<button onClick='disconnectGame()'>Quit</button>
 			</div>
 			
 			<div id='after-game-menu' style="display:none">

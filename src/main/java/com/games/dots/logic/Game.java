@@ -191,7 +191,6 @@ public class Game {
 					m_cycles.add(cycle);
 					int newScore = m_scores.get(move.getPlayer().id) + deadPoints.size();					
 					m_scores.put(move.getPlayer().id, newScore);
-					Map<String, Integer> scoreChange = new HashMap<>();
 					actionResponse.scoreChange.put(move.getPlayer().id, newScore);
 					
 				}
@@ -348,6 +347,18 @@ public class Game {
 	public GameMessage close() {
 		GameMessage stateChange = new GameMessage();
 		stateChange.newState.state = "closed";
+		List<String> winners = new LinkedList<String>();
+		int maxScore = 0;
+		for (String playerId : m_scores.keySet()){
+			if (m_scores.get(playerId) > maxScore){
+				winners.clear();
+				winners.add(playerId);
+			}
+			else if (m_scores.get(playerId) == maxScore){
+				winners.add(playerId);
+			}
+		}
+		stateChange.newState.winners = winners;
 		return stateChange;
 	}
 

@@ -11,8 +11,9 @@ function GameStatusPanel(panelDivName){
 		}
 	};
 	
-	this.addPlayer = function(player){
-		m_panelDiv.appendChild(createPlayerDiv(player));
+	this.addPlayer = function addPlayer(player){
+		if ($('#player'+player.id+'-container').length == 0)
+			m_panelDiv.appendChild(createPlayerDiv(player));
 	};
 	
 	this.scoreChange = function scoreChange(scores){

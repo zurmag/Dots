@@ -41,7 +41,7 @@ function Game(settings, state){
 	
 	this.disconnect = function disconnect(){
 		globals.server.disconnectGame(m_me.id, m_gameId, function(){
-			announce('info', 'Game completed. You won!');
+			announce('info', 'Game completed.');
 		});
 		globals.activeGame = false;
 	};
@@ -292,8 +292,13 @@ function Game(settings, state){
 		}
 	}
 	
-	function endGame(){
-		globals.menuPanel.onGameEnd();
+	function GameOver(isWinner){
+		if (isWinner)
+			announce('info', 'You win!');
+		else{
+			announce('info', 'You lose!');
+		}
+		globals.menuPanel.onGameEnd(isWinner);
 		globals.activeGame = false;
 	}
 	
@@ -344,7 +349,16 @@ function Game(settings, state){
 		m_state = newState.state;
 		if (m_state){
 			if (m_state == 'closed'){
-				endGame();
+				if (newState.winners){
+					for (var i = 0; i < newState.winners.length ; i++){
+						if (newState.winners[i] == m_me.id){
+							GameOver(true);
+							return;
+						}
+					}
+					
+				}
+				GameOver(false);
 			}
 			else if (m_state == 'active'){
 				activate();
@@ -354,7 +368,7 @@ function Game(settings, state){
 			}
 			else{
 				console.error('unknown state received: '+ newState.newState );
-			}			
+			}
 		}
 		
 		if (newState.activePlayer){
@@ -368,8 +382,10 @@ function Game(settings, state){
 		}
 		
 		if (newState.newPlayer){
-			addPlayer(newState.newPlayer);			
+			self.addPlayer(newState.newPlayer);			
 		}
+		
+		
 	}
 	
 }
