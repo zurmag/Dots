@@ -23,12 +23,26 @@ function onNewGame(){
 
 function joinGame(gameId){
 	
-	globals.server.getPlayers(gameId, function(data){
-		for (var i=0;i<data.length;i++){
-			globals.activeGame.addPlayer(data[i]);
-		}
-		showActiveGame();
-	});
+	gameObj = globals.games[gameId];
+	if (!globals.activeGame){
+		globals.activeGame = new Game({
+			size: gameObj.size, 
+			id: gameObj.id,
+			color: 'green'
+		});
+		globals.server.getPlayers(gameId, function(data){
+			for (var i=0;i<data.length;i++){
+				globals.activeGame.addPlayer(data[i]);
+			}
+			showActiveGame();
+		});
+		announce('info', 'Welcome');
+	}
+	else{
+		announce('info', 'you are in active game!');
+	}
+	
+	
 }
 
 function showActiveGame(){

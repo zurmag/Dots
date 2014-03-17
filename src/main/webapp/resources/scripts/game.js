@@ -23,8 +23,10 @@ function Game(settings, state){
 	};
 	
 	//public
-	this.addPlayer = function addPlayer(player){
-		m_players[player.id] = player;
+	this.addPlayer = function addPlayer(newPlayer){		
+		var player = new Player(newPlayer.color, newPlayer.id);
+		m_players[newPlayer.id] = player;
+		globals.statusPanel.addPlayer(player);
 	};
 	
 	this.getActivePlayer = function getActivePlayer(){
@@ -366,9 +368,7 @@ function Game(settings, state){
 		}
 		
 		if (newState.newPlayer){
-			var player = new Player(newState.newPlayer.color, newState.newPlayer.id);
-			m_players[newState.newPlayer.id] = player;
-			globals.statusPanel.addPlayer(player);
+			addPlayer(newState.newPlayer);			
 		}
 	}
 	

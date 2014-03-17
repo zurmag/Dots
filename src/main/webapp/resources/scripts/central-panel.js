@@ -36,19 +36,7 @@ function CentralPanel(panelDivName){
 		activeContainer.innerHTML = '';
 		activeContainer.appendChild(createGamesView(data));
 		$('div#games-container button').click(function (){
-			gameObj = globals.games[this.id];
-			if (!globals.activeGame){
-				globals.activeGame = new Game({
-					size: gameObj.size, 
-					id: gameObj.id,
-					color: 'green'
-				});
-				joinGame(gameObj.id);
-				announce('info', 'Welcome');
-			}
-			else{
-				announce('info', 'you are in active game!');
-			}
+			joinGame(this.id);			
 			
 		});
 	};
