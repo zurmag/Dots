@@ -1,19 +1,32 @@
 function GameStatusPanel(panelDivName){
 	
 	var m_panelDiv = document.getElementById(panelDivName);
-	
+	var self = this;
 	this.showActiveGameStatus = function(game){
 		var players = game.getPlayers();
 		$(m_panelDiv).empty();
 		for (var i = 0; i < players.length ; i++){
 			var player = players[i];
-			m_panelDiv.appendChild(createPlayerDiv(player));
+			self.addPlayer(player);
 		}
 	};
 	
 	this.addPlayer = function addPlayer(player){
-		if ($('#player'+player.id+'-container').length == 0)
+		if ($('#player'+player.id+'-container').length == 0){
 			m_panelDiv.appendChild(createPlayerDiv(player));
+			var gameClock = $('#game-clock-'+player.id).FlipClock({
+				countdown: true,
+				clockFace: 'MinuteCounter'
+			});
+			gameClock.setTime(10);
+			gameClock.start();
+			var moveClock = $('#move-clock-'+player.id).FlipClock({
+				countdown: true,
+				clockFace: 'MinuteCounter'
+			});
+			$('.flip-clock-label').hide();
+			
+		}
 	};
 	
 	this.scoreChange = function scoreChange(scores){
@@ -22,8 +35,7 @@ function GameStatusPanel(panelDivName){
 	};
 	
 	this.hideActiveGameStatus = function hideActiveGameStatus(){
-		var activePlayerDiv = createOrGetElement('div', 'active-player');
-		activePlayerDiv.style.display='none';
+		$(m_panelDiv).empty();
 	};
 	
 	function changePlayerScore(id, score){
@@ -32,17 +44,38 @@ function GameStatusPanel(panelDivName){
 	
 	function createPlayerDiv(player){
 		var playerDiv = document.createElement('div');
-		playerDiv.id = "player" + player.id + "-container";
+		playerDiv.id = "player" + player.id + "-container";		
+		
+		var playerInfo = document.createElement('div');
+		playerInfo.id = "player" + player.id + "-info";
+		$(playerInfo).css('float', 'left');
 		
 		var img = document.createElement('img');
 		img.id = "player" + player.id + "img";
 		img.src = player.getAvatar();
-		playerDiv.appendChild(img);
+		playerInfo.appendChild(img);
 		
-		var playerInfo = document.createElement('div');
-		playerInfo.id = "player" + player.id + "-info";
-		playerInfo.innerHTML = "Score: " + player.score;
+		var score = document.createElement('div');
+		score.innerHTML = "Score: " + player.score;
+		playerInfo.appendChild(score);
+		
 		playerDiv.appendChild(playerInfo);
+		
+		var clockDiv = document.createElement('div');
+		$(clockDiv).css('float', 'left');
+		
+		var gameClock = document.createElement('div');
+		gameClock.id = 'game-clock-'+player.id;
+		$(gameClock).css('zoom','0.24');
+		
+		var moveClock = document.createElement('div');
+		moveClock.id = 'move-clock-'+player.id;
+		$(moveClock).css('zoom','0.24');
+		
+		clockDiv.appendChild(gameClock);
+		clockDiv.appendChild(moveClock);
+		
+		playerDiv.appendChild(clockDiv);
 		return playerDiv;
 	}
 	
