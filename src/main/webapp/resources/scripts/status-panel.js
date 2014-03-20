@@ -14,17 +14,20 @@ function GameStatusPanel(panelDivName){
 	this.addPlayer = function addPlayer(player){
 		if ($('#player'+player.id+'-container').length == 0){
 			m_panelDiv.appendChild(createPlayerDiv(player));
-			var gameClock = $('#game-clock-'+player.id).FlipClock({
-				countdown: true,
-				clockFace: 'MinuteCounter'
-			});
+			
+			var gameClockDiv = $('#game-clock-'+player.id);
+			var gameClock = $(gameClockDiv).FlipClock({countdown: true,clockFace: 'MinuteCounter'});
+			rescale(gameClockDiv, 0.24, 0.24);						
+			
+			var moveClockDiv = $('#move-clock-'+player.id);
+			var moveClock = $(moveClockDiv).FlipClock({countdown: true,clockFace: 'MinuteCounter'});
+			rescale(moveClockDiv, 0.24, 0.24);
+			$('.flip-clock-label').hide();
+			
 			gameClock.setTime(10);
 			gameClock.start();
-			var moveClock = $('#move-clock-'+player.id).FlipClock({
-				countdown: true,
-				clockFace: 'MinuteCounter'
-			});
-			$('.flip-clock-label').hide();
+			moveClock.setTime(10);
+			moveClock.start();
 			
 		}
 	};
@@ -45,10 +48,10 @@ function GameStatusPanel(panelDivName){
 	function createPlayerDiv(player){
 		var playerDiv = document.createElement('div');
 		playerDiv.id = "player" + player.id + "-container";		
-		
+		$(playerDiv).css('height','70px');
 		var playerInfo = document.createElement('div');
 		playerInfo.id = "player" + player.id + "-info";
-		$(playerInfo).css('float', 'left');
+		$(playerInfo).css('float', 'left').css('height', 'inherit');
 		
 		var img = document.createElement('img');
 		img.id = "player" + player.id + "img";
@@ -62,32 +65,30 @@ function GameStatusPanel(panelDivName){
 		playerDiv.appendChild(playerInfo);
 		
 		var clockDiv = document.createElement('div');
-		$(clockDiv).css('float', 'left');
-		
+		clockDiv.id = 'clocks-'+player.id;
+		$(clockDiv).css('float', 'left').css('height', 'inherit');
 		var gameClock = document.createElement('div');
 		gameClock.id = 'game-clock-'+player.id;
-		$(gameClock).css('zoom','0.24');
 		
 		var moveClock = document.createElement('div');
-		moveClock.id = 'move-clock-'+player.id;
-		$(moveClock).css('zoom','0.24');
-		
+		moveClock.id = 'move-clock-'+player.id;		
 		clockDiv.appendChild(gameClock);
 		clockDiv.appendChild(moveClock);
 		
 		playerDiv.appendChild(clockDiv);
+		
 		return playerDiv;
 	}
 	
-	function createOrGetElement(el, id){
-		var querry = $(el + '#' + id);
-		var element = false;
-		if (querry.length == 0){
-			element = document.createElement(el);
-			element.id = id;			
-		}else{
-			element = querry[0];		
-		}
-		return element;
+	function rescale(elem, ratioX, ratioY){
+		elem = $(elem);
+		var height = elem.height();
+	    var width = elem.width();
+	    
+	    //elem.toggleClass('rescaled');
+	    elem.css('transform', 'scale('+ratioX +', '+ratioY+')');
+	    elem.css('transform-origin','0 0');
+	    //elem.css('width', parseInt(width*ratioX) + 'px');
+	    //elem.css('height', parseInt(height*ratioY) + 'px');
 	}
 }
