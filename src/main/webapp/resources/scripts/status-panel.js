@@ -17,10 +17,12 @@ function GameStatusPanel(panelDivName){
 			
 			var gameClockDiv = $('#game-clock-'+player.id);
 			var gameClock = $(gameClockDiv).FlipClock({countdown: true,clockFace: 'MinuteCounter'});
+			gameClockDiv.height(0);
 			rescale(gameClockDiv, 0.24, 0.24);						
 			
 			var moveClockDiv = $('#move-clock-'+player.id);
 			var moveClock = $(moveClockDiv).FlipClock({countdown: true,clockFace: 'MinuteCounter'});
+			moveClockDiv.height(0);
 			rescale(moveClockDiv, 0.24, 0.24);
 			$('.flip-clock-label').hide();
 			
