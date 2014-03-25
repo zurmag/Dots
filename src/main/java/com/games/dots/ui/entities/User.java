@@ -36,7 +36,7 @@ public class User {
 		if (userType == null) {
 			if (other.userType != null)
 				return false;
-		} else if (!id.equals(other.userType)){
+		} else if (!userType.equals(other.userType)){
 			return false;
 		}
 		
