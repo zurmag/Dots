@@ -26,7 +26,7 @@ function CentralPanel(panelDivName){
 		activeContainer.style.display='block';
 	};
 	
-	this.showNewGameView = function showNewGameView(){
+	this.showNewGameDialog = function showNewGameDialog(){
 		activeContainer.style.display='none';
 		activeContainer = divs['new-game-container']; 
 		activeContainer.style.display='block';
@@ -59,9 +59,9 @@ function CentralPanel(panelDivName){
 	}
 	
 	function createNewGameContainer(){
-		var newGameContainerDiv = document.createElement('div');
+		var newGameContainerDiv = createNewGameView();
 		newGameContainerDiv.style.display='none';
-		newGameContainerDiv.id = "new-game-container";
+		newGameContainerDiv.id = "new-game-container";		
 		return newGameContainerDiv;
 	}
 	
@@ -77,6 +77,36 @@ function CentralPanel(panelDivName){
 		gamesContainerDiv.style.display='none';
 		gamesContainerDiv.id = "games-container";
 		return gamesContainerDiv;
+	}
+	
+	function createNewGameView(){
+		var div = document.createElement('div');
+		
+		var gameSizeDiv = document.createElement('div');
+		gameSizeDiv.id = 'game-size-div';
+		div.appendChild(gameSizeDiv);
+		
+		var gameSizeForm = document.createElement('form');
+		gameSizeForm.id = 'game-size-form';
+		gameSizeDiv.appendChild(gameSizeForm);
+		gameSizeForm.appendChild(createRadioInput('small'));
+		gameSizeForm.appendChild(createRadioInput('medium'));
+		gameSizeForm.appendChild(createRadioInput('big'));		
+		
+		
+		return div;
+	}
+	
+	function createRadioInput(label){
+		var input = document.createElement('input');
+		input.id = 'input-'+label;
+		input.type = 'radio';
+		input.name = label;
+		var labelTag = document.createElement('label');
+		labelTag.for = input.id;
+		labelTag.innerHTML = label;
+		input.appendChild(labelTag);		
+		return input;
 	}
 	
 	function createGamesView(gamesArray){
