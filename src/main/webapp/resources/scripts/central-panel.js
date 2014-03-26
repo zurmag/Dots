@@ -8,7 +8,10 @@ function CentralPanel(panelDivName){
 	
 	divs['profile-container'] = createProfileContainer(); 
 	activeContainer = divs["profile-container"];
-	panelDiv.appendChild(activeContainer);		
+	panelDiv.appendChild(activeContainer);
+	
+	divs['new-game-container'] = createNewGameContainer();
+	panelDiv.appendChild(divs['new-game-container']);
 	
 	divs['board-container'] = createBoardContainer();
 	panelDiv.appendChild(divs['board-container']);
@@ -17,13 +20,19 @@ function CentralPanel(panelDivName){
 	divs['games-container'] = createGamesContainer();
 	panelDiv.appendChild(divs['games-container']);
 		
-	this.showProfile = function(){		
+	this.showProfile = function showProfile(){		
 		activeContainer.style.display='none';
 		activeContainer = divs['profile-container']; 
 		activeContainer.style.display='block';
 	};
 	
-	this.showBoard = function(){		
+	this.showNewGameView = function showNewGameView(){
+		activeContainer.style.display='none';
+		activeContainer = divs['new-game-container']; 
+		activeContainer.style.display='block';
+	};
+	
+	this.showBoard = function showBoard(){		
 		activeContainer.style.display='none';
 		activeContainer = divs['board-container'];
 		activeContainer.style.display='block';		
@@ -49,6 +58,13 @@ function CentralPanel(panelDivName){
 		return profileContainerDiv;
 	}
 	
+	function createNewGameContainer(){
+		var newGameContainerDiv = document.createElement('div');
+		newGameContainerDiv.style.display='none';
+		newGameContainerDiv.id = "new-game-container";
+		return newGameContainerDiv;
+	}
+	
 	function createBoardContainer(){
 		var boardContainerDiv = document.createElement('div');
 		boardContainerDiv.style.display='none';
@@ -60,7 +76,6 @@ function CentralPanel(panelDivName){
 		var gamesContainerDiv = document.createElement('div');
 		gamesContainerDiv.style.display='none';
 		gamesContainerDiv.id = "games-container";
-		gamesContainerDiv.innerHTML="Games";
 		return gamesContainerDiv;
 	}
 	
