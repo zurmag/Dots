@@ -29,7 +29,9 @@ function CentralPanel(panelDivName){
 	this.showNewGameDialog = function showNewGameDialog(){
 		activeContainer.style.display='none';
 		activeContainer = divs['new-game-container']; 
-		activeContainer.style.display='block';
+		activeContainer.style.display='block';		
+		$( ".radio" ).buttonset();
+		
 	};
 	
 	this.showBoard = function showBoard(){		
@@ -59,7 +61,7 @@ function CentralPanel(panelDivName){
 	}
 	
 	function createNewGameContainer(){
-		var newGameContainerDiv = createNewGameView();
+		var newGameContainerDiv = createNewGameView();		
 		newGameContainerDiv.style.display='none';
 		newGameContainerDiv.id = "new-game-container";		
 		return newGameContainerDiv;
@@ -80,33 +82,71 @@ function CentralPanel(panelDivName){
 	}
 	
 	function createNewGameView(){
+		var label;
 		var div = document.createElement('div');
 		
 		var gameSizeDiv = document.createElement('div');
 		gameSizeDiv.id = 'game-size-div';
-		div.appendChild(gameSizeDiv);
+		div.appendChild(gameSizeDiv);		
+		label = document.createElement('h3');
+		label.innerHTML = 'Game size';
+		gameSizeDiv.appendChild(label);
+		gameSizeDiv.appendChild(createRadioInputs(['small', 'medium', 'big'], 'medium', 'game-size-form'));
 		
-		var gameSizeForm = document.createElement('form');
-		gameSizeForm.id = 'game-size-form';
-		gameSizeDiv.appendChild(gameSizeForm);
-		gameSizeForm.appendChild(createRadioInput('small'));
-		gameSizeForm.appendChild(createRadioInput('medium'));
-		gameSizeForm.appendChild(createRadioInput('big'));		
+		var playernumberDiv = document.createElement('div');
+		playernumberDiv.id = 'player-number-div';
+		div.appendChild(playernumberDiv);
+		label = document.createElement('h3');
+		label.innerHTML = 'Players in game';
+		playernumberDiv.appendChild(label);
+		playernumberDiv.appendChild(createRadioInputs(['2', '3', '4'], '2', 'players-number-form'));
 		
+		var submitButton = document.createElement('button');
+		submitButton.innerHTML = 'Start Game';
+		$(submitButton).button().click(function(){
+			var size = $("div#game-size-div label[aria-pressed='true'] span").html();
+			alert(size);
+			
+			/*var gameSettings = {size: "Medium", players: 2};
+			
+			globals.server.newGame(gameSettings, function (data, textStatus, request){
+				gameSettings.location = request.getResponseHeader('location');
+				gameSettings.id = request.getResponseHeader('location').split('/').pop();
+				gameSettings.color = 'red';
+				globals.activeGame = new Game(gameSettings);
+				showActiveGame();
+			});*/
+			
+		});
+		div.appendChild(submitButton);
 		
 		return div;
 	}
 	
-	function createRadioInput(label){
-		var input = document.createElement('input');
-		input.id = 'input-'+label;
-		input.type = 'radio';
-		input.name = label;
-		var labelTag = document.createElement('label');
-		labelTag.for = input.id;
-		labelTag.innerHTML = label;
-		input.appendChild(labelTag);		
-		return input;
+	function createRadioInputs(labels, defaultLabel, formName){
+		
+		var gameSizeForm = document.createElement('form');
+		gameSizeForm.id = formName;
+		
+		var div = document.createElement('div');div.setAttribute('class','radio');
+		for (var i = 0;i<labels.length;i++){
+			var label = labels[i];
+			var input = document.createElement('input');
+			input.id = 'input-'+label;
+			input.type = 'radio';
+			input.name = formName;
+			
+			if (label == defaultLabel){
+				input.checked = 'checked';
+			}
+			var labelTag = document.createElement('label');
+			$(labelTag).attr('for',input.id);
+			labelTag.innerHTML = label;			
+			div.appendChild(input);
+			div.appendChild(labelTag);
+		}
+		div.appendChild(gameSizeForm);
+		return div;
 	}
 	
 	function createGamesView(gamesArray){
