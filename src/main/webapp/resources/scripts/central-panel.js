@@ -91,7 +91,7 @@ function CentralPanel(panelDivName){
 		label = document.createElement('h3');
 		label.innerHTML = 'Game size';
 		gameSizeDiv.appendChild(label);
-		gameSizeDiv.appendChild(createRadioInputs(['small', 'medium', 'big'], 'medium', 'game-size'));
+		gameSizeDiv.appendChild(createRadioInputs(['Small', 'Medium', 'Big'], 'Medium', 'game-size'));
 		
 		var playernumberDiv = document.createElement('div');
 		playernumberDiv.id = 'player-number-div';
@@ -106,7 +106,7 @@ function CentralPanel(panelDivName){
 		$(submitButton).button().click(function(){
 			var gameSize = $("#radio-game-size :radio:checked").attr('id').replace('input-','');
 			var playersNumber = $("#radio-players-number :radio:checked").attr('id').replace('input-','');
-			var gameSettings = {size: gameSize, players: playersNumber};
+			var gameSettings = {size: gameSize, players: playersNumber, widthPx: globals.gameWidth};
 			
 			globals.server.newGame(gameSettings, function (data, textStatus, request){
 				gameSettings.location = request.getResponseHeader('location');

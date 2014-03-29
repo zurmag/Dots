@@ -41,6 +41,7 @@ public class PlayersController {
 				uiGame.state.players.addAll(game.getPlayers());
 				uiGame.state.activePlayer = game.getActivePlayer();
 				uiGame.state.score = game.getScore();
+				uiGame.size = game.getBoardSize();
 			}
 		}
 		

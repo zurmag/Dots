@@ -53,10 +53,10 @@ function Game(settings, state){
 		m_gameId = settings.id;
 		var width = 0;
 		var height = 0;		
-		if (settings.size == 'small'){
+		if (settings.size == 'Small'){
 			width = height = 10;
 		}
-		else if (settings.size == 'big'){
+		else if (settings.size == 'Big'){
 			width = height = 30;
 		}
 		else {//medium
@@ -73,7 +73,10 @@ function Game(settings, state){
 				board[x][y] = null;
 			};
 		};
-
+		
+		if (settings.widthPx)
+			calculateDimensions(settings.widthPx, width);
+		
 		var widthPx = offset * 2 + (width-1) * distance;
 		
 		stage = new Kinetic.Stage({
@@ -385,6 +388,19 @@ function Game(settings, state){
 			self.addPlayer(newState.newPlayer);			
 		}
 		
+		
+	}
+	
+	
+	function calculateDimensions(widthPx, width){
+		width--;
+		var o = 5;//minimal offset
+		var d = Math.floor((widthPx -2*o)/width);
+		o = Math.floor((widthPx-(d * width))/2);
+		if (d < distance || ((d == distance) && o < offset)){
+			offset = o;
+			distance = d;
+		}
 		
 	}
 	

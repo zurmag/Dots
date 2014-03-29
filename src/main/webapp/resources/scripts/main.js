@@ -84,7 +84,7 @@ function init(){
 			//var accessToken = response.authResponse.accessToken;
 			$.getJSON('players/'+uid+'/activeGames?fullState=true', function(data){
 				if (data.length > 0){			
-					var settings = {size: data[0].size, id: data[0].id, state: data[0].state.state};
+					var settings = {size: data[0].size, id: data[0].id, state: data[0].state.state, widthPx: globals.gameWidth};
 					globals.activeGame = new Game(settings, data[0].state);
 					showActiveGame();
 					announce('info', 'Welcome back');

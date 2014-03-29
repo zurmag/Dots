@@ -49,7 +49,7 @@ public class FacebookController {
 	IRepository<com.games.dots.ui.entities.User> m_players;
 	
 	@Autowired
-	private ConfigurationManager m_configurationManger;
+	private ConfigurationManager m_configurationManager;
 	/**
 	 * Simply selects the home view to render by returning its name.
 	 * @throws URISyntaxException 
@@ -62,7 +62,7 @@ public class FacebookController {
 			Locale locale
 			) throws URISyntaxException, IOException {
 		if (code != null){
-			FacebookClient.AccessToken token = getFacebookUserToken(code, m_configurationManger.getFbCanvasUrl());
+			FacebookClient.AccessToken token = getFacebookUserToken(code, m_configurationManager.getFbCanvasUrl());
 			FacebookClient facebookClient = new DefaultFacebookClient(token.getAccessToken());
 			User fbuser = facebookClient.fetchObject("me", User.class);
 			com.games.dots.ui.entities.User user = new com.games.dots.ui.entities.User();
@@ -73,7 +73,7 @@ public class FacebookController {
         
 		
 		HttpHeaders headers = new HttpHeaders();
-	    headers.setLocation(new URI(m_configurationManger.getFbCanvasPage()));
+	    headers.setLocation(new URI(m_configurationManager.getFbCanvasPage()));
 	    
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
@@ -104,7 +104,7 @@ public class FacebookController {
             }
 
             //check if data is signed correctly
-            if(!hmacSHA256(signedRequest[1], m_configurationManger.getFbSecretKey()).equals(sig)) {
+            if(!hmacSHA256(signedRequest[1], m_configurationManager.getFbSecretKey()).equals(sig)) {
                 //signature is not correct, possibly the data was tampered with
                 return null;
             }
@@ -113,15 +113,16 @@ public class FacebookController {
             if(!data.containsKey("user_id") || !data.containsKey("oauth_token")) {
                 //this is guest, create authorization url that will be passed to javascript
                 //note that redirect_uri (page the user will be forwarded to after authorization) is set to fbCanvasUrl
-                mav.addObject("redirectUrl", "https://www.facebook.com/dialog/oauth?client_id=" + m_configurationManger.getFbAppId() + 
-                        "&redirect_uri=" + URLEncoder.encode(m_configurationManger.getFbCanvasUrl(), "UTF-8"));
+                mav.addObject("redirectUrl", "https://www.facebook.com/dialog/oauth?client_id=" + m_configurationManager.getFbAppId() + 
+                        "&redirect_uri=" + URLEncoder.encode(m_configurationManager.getFbCanvasUrl(), "UTF-8"));
             } else {
                 //this is authorized user, get their info from Graph API using received access token
                 String accessToken = data.get("oauth_token");
                 FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
                 User user = facebookClient.fetchObject("me", User.class);
-                mav.addObject("fbAppId", m_configurationManger.getFbAppId());
+                mav.addObject("fbAppId", m_configurationManager.getFbAppId());                
                 mav.addObject("user", user);
+                mav.addObject("gameWidth", m_configurationManager.getGameWidth());
             }
 			
 
@@ -139,8 +140,8 @@ public class FacebookController {
         return new String(hmacData);
     }
     private FacebookClient.AccessToken getFacebookUserToken(String code, String redirectUrl) throws IOException {
-        String appId = m_configurationManger.getFbAppId();
-        String secretKey = m_configurationManger.getFbSecretKey();
+        String appId = m_configurationManager.getFbAppId();
+        String secretKey = m_configurationManager.getFbSecretKey();
 
         WebRequestor wr = new DefaultWebRequestor();
         WebRequestor.Response accessTokenResponse = wr.executeGet(

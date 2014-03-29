@@ -20,7 +20,7 @@
    	<script src="https://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.4.min.js" type="text/javascript"></script>
    	<script src="resources/scripts/server-proxy.js"></script>
    	<script>
-   	window.globals = {activeGame: false};
+   	window.globals = {activeGame: false, gameWidth: ${gameWidth}};
    	$(document).ready(function () {
    		
    		$( "input[type=submit], a, button" )
@@ -62,10 +62,10 @@
 			</div>	
 				
 		</div >
-		<div id="central-panel" class=Panel>
+		<div id="central-panel" class=Panel style='width: ${gameWidth}px'>
 			<div id="announcement-bar" class="info-announcement">Welcome</div>
 		</div>
-		<div id="status-panel" class="Panel"></div>
+		<div id="status-panel" class="Panel" style='width: 355px'></div>
 	</div>
 	<script type="text/javascript" src='resources/scripts/player.js'></script>
 	<script type="text/javascript" src='resources/scripts/board-cell.js'></script>
