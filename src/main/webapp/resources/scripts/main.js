@@ -7,16 +7,10 @@ function onProfile(){
 }
 
 function onNewGame(){
-	announce('info', 'Your game');
-	var gameSettings = {size: "Medium", players: 2};
 	
-	globals.server.newGame(gameSettings, function (data, textStatus, request){
-		gameSettings.location = request.getResponseHeader('location');
-		gameSettings.id = request.getResponseHeader('location').split('/').pop();
-		gameSettings.color = 'red';
-		globals.activeGame = new Game(gameSettings);
-		showActiveGame();
-	});
+	globals.centralPanel.showNewGameDialog();
+	globals.statusPanel.hideActiveGameStatus();
+	announce('info', 'Choose your game');
 	
 }
 

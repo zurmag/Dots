@@ -26,10 +26,12 @@ function CentralPanel(panelDivName){
 		activeContainer.style.display='block';
 	};
 	
-	this.showNewGameView = function showNewGameView(){
+	this.showNewGameDialog = function showNewGameDialog(){
 		activeContainer.style.display='none';
 		activeContainer = divs['new-game-container']; 
-		activeContainer.style.display='block';
+		activeContainer.style.display='block';		
+		$( ".radio" ).buttonset();
+		
 	};
 	
 	this.showBoard = function showBoard(){		
@@ -59,9 +61,9 @@ function CentralPanel(panelDivName){
 	}
 	
 	function createNewGameContainer(){
-		var newGameContainerDiv = document.createElement('div');
+		var newGameContainerDiv = createNewGameView();		
 		newGameContainerDiv.style.display='none';
-		newGameContainerDiv.id = "new-game-container";
+		newGameContainerDiv.id = "new-game-container";		
 		return newGameContainerDiv;
 	}
 	
@@ -77,6 +79,75 @@ function CentralPanel(panelDivName){
 		gamesContainerDiv.style.display='none';
 		gamesContainerDiv.id = "games-container";
 		return gamesContainerDiv;
+	}
+	
+	function createNewGameView(){
+		var label;
+		var div = document.createElement('div');
+		
+		var gameSizeDiv = document.createElement('div');
+		gameSizeDiv.id = 'game-size-div';
+		div.appendChild(gameSizeDiv);		
+		label = document.createElement('h3');
+		label.innerHTML = 'Game size';
+		gameSizeDiv.appendChild(label);
+		gameSizeDiv.appendChild(createRadioInputs(['small', 'medium', 'big'], 'medium', 'game-size'));
+		
+		var playernumberDiv = document.createElement('div');
+		playernumberDiv.id = 'player-number-div';
+		div.appendChild(playernumberDiv);
+		label = document.createElement('h3');
+		label.innerHTML = 'Players in game';
+		playernumberDiv.appendChild(label);
+		playernumberDiv.appendChild(createRadioInputs(['2', '3', '4'], '2', 'players-number'));
+		
+		var submitButton = document.createElement('button');
+		submitButton.innerHTML = 'Start Game';
+		$(submitButton).button().click(function(){
+			var gameSize = $("#radio-game-size :radio:checked").attr('id').replace('input-','');
+			var playersNumber = $("#radio-players-number :radio:checked").attr('id').replace('input-','');
+			var gameSettings = {size: gameSize, players: playersNumber};
+			
+			globals.server.newGame(gameSettings, function (data, textStatus, request){
+				gameSettings.location = request.getResponseHeader('location');
+				gameSettings.id = request.getResponseHeader('location').split('/').pop();
+				gameSettings.color = 'red';
+				globals.activeGame = new Game(gameSettings);
+				showActiveGame();
+			});
+			
+		});
+		div.appendChild(submitButton);
+		
+		return div;
+	}
+	
+	function createRadioInputs(labels, defaultLabel, name){
+		
+		var gameSizeForm = document.createElement('form');
+		gameSizeForm.id = 'form-' + name;
+		
+		var div = document.createElement('div');
+		div.className = 'radio';
+		div.id = 'radio-'+name;
+		for (var i = 0;i<labels.length;i++){
+			var label = labels[i];
+			var input = document.createElement('input');
+			input.id = 'input-'+label;
+			input.type = 'radio';
+			input.name = name;
+			
+			if (label == defaultLabel){
+				input.checked = 'checked';
+			}
+			var labelTag = document.createElement('label');
+			$(labelTag).attr('for',input.id);
+			labelTag.innerHTML = label;			
+			div.appendChild(input);
+			div.appendChild(labelTag);
+		}
+		div.appendChild(gameSizeForm);
+		return div;
 	}
 	
 	function createGamesView(gamesArray){

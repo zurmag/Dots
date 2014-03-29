@@ -6,6 +6,10 @@ button{
 	width: 130px;
 	font-size: 0.9em ! important;
 }
+h3{
+	color: #2779aa;
+	
+}
 #announcement-bar{
 	text-align: center;
 	font-size: larger;
