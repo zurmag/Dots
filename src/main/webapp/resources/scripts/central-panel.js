@@ -91,7 +91,7 @@ function CentralPanel(panelDivName){
 		label = document.createElement('h3');
 		label.innerHTML = 'Game size';
 		gameSizeDiv.appendChild(label);
-		gameSizeDiv.appendChild(createRadioInputs(['small', 'medium', 'big'], 'medium', 'game-size-form'));
+		gameSizeDiv.appendChild(createRadioInputs(['small', 'medium', 'big'], 'medium', 'game-size'));
 		
 		var playernumberDiv = document.createElement('div');
 		playernumberDiv.id = 'player-number-div';
@@ -99,15 +99,14 @@ function CentralPanel(panelDivName){
 		label = document.createElement('h3');
 		label.innerHTML = 'Players in game';
 		playernumberDiv.appendChild(label);
-		playernumberDiv.appendChild(createRadioInputs(['2', '3', '4'], '2', 'players-number-form'));
+		playernumberDiv.appendChild(createRadioInputs(['2', '3', '4'], '2', 'players-number'));
 		
 		var submitButton = document.createElement('button');
 		submitButton.innerHTML = 'Start Game';
 		$(submitButton).button().click(function(){
-			var size = $("div#game-size-div label[aria-pressed='true'] span").html();
-			alert(size);
-			
-			/*var gameSettings = {size: "Medium", players: 2};
+			var gameSize = $("#radio-game-size :radio:checked").attr('id').replace('input-','');
+			var playersNumber = $("#radio-players-number :radio:checked").attr('id').replace('input-','');
+			var gameSettings = {size: gameSize, players: playersNumber};
 			
 			globals.server.newGame(gameSettings, function (data, textStatus, request){
 				gameSettings.location = request.getResponseHeader('location');
@@ -115,7 +114,7 @@ function CentralPanel(panelDivName){
 				gameSettings.color = 'red';
 				globals.activeGame = new Game(gameSettings);
 				showActiveGame();
-			});*/
+			});
 			
 		});
 		div.appendChild(submitButton);
@@ -123,18 +122,20 @@ function CentralPanel(panelDivName){
 		return div;
 	}
 	
-	function createRadioInputs(labels, defaultLabel, formName){
+	function createRadioInputs(labels, defaultLabel, name){
 		
 		var gameSizeForm = document.createElement('form');
-		gameSizeForm.id = formName;
+		gameSizeForm.id = 'form-' + name;
 		
-		var div = document.createElement('div');div.setAttribute('class','radio');
+		var div = document.createElement('div');
+		div.className = 'radio';
+		div.id = 'radio-'+name;
 		for (var i = 0;i<labels.length;i++){
 			var label = labels[i];
 			var input = document.createElement('input');
 			input.id = 'input-'+label;
 			input.type = 'radio';
-			input.name = formName;
+			input.name = name;
 			
 			if (label == defaultLabel){
 				input.checked = 'checked';
