@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.games.dots.repositories.IRepository;
-import com.games.dots.ui.entities.UserType;
+import com.games.dots.ui.entities.IdType;
 import com.games.dots.utilities.ConfigurationManager;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.DefaultWebRequestor;
@@ -67,7 +67,7 @@ public class FacebookController {
 			User fbuser = facebookClient.fetchObject("me", User.class);
 			com.games.dots.ui.entities.User user = new com.games.dots.ui.entities.User();
 	        user.id = fbuser.getId();
-	        user.setUserType(UserType.FBUser);
+	        user.setUserType(IdType.FBUser);
 	        m_players.add(user);
 		}
         

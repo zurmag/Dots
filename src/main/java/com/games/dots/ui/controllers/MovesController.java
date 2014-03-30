@@ -40,7 +40,7 @@ public class MovesController {
 	    if (player == null){
 	    	player = new User();
 	    	player.id = playerId;
-	    	player.userType = UserType.FBUser;
+	    	player.userType = IdType.FBUser;
 	    }
 		Move move = new Move(player, coordinates);
 		Game game = games.get(gameId);

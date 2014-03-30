@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 	public String id;
-	public UserType userType;	
+	public IdType userType;	
 	public String color;
 	public String avatarUrl;
 	
@@ -44,7 +44,7 @@ public class User {
 		return true;
 	}
 
-	public void setUserType(UserType userType) {
+	public void setUserType(IdType userType) {
 		this.userType = userType;
 		
 	}
