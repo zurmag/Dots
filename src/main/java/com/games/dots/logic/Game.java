@@ -26,15 +26,16 @@ import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
-import com.games.dots.ui.entities.User;
+import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.UserId;
 
 public class Game {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
-	private List<User> m_players = new ArrayList<User>();
-	private Map<String, User> m_playersMap = new HashMap<>();
-	private Map<String, Integer> m_scores = new HashMap<>();
+	private List<Player> m_players = new ArrayList<Player>();
+	private Map<UserId, Player> m_playersMap = new HashMap<>();
+	private Map<UserId, Integer> m_scores = new HashMap<>();
 	private int m_maxNumberOfPlayers;
 	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
@@ -94,7 +95,7 @@ public class Game {
 		return m_maxNumberOfPlayers;
 	}
 	
-	public Collection<User> getPlayers(){
+	public Collection<Player> getPlayers(){
 		return m_players;
 	}
 	
@@ -102,17 +103,17 @@ public class Game {
 		return m_size;
 	}
 	
-	public Map<String, Integer> getScore(){
+	public Map<UserId, Integer> getScore(){
 		return m_scores;
 	}
 
-	public GameMessage addPlayer(User user) {
+	public GameMessage addPlayer(Player player) {
 		GameMessage stateChange = new GameMessage();
 		if (m_players.size() < m_maxNumberOfPlayers){
-			m_players.add(user);
-			m_playersMap.put(user.id, user);
-			m_scores.put(user.id, 0);
-			stateChange.newState.newPlayer = user;
+			m_players.add(player);
+			m_playersMap.put(player.id, player);
+			m_scores.put(player.id, 0);
+			stateChange.newState.newPlayer = player;
 		}
 		else{
 			//TODO: Think about error
@@ -136,8 +137,8 @@ public class Game {
 			return close();
 		}
 		
-		User user = m_playersMap.get(userId);
-		User activePlayer = getActivePlayer();
+		Player user = m_playersMap.get(userId);
+		Player activePlayer = getActivePlayer();
 		
 		if (user.equals(activePlayer)) {
 			nextTurn();activePlayer = getActivePlayer();
@@ -158,10 +159,10 @@ public class Game {
 	
 	public synchronized GameMessage makeMove(Move move){
 		GameMessage actionResponse = new GameMessage();
-		move.setPlayer(m_playersMap.get(move.getPlayer().id));
+		move.setPlayer(move.getPlayerId());
 		
 		actionResponse.move = move;
-		if (!move.getPlayer().equals(getActivePlayer())){
+		if (!move.getPlayerId().equals(getActivePlayer())){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
@@ -184,14 +185,14 @@ public class Game {
 		if (actionResponse.newCycles.isEmpty()){
 		
 			for (Coordinates[] cycle : createAndGetNewCycles(move)){							
-				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
+				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayerId());
 				if (deadPoints.size() > 0){					
 					actionResponse.newDeadDots.addAll(deadPoints);
 					actionResponse.newCycles.add(cycle);
 					m_cycles.add(cycle);
-					int newScore = m_scores.get(move.getPlayer().id) + deadPoints.size();					
-					m_scores.put(move.getPlayer().id, newScore);
-					actionResponse.scoreChange.put(move.getPlayer().id, newScore);
+					int newScore = m_scores.get(move.getPlayerId().id) + deadPoints.size();					
+					m_scores.put(move.getPlayerId(), newScore);
+					actionResponse.scoreChange.put(move.getPlayerId().id, newScore);
 					
 				}
 				else{
@@ -236,7 +237,7 @@ public class Game {
 		List<Coordinates[]> cycles = new LinkedList<Coordinates[]>();
 		
 		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
-			Move target = new Move(move.getPlayer(), coordinates);
+			Move target = new Move(move.getPlayerId(), coordinates);
 			if (!m_moves_board.containsVertex(target)) //only my moves
 				continue;			
 			
@@ -301,7 +302,7 @@ public class Game {
 		return vertexes;
 	}
 	
-	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, User me){
+	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, UserId me){
 		Set<Coordinates> deadPoints = new HashSet<>();
 		//sort by second coordinate:
 		Coordinates[] newCycle =cycle.clone();
@@ -324,11 +325,11 @@ public class Game {
 			}
 			
 			if (left.x < right.x){
-				for (User otherPlayer : m_players){
-					if (otherPlayer.equals(me)) continue;
+				for (Player otherPlayer : m_players){
+					if (otherPlayer.id.equals(me)) continue;
 					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
-						Move move = new Move(otherPlayer, c);
+						Move move = new Move(otherPlayer.id, c);
 						if (m_moves_board.containsVertex(move))
 							deadPoints.add(c);								
 					}
@@ -347,9 +348,9 @@ public class Game {
 	public GameMessage close() {
 		GameMessage stateChange = new GameMessage();
 		stateChange.newState.state = "closed";
-		List<String> winners = new LinkedList<String>();
+		List<UserId> winners = new LinkedList<UserId>();
 		int maxScore = 0;
-		for (String playerId : m_scores.keySet()){
+		for (UserId playerId : m_scores.keySet()){
 			if (m_scores.get(playerId) > maxScore){
 				winners.clear();
 				winners.add(playerId);
@@ -380,7 +381,7 @@ public class Game {
 		return m_cycles;
 	}
 
-	public User getActivePlayer() {
+	public Player getActivePlayer() {
 		return m_players.get(m_currentPlayerIndex);
 	}
 	

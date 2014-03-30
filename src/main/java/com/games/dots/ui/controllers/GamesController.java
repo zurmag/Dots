@@ -22,7 +22,7 @@ import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.GameMessage;
-import com.games.dots.ui.entities.User;
+import com.games.dots.ui.entities.Player;
 
 @Controller
 public class GamesController {
@@ -56,13 +56,11 @@ public class GamesController {
 	
 	@RequestMapping(value = "/games/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<?> addPlayerToGame(
-			@PathVariable String id	, @RequestBody User user
+			@PathVariable String id	, @RequestBody Player player
 			){
 		logger.debug("addPlayerToGame");		
-		if (user.avatarUrl == null || user.avatarUrl.isEmpty()){
-			user.avatarUrl = "https://graph.facebook.com/" + user.id + "/picture";
-		}
-		GameMessage stateChange = m_games.get(id).addPlayer(user); 
+		
+		GameMessage stateChange = m_games.get(id).addPlayer(player); 
 		m_template.convertAndSend("/sub/games/" + id, stateChange);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -100,7 +98,7 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.GET)
-	public @ResponseBody Collection<com.games.dots.ui.entities.User> getGamePlayers(
+	public @ResponseBody Collection<com.games.dots.ui.entities.Player> getGamePlayers(
 			@PathVariable String gameId){
 				
 		return m_games.get(gameId).getPlayers();

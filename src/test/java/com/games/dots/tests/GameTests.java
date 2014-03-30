@@ -12,7 +12,7 @@ import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
-import com.games.dots.ui.entities.User;
+import com.games.dots.ui.entities.Player;
 
 
 public class GameTests {
@@ -40,8 +40,8 @@ public class GameTests {
 		settings.players = 2;
 		settings.size = "Small";
 		Game smallGame = new Game(settings);
-		User player1 = new User();player1.id = "1";		
-		User player2 = new User();player2.id = "2";
+		Player player1 = new Player();player1.id.id = "1";		
+		Player player2 = new Player();player2.id.id = "2";
 		smallGame.addPlayer(player1);
 		smallGame.addPlayer(player2);
 		
@@ -52,11 +52,11 @@ public class GameTests {
 		coordinates[3] = new Coordinates(1, 2);
 		coordinates[4] = new Coordinates(2, 1);
 		Move[] moves = new Move[5];
-		moves[0] = new Move(player1, coordinates[0]);
-		moves[1] = new Move(player2, coordinates[1]);
-		moves[2] = new Move(player2, coordinates[2]);
-		moves[3] = new Move(player2, coordinates[3]);
-		moves[4] = new Move(player2, coordinates[4]);
+		moves[0] = new Move(player1.id, coordinates[0]);
+		moves[1] = new Move(player2.id, coordinates[1]);
+		moves[2] = new Move(player2.id, coordinates[2]);
+		moves[3] = new Move(player2.id, coordinates[3]);
+		moves[4] = new Move(player2.id, coordinates[4]);
 		
 		//Act			
 		smallGame.makeMove(moves[0]);smallGame.makeMove(moves[1]);smallGame.makeMove(moves[2]);smallGame.makeMove(moves[3]);
@@ -76,8 +76,8 @@ public class GameTests {
 		settings.players = 2;
 		settings.size = "Small";
 		Game smallGame = new Game(settings);
-		User player1 = new User();player1.id = "1";		
-		User player2 = new User();player2.id = "2";
+		Player player1 = new Player();player1.id.id = "1";		
+		Player player2 = new Player();player2.id.id = "2";
 		smallGame.addPlayer(player1);
 		smallGame.addPlayer(player2);
 
@@ -97,11 +97,11 @@ public class GameTests {
 		player2Coordinates.add(new Coordinates(1, 3));
 		
 		for(Coordinates c : player1Coordinates){
-			player1Moves.add(new Move(player1, c));
+			player1Moves.add(new Move(player1.id, c));
 		}
 		
 		for(Coordinates c : player2Coordinates){
-			player1Moves.add(new Move(player2, c));
+			player1Moves.add(new Move(player2.id, c));
 		}		
 		
 		//Act

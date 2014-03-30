@@ -8,8 +8,8 @@ import java.util.Map;
 public class State {
 	public Collection<Move> moves = new LinkedList<Move>();
 	public Collection<Coordinates[]> cycles = new LinkedList<>();;
-	public Collection<User> players = new LinkedList<User>();
-	public Map<String, Integer> score = new HashMap<>();
-	public User activePlayer = null;
+	public Collection<Player> players = new LinkedList<Player>();
+	public Map<UserId, Integer> score = new HashMap<>();
+	public Player activePlayer = null;
 	public String state;
 }

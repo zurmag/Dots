@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.games.dots.logic.Game;
-import com.games.dots.ui.entities.User;
+import com.games.dots.ui.entities.Player;
 
 public class GamesRepository implements IRepository<Game> {
 
@@ -54,7 +54,7 @@ public class GamesRepository implements IRepository<Game> {
 	public Collection<Game> getAactiveGames(String playerId) {
 		ArrayList<Game> activeGames = new ArrayList<Game>();
 		for (Game game : m_storage.values()){
-			for (User user : game.getPlayers()){
+			for (Player user : game.getPlayers()){
 				if (user.id.equals(playerId)){
 					activeGames.add(game);
 					break;

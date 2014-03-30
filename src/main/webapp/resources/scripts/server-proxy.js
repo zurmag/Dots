@@ -61,7 +61,7 @@ function ServerProxy(){
 	};
 	
 	this.disconnectGame = function disconnectGame(playerId, gameId, success){
-		var url = 'games/' + gameId + '/players/' + playerId;
+		var url = 'games/' + gameId + '/players/' + playerId.id;
 		delete m_subscribtions[url];
 		$.ajax({
 			url:url,

@@ -103,7 +103,7 @@ function Game(settings, state){
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
-				var player = new Player(m_me.color, uid);
+				var player = new Player(m_me.color, {id:uid, type: 'FBUser'});
 								
 				m_players[player.id] = player;
 				m_activePlayer = player;
@@ -253,7 +253,7 @@ function Game(settings, state){
 		for (var i = 0 ; i < state.players.length; i++){
 			var player = new Player(state.players[i].color, state.players[i].id);
 			m_players[player.id] = player;
-			if (m_me.id == player.id){
+			if (JSON.stringify(m_me.id) == JSON.stringify(player.id)){
 				m_me = player;
 			}
 		}
@@ -338,7 +338,7 @@ function Game(settings, state){
 	
 	function errorHandler(message){
 		if (message.move != null){
-			if(message.move.player.id == m_me.id){
+			if(JSON.stringify(message.move.player.id) == JSON.stringify(m_me.id)){
 				undoMove(message.move.coordinates);
 				announce('error', message.errorMessage);
 			}
@@ -354,7 +354,7 @@ function Game(settings, state){
 			if (m_state == 'closed'){
 				if (newState.winners){
 					for (var i = 0; i < newState.winners.length ; i++){
-						if (newState.winners[i] == m_me.id){
+						if (JSON.stringify(newState.winners[i]) == JSON.stringify(m_me.id)){
 							GameOver(true);
 							return;
 						}
@@ -375,7 +375,7 @@ function Game(settings, state){
 		}
 		
 		if (newState.activePlayer){
-			if (newState.activePlayer.id == m_me.id){
+			if (JSON.stringify(newState.activePlayer.id) == JSON.stringify(m_me.id)){
 				announce('info', 'Your turn!');				
 			}
 			else{

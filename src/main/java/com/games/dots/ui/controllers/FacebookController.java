@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.games.dots.repositories.IRepository;
+import com.games.dots.repositories.PlayersRepository;
 import com.games.dots.ui.entities.IdType;
 import com.games.dots.utilities.ConfigurationManager;
 import com.restfb.DefaultFacebookClient;
@@ -45,8 +45,8 @@ public class FacebookController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FacebookController.class);
 	
-	@Resource(name="playersRepository")
-	IRepository<com.games.dots.ui.entities.User> m_players;
+	@Resource()
+	PlayersRepository m_players;
 	
 	@Autowired
 	private ConfigurationManager m_configurationManager;
@@ -66,8 +66,8 @@ public class FacebookController {
 			FacebookClient facebookClient = new DefaultFacebookClient(token.getAccessToken());
 			User fbuser = facebookClient.fetchObject("me", User.class);
 			com.games.dots.ui.entities.User user = new com.games.dots.ui.entities.User();
-	        user.id = fbuser.getId();
-	        user.setUserType(IdType.FBUser);
+	        user.id.id = fbuser.getId();
+	        user.id.type = IdType.FBUser;
 	        m_players.add(user);
 		}
         

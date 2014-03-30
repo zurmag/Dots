@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.IRepository;
+import com.games.dots.repositories.PlayersRepository;
 import com.games.dots.ui.entities.*;
 
 @Controller
@@ -21,7 +22,7 @@ public class MovesController {
 	IRepository<Game> games;
 	
 	@Resource(name="playersRepository")
-	IRepository<User> players;
+	PlayersRepository players;
 	
 	private SimpMessagingTemplate m_template;
 	
@@ -35,14 +36,18 @@ public class MovesController {
 			@DestinationVariable String gameId, 
 			@DestinationVariable String playerId){    
 		GameMessage response = null;
-		User player = players.get(playerId);
+		UserId id = new UserId();
+		id.id = playerId;
+		id.type = IdType.FBUser;
+		User player = players.get(id);
 	    
 	    if (player == null){
 	    	player = new User();
-	    	player.id = playerId;
-	    	player.userType = IdType.FBUser;
+	    	player.id = new UserId();
+	    	player.id.id = playerId;
+	    	player.id.type = IdType.FBUser;
 	    }
-		Move move = new Move(player, coordinates);
+		Move move = new Move(player.id, coordinates);
 		Game game = games.get(gameId);
 		if (game == null){
 			response = new GameMessage();
