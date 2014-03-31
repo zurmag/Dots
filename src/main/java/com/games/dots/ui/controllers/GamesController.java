@@ -22,7 +22,9 @@ import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.GameMessage;
+import com.games.dots.ui.entities.IdType;
 import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.UserId;
 
 @Controller
 public class GamesController {
@@ -69,11 +71,14 @@ public class GamesController {
 	public ResponseEntity<?> removePlayerFromGame(
 			@PathVariable String gameId	, @PathVariable String userId
 			){
-		logger.debug("addPlayerToGame");		
+		logger.debug("removePlayerFromGame");		
 		
 		Game game = m_games.get(gameId);
 		if (game != null){
-			GameMessage stateChange = game.removePlayer(userId);
+			UserId id = new UserId();
+			id.id = userId;
+			id.type = IdType.FBUser;
+			GameMessage stateChange = game.removePlayer(id);
 		
 			if (stateChange != null) {
 				m_template.convertAndSend("/sub/games/" + gameId, stateChange);

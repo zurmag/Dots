@@ -39,15 +39,17 @@ public class MovesController {
 		UserId id = new UserId();
 		id.id = playerId;
 		id.type = IdType.FBUser;
-		User player = players.get(id);
+		User user = players.get(id);
 	    
-	    if (player == null){
-	    	player = new User();
-	    	player.id = new UserId();
-	    	player.id.id = playerId;
-	    	player.id.type = IdType.FBUser;
+	    if (user == null){
+	    	user = new User();
+	    	user.id = new UserId();
+	    	user.id.id = playerId;
+	    	user.id.type = IdType.FBUser;
 	    }
-		Move move = new Move(player.id, coordinates);
+	    Player player = new Player();
+	    player.id = user.id;
+		Move move = new Move(player, coordinates);
 		Game game = games.get(gameId);
 		if (game == null){
 			response = new GameMessage();

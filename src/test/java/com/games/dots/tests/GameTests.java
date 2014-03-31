@@ -52,11 +52,11 @@ public class GameTests {
 		coordinates[3] = new Coordinates(1, 2);
 		coordinates[4] = new Coordinates(2, 1);
 		Move[] moves = new Move[5];
-		moves[0] = new Move(player1.id, coordinates[0]);
-		moves[1] = new Move(player2.id, coordinates[1]);
-		moves[2] = new Move(player2.id, coordinates[2]);
-		moves[3] = new Move(player2.id, coordinates[3]);
-		moves[4] = new Move(player2.id, coordinates[4]);
+		moves[0] = new Move(player1, coordinates[0]);
+		moves[1] = new Move(player2, coordinates[1]);
+		moves[2] = new Move(player2, coordinates[2]);
+		moves[3] = new Move(player2, coordinates[3]);
+		moves[4] = new Move(player2, coordinates[4]);
 		
 		//Act			
 		smallGame.makeMove(moves[0]);smallGame.makeMove(moves[1]);smallGame.makeMove(moves[2]);smallGame.makeMove(moves[3]);
@@ -97,11 +97,11 @@ public class GameTests {
 		player2Coordinates.add(new Coordinates(1, 3));
 		
 		for(Coordinates c : player1Coordinates){
-			player1Moves.add(new Move(player1.id, c));
+			player1Moves.add(new Move(player1, c));
 		}
 		
 		for(Coordinates c : player2Coordinates){
-			player1Moves.add(new Move(player2.id, c));
+			player1Moves.add(new Move(player2, c));
 		}		
 		
 		//Act

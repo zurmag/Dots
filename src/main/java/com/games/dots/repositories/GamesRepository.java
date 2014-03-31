@@ -51,11 +51,11 @@ public class GamesRepository implements IRepository<Game> {
 		return m_storage.values();
 	}
 
-	public Collection<Game> getAactiveGames(String playerId) {
+	public Collection<Game> getActiveGames(String playerId) {
 		ArrayList<Game> activeGames = new ArrayList<Game>();
 		for (Game game : m_storage.values()){
 			for (Player user : game.getPlayers()){
-				if (user.id.equals(playerId)){
+				if (user.id.id.equals(playerId)){
 					activeGames.add(game);
 					break;
 				}

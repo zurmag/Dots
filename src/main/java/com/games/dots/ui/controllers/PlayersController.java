@@ -30,7 +30,7 @@ public class PlayersController {
 			){
 		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();
 		
-		for(Game game: m_games.getAactiveGames(playerId)){
+		for(Game game: m_games.getActiveGames(playerId)){
 			com.games.dots.ui.entities.Game uiGame = new com.games.dots.ui.entities.Game(game);
 			games.add(uiGame);
 			if (fullState){

@@ -129,7 +129,7 @@ public class Game {
 		
 	}
 	
-	public GameMessage removePlayer(String userId) {
+	public GameMessage removePlayer(UserId userId) {
 		GameMessage stateChange = new GameMessage();
 		if (!m_playersMap.containsKey(userId)) 
 			return null;
@@ -159,10 +159,10 @@ public class Game {
 	
 	public synchronized GameMessage makeMove(Move move){
 		GameMessage actionResponse = new GameMessage();
-		move.setPlayer(move.getPlayerId());
+		move.setPlayer(m_playersMap.get(move.getPlayer().id));
 		
 		actionResponse.move = move;
-		if (!move.getPlayerId().equals(getActivePlayer())){
+		if (!move.getPlayer().equals(getActivePlayer())){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
@@ -185,14 +185,14 @@ public class Game {
 		if (actionResponse.newCycles.isEmpty()){
 		
 			for (Coordinates[] cycle : createAndGetNewCycles(move)){							
-				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayerId());
+				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
 				if (deadPoints.size() > 0){					
 					actionResponse.newDeadDots.addAll(deadPoints);
 					actionResponse.newCycles.add(cycle);
 					m_cycles.add(cycle);
-					int newScore = m_scores.get(move.getPlayerId().id) + deadPoints.size();					
-					m_scores.put(move.getPlayerId(), newScore);
-					actionResponse.scoreChange.put(move.getPlayerId().id, newScore);
+					int newScore = m_scores.get(move.getPlayer().id) + deadPoints.size();					
+					m_scores.put(move.getPlayer().id, newScore);
+					actionResponse.scoreChange.put(move.getPlayer().id.id, newScore);
 					
 				}
 				else{
@@ -237,7 +237,7 @@ public class Game {
 		List<Coordinates[]> cycles = new LinkedList<Coordinates[]>();
 		
 		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
-			Move target = new Move(move.getPlayerId(), coordinates);
+			Move target = new Move(move.getPlayer(), coordinates);
 			if (!m_moves_board.containsVertex(target)) //only my moves
 				continue;			
 			
@@ -302,7 +302,7 @@ public class Game {
 		return vertexes;
 	}
 	
-	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, UserId me){
+	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, Player me){
 		Set<Coordinates> deadPoints = new HashSet<>();
 		//sort by second coordinate:
 		Coordinates[] newCycle =cycle.clone();
@@ -326,10 +326,10 @@ public class Game {
 			
 			if (left.x < right.x){
 				for (Player otherPlayer : m_players){
-					if (otherPlayer.id.equals(me)) continue;
+					if (otherPlayer.equals(me)) continue;
 					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
-						Move move = new Move(otherPlayer.id, c);
+						Move move = new Move(otherPlayer, c);
 						if (m_moves_board.containsVertex(move))
 							deadPoints.add(c);								
 					}
