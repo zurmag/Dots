@@ -41,7 +41,7 @@ function ServerProxy(){
 	};
 	
 	this.makeMove = function(gameId, player, coordinates){
-		var actionUrl = '/action' + '/games/' + gameId + '/players/' + player.id.id + '/moves';			
+		var actionUrl = '/action' + '/games/' + gameId + '/players/' + player.id + '/moves';			
 		m_stompClient.send(actionUrl, {}, JSON.stringify(coordinates));
 	};
 	
@@ -61,7 +61,7 @@ function ServerProxy(){
 	};
 	
 	this.disconnectGame = function disconnectGame(playerId, gameId, success){
-		var url = 'games/' + gameId + '/players/' + playerId.id;
+		var url = 'games/' + gameId + '/players/' + playerId;
 		delete m_subscribtions[url];
 		$.ajax({
 			url:url,

@@ -9,7 +9,6 @@ public class State {
 	public Collection<Move> moves = new LinkedList<Move>();
 	public Collection<Coordinates[]> cycles = new LinkedList<>();;
 	public Collection<Player> players = new LinkedList<Player>();
-	public Map<UserId, Integer> score = new HashMap<>();
 	public Player activePlayer = null;
 	public String state;
 }

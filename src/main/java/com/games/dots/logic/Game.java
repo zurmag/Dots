@@ -1,6 +1,5 @@
 package com.games.dots.logic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -27,15 +26,12 @@ import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
 import com.games.dots.ui.entities.Player;
-import com.games.dots.ui.entities.UserId;
 
 public class Game {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
-	private List<Player> m_players = new ArrayList<Player>();
-	private Map<UserId, Player> m_playersMap = new HashMap<>();
-	private Map<UserId, Integer> m_scores = new HashMap<>();
+	private Map<Integer, Player> m_playersMap = new HashMap<>();
 	private int m_maxNumberOfPlayers;
 	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
@@ -96,30 +92,26 @@ public class Game {
 	}
 	
 	public Collection<Player> getPlayers(){
-		return m_players;
+		return m_playersMap.values();
 	}
 	
 	public BoardSize getBoardSize(){
 		return m_size;
 	}
-	
-	public Map<UserId, Integer> getScore(){
-		return m_scores;
-	}
 
 	public GameMessage addPlayer(Player player) {
+		player.id = m_playersMap.size();
+		
 		GameMessage stateChange = new GameMessage();
-		if (m_players.size() < m_maxNumberOfPlayers){
-			m_players.add(player);
+		if (m_playersMap.size() < m_maxNumberOfPlayers){
 			m_playersMap.put(player.id, player);
-			m_scores.put(player.id, 0);
 			stateChange.newState.newPlayer = player;
 		}
 		else{
 			//TODO: Think about error
 		}
 		
-		if (m_players.size() == m_maxNumberOfPlayers){
+		if (m_playersMap.size() == m_maxNumberOfPlayers){
 			stateChange.newState.state = "active";
 			m_state = "active";
 		}
@@ -129,28 +121,27 @@ public class Game {
 		
 	}
 	
-	public GameMessage removePlayer(UserId userId) {
+	public GameMessage removePlayer(Integer playerId) {
 		GameMessage stateChange = new GameMessage();
-		if (!m_playersMap.containsKey(userId)) 
+		if (!m_playersMap.containsKey(playerId)) 
 			return null;
-		if (m_players.size() == 1) {
+		if (m_playersMap.size() == 1) {
 			return close();
 		}
 		
-		Player user = m_playersMap.get(userId);
+		Player player = m_playersMap.get(playerId);
 		Player activePlayer = getActivePlayer();
 		
-		if (user.equals(activePlayer)) {
+		if (player.equals(activePlayer)) {
 			nextTurn();activePlayer = getActivePlayer();
 		}
-		m_players.remove(user);			
-		m_playersMap.remove(userId);
-		m_currentPlayerIndex = m_players.indexOf(activePlayer);
-		if (m_players.size() == 1){
+		m_playersMap.remove(playerId);			
+		m_currentPlayerIndex = activePlayer.id;
+		if (m_playersMap.size() == 1){
 			return close();
 		}
 		
-		stateChange.newState.removedPlayer = user;
+		stateChange.newState.removedPlayer = player;
 		stateChange.newState.state = m_state = "waiting";
 		
 		return stateChange;
@@ -159,10 +150,9 @@ public class Game {
 	
 	public synchronized GameMessage makeMove(Move move){
 		GameMessage actionResponse = new GameMessage();
-		move.setPlayer(m_playersMap.get(move.getPlayer().id));
 		
 		actionResponse.move = move;
-		if (!move.getPlayer().equals(getActivePlayer())){
+		if (move.getPlayerId() == getActivePlayer().id){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
@@ -185,15 +175,14 @@ public class Game {
 		if (actionResponse.newCycles.isEmpty()){
 		
 			for (Coordinates[] cycle : createAndGetNewCycles(move)){							
-				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayer());
+				Set<Coordinates> deadPoints = getDeadPoints(cycle, move.getPlayerId());
 				if (deadPoints.size() > 0){					
 					actionResponse.newDeadDots.addAll(deadPoints);
 					actionResponse.newCycles.add(cycle);
 					m_cycles.add(cycle);
-					int newScore = m_scores.get(move.getPlayer().id) + deadPoints.size();					
-					m_scores.put(move.getPlayer().id, newScore);
-					actionResponse.scoreChange.put(move.getPlayer().id.id, newScore);
-					
+					Player player = m_playersMap.get(move.getPlayerId());
+					player.score += deadPoints.size();					
+					actionResponse.scoreChange.put(move.getPlayerId(), player.score);
 				}
 				else{
 					m_emptyCycles.add(cycle);
@@ -237,7 +226,7 @@ public class Game {
 		List<Coordinates[]> cycles = new LinkedList<Coordinates[]>();
 		
 		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
-			Move target = new Move(move.getPlayer(), coordinates);
+			Move target = new Move(move.getPlayerId(), coordinates);
 			if (!m_moves_board.containsVertex(target)) //only my moves
 				continue;			
 			
@@ -302,7 +291,7 @@ public class Game {
 		return vertexes;
 	}
 	
-	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, Player me){
+	private Set<Coordinates> getDeadPoints(Coordinates[] cycle, int me){
 		Set<Coordinates> deadPoints = new HashSet<>();
 		//sort by second coordinate:
 		Coordinates[] newCycle =cycle.clone();
@@ -325,11 +314,11 @@ public class Game {
 			}
 			
 			if (left.x < right.x){
-				for (Player otherPlayer : m_players){
-					if (otherPlayer.equals(me)) continue;
+				for (Player otherPlayer : m_playersMap.values()){
+					if (otherPlayer.id == me) continue;
 					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
-						Move move = new Move(otherPlayer, c);
+						Move move = new Move(otherPlayer.id, c);
 						if (m_moves_board.containsVertex(move))
 							deadPoints.add(c);								
 					}
@@ -348,15 +337,15 @@ public class Game {
 	public GameMessage close() {
 		GameMessage stateChange = new GameMessage();
 		stateChange.newState.state = "closed";
-		List<UserId> winners = new LinkedList<UserId>();
+		List<Integer> winners = new LinkedList<>();
 		int maxScore = 0;
-		for (UserId playerId : m_scores.keySet()){
-			if (m_scores.get(playerId) > maxScore){
+		for (Player player : m_playersMap.values()){
+			if (player.score > maxScore){
 				winners.clear();
-				winners.add(playerId);
+				winners.add(player.id);
 			}
-			else if (m_scores.get(playerId) == maxScore){
-				winners.add(playerId);
+			else if (player.score == maxScore){
+				winners.add(player.id);
 			}
 		}
 		stateChange.newState.winners = winners;
@@ -365,7 +354,7 @@ public class Game {
 
 	public boolean isOpenForRegistartion() {
 		
-		return m_players.size() < m_maxNumberOfPlayers;
+		return m_playersMap.size() < m_maxNumberOfPlayers;
 	}
 	
 	public boolean isActive(){
@@ -382,15 +371,20 @@ public class Game {
 	}
 
 	public Player getActivePlayer() {
-		return m_players.get(m_currentPlayerIndex);
+		return m_playersMap.get(m_currentPlayerIndex);
 	}
 	
 	public void nextTurn() {
-		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_players.size();
+		m_currentPlayerIndex ++; m_currentPlayerIndex %= m_playersMap.size();
 	}
 
 	public String getState() {
 		return m_state;
+	}
+
+	public Player getPlayer(Integer playerId) {
+		return m_playersMap.get(playerId);
+		
 	}
 	
 	

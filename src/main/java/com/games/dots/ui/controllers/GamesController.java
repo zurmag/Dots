@@ -14,17 +14,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
-import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.GameMessage;
-import com.games.dots.ui.entities.IdType;
+import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Player;
-import com.games.dots.ui.entities.UserId;
 
 @Controller
 public class GamesController {
@@ -61,25 +63,26 @@ public class GamesController {
 			@PathVariable String id	, @RequestBody Player player
 			){
 		logger.debug("addPlayerToGame");		
-		
+		player.gameId = id;
 		GameMessage stateChange = m_games.get(id).addPlayer(player); 
 		m_template.convertAndSend("/sub/games/" + id, stateChange);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/games/{gameId}/players/{userId}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/games/{gameId}/players/{playerId}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> removePlayerFromGame(
-			@PathVariable String gameId	, @PathVariable String userId
+			@PathVariable String gameId	, @PathVariable Integer playerId
 			){
 		logger.debug("removePlayerFromGame");		
 		
 		Game game = m_games.get(gameId);
 		if (game != null){
-			UserId id = new UserId();
-			id.id = userId;
-			id.type = IdType.FBUser;
-			GameMessage stateChange = game.removePlayer(id);
-		
+			GameMessage stateChange = game.removePlayer(playerId);
+			Player player = game.getPlayer(playerId);
+			if (player != null){
+				m_games.remove(player.userId);
+			}
+			
 			if (stateChange != null) {
 				m_template.convertAndSend("/sub/games/" + gameId, stateChange);
 				if ("closed".equals(stateChange.newState.state)) {

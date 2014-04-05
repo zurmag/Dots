@@ -8,5 +8,5 @@ public class GamesStateChange {
 	public Player activePlayer;
 	public Player newPlayer;
 	public Player removedPlayer;
-	public List<UserId> winners = new LinkedList<UserId>();
+	public List<Integer> winners = new LinkedList<>();
 }
