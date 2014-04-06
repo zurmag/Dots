@@ -30,6 +30,7 @@
     </beans:bean>
 	
 	<beans:bean name="gamesRepository" class="com.games.dots.repositories.GamesRepository" scope="singleton"/>
+	<beans:bean name="playersRepository" class="com.games.dots.repositories.PlayersRepository" scope="singleton"/>
 	<beans:bean name="configurationManger" class="com.games.dots.utilities.ConfigurationManager" scope="singleton"/>
 	
 	

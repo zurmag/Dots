@@ -58,15 +58,15 @@ public class GamesController {
 	    return new ResponseEntity<String>(game.id, headers, HttpStatus.OK);	    
 	}
 	
-	@RequestMapping(value = "/games/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> addPlayerToGame(
-			@PathVariable String id	, @RequestBody Player player
+	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.POST)
+	public ResponseEntity<Integer> addPlayerToGame(
+			@PathVariable String gameId	, @RequestBody Player player
 			){
 		logger.debug("addPlayerToGame");		
-		player.gameId = id;
-		GameMessage stateChange = m_games.get(id).addPlayer(player); 
-		m_template.convertAndSend("/sub/games/" + id, stateChange);
-		return new ResponseEntity<>(HttpStatus.OK);
+		player.gameId = gameId;
+		GameMessage stateChange = m_games.get(gameId).addPlayer(player); 
+		m_template.convertAndSend("/sub/games/" + gameId, stateChange);
+		return new ResponseEntity<Integer>(player.id, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players/{playerId}", method = RequestMethod.DELETE)

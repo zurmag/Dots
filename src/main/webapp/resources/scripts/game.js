@@ -105,14 +105,19 @@ function Game(settings, state){
 				//var accessToken = response.authResponse.accessToken;
 				var player = new Player(m_me.color, {id:uid, type: 'FBUser'});
 								
-				m_players[player.id] = player;
+				
 				m_activePlayer = player;
 				m_me = player;
 				
 				if (state != null){
 					restoreState(state);		
 				}else{
-					globals.server.addPlayerToGame(m_me, m_gameId);
+					globals.server.addPlayerToGame(m_me, m_gameId, function(data){
+						player.id = data;
+						m_players[player.id] = player;
+						globals.statusPanel.addPlayer(player);
+					});
+					
 					announce('info', 'Waiting for other players...');
 				}
 				
@@ -251,23 +256,25 @@ function Game(settings, state){
 		console.debug(state);
 		
 		for (var i = 0 ; i < state.players.length; i++){
-			var player = new Player(state.players[i].color, state.players[i].id);
+			var player = new Player(state.players[i].color, state.players[i].iserId);
+			player.id = state.players[i].id;player.score = state.players[i].score;
+			
 			m_players[player.id] = player;
-			if (JSON.stringify(m_me.id) == JSON.stringify(player.id)){
+			if (m_me.id == player.id){
 				m_me = player;
 			}
 		}
+		
 		for (var i = 0; i < state.moves.length; i++){
 			
 			m_activePlayer = new Player(state.moves[i].player.color, state.moves[i].player.id);state.moves[i].player;
 			restoreMove(state.moves[i]);			
 		}
-		m_activePlayer = new Player(state.activePlayer.color, state.activePlayer.id);
+		m_activePlayer = m_players[state.activePlayer.id];
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
-		self.onScoreChange(state.score);
-		
+		self.onScoreChange(state.score);		
 	}
 	
 	function restoreMove(move){

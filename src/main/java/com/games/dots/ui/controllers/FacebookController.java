@@ -45,7 +45,7 @@ public class FacebookController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FacebookController.class);
 	
-	@Resource()
+	@Resource
 	PlayersRepository m_players;
 	
 	@Autowired

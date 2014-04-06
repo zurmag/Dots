@@ -74,7 +74,9 @@ public class GamesRepository implements IRepository<Game, UserId> {
 
 	public Collection<Game> getActiveGames(UserId userId) {
 		ArrayList<Game> activeGames = new ArrayList<Game>();
-		activeGames.add(m_User2Game.get(userId));
+		Game game = m_User2Game.get(userId);
+		if (game != null)
+			activeGames.add(game);
 		//TODO: many games per userId not supported here
 		return activeGames;
 	}
