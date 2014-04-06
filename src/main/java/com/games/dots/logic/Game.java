@@ -152,7 +152,7 @@ public class Game {
 		GameMessage actionResponse = new GameMessage();
 		
 		actionResponse.move = move;
-		if (move.getPlayerId() == getActivePlayer().id){
+		if (move.getPlayerId() != getActivePlayer().id){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
