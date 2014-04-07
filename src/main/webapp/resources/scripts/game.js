@@ -262,21 +262,25 @@ function Game(settings, state){
 			var player = new Player(state.players[i]);
 			
 			m_players[player.id] = player;
-			if (m_me.id == player.id){
+			if (JSON.stringify(m_me.userId) == JSON.stringify(player.userId)){
 				m_me = player;
 			}
 		}
 		
 		for (var i = 0; i < state.moves.length; i++){
 			
-			m_activePlayer = new Player(state.moves[i].player);
+			m_activePlayer = new Player(m_players[state.moves[i].playerId]);
 			restoreMove(state.moves[i]);			
 		}
 		m_activePlayer = m_players[state.activePlayer.id];
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
-		self.onScoreChange(state.score);		
+		var score = {};
+		for (var i = 0;i<state.players.length;i++){
+			score[state.players[i].id] = state.players[i].score;
+		}
+		self.onScoreChange(score);		
 	}
 	
 	function restoreMove(move){
@@ -347,7 +351,7 @@ function Game(settings, state){
 	
 	function errorHandler(message){
 		if (message.move != null){
-			if(m_players[message.move.playerId] == m_me.id){
+			if(message.move.playerId == m_me.id){
 				undoMove(message.move.coordinates);
 				announce('error', message.errorMessage);
 			}
