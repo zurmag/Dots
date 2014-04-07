@@ -186,9 +186,9 @@ function CentralPanel(panelDivName){
 			td = document.createElement('td');td.innerHTML=data.size;tr.appendChild(td);
 			td = document.createElement('td');td.innerHTML=data.maxPlayers;tr.appendChild(td);
 			var connectedPlayers = document.createElement('div');
-			for(var i = 0;i < data.players.length;i++){
+			for(var i = 0;i < data.state.players.length;i++){
 				var img = document.createElement('img');
-				var player = new Player(data.players[i].color, data.players[i].id);
+				var player = new Player(data.state.players[i]);
 				img.src = player.getAvatar();
 				connectedPlayers.appendChild(img);
 			}

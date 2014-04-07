@@ -24,7 +24,7 @@ function Game(settings, state){
 	
 	//public
 	this.addPlayer = function addPlayer(newPlayer){		
-		var player = new Player(newPlayer.color, newPlayer.id);
+		var player = new Player(newPlayer);
 		m_players[newPlayer.id] = player;
 		globals.statusPanel.addPlayer(player);
 	};
@@ -103,7 +103,10 @@ function Game(settings, state){
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
-				var player = new Player(m_me.color, {id:uid, type: 'FBUser'});
+				var player = new Player({
+					color: m_me.color, 
+					userId: {id:uid, type: 'FBUser'}
+				});
 								
 				
 				m_activePlayer = player;
@@ -256,8 +259,7 @@ function Game(settings, state){
 		console.debug(state);
 		
 		for (var i = 0 ; i < state.players.length; i++){
-			var player = new Player(state.players[i].color, state.players[i].iserId);
-			player.id = state.players[i].id;player.score = state.players[i].score;
+			var player = new Player(state.players[i]);
 			
 			m_players[player.id] = player;
 			if (m_me.id == player.id){
@@ -267,7 +269,7 @@ function Game(settings, state){
 		
 		for (var i = 0; i < state.moves.length; i++){
 			
-			m_activePlayer = new Player(state.moves[i].player.color, state.moves[i].player.id);state.moves[i].player;
+			m_activePlayer = new Player(state.moves[i].player);
 			restoreMove(state.moves[i]);			
 		}
 		m_activePlayer = m_players[state.activePlayer.id];
@@ -279,9 +281,9 @@ function Game(settings, state){
 	
 	function restoreMove(move){
 		var coordinates = move.coordinates;
-		gMouseDown(coordinates.x, coordinates.y, move.player.color);
+		gMouseDown(coordinates.x, coordinates.y, m_players[move.playerId].color);
 		gMouseUp(coordinates.x, coordinates.y);
-		board[coordinates.x][coordinates.y].player = move.player;
+		board[coordinates.x][coordinates.y].player = m_players[move.playerId];
 		
 	}
 	function drawCycles(cycles){
@@ -345,7 +347,7 @@ function Game(settings, state){
 	
 	function errorHandler(message){
 		if (message.move != null){
-			if(JSON.stringify(message.move.player.id) == JSON.stringify(m_me.id)){
+			if(m_players[message.move.playerId] == m_me.id){
 				undoMove(message.move.coordinates);
 				announce('error', message.errorMessage);
 			}
@@ -388,7 +390,7 @@ function Game(settings, state){
 			else{
 				announce('info', newState.activePlayer.color +'s turn');
 			}
-			m_activePlayer = new Player(newState.activePlayer.color, newState.activePlayer.id);
+			m_activePlayer = new Player(newState.activePlayer);
 		}
 		
 		if (newState.newPlayer){

@@ -12,15 +12,15 @@ function GameStatusPanel(panelDivName){
 	};
 	
 	this.addPlayer = function addPlayer(player){
-		if ($('#player'+player.id.id+'-container').length == 0){
+		if ($('#player'+player.id+'-container').length == 0){
 			m_panelDiv.appendChild(createPlayerDiv(player));
 			
-			var gameClockDiv = $('#game-clock-'+player.id.id);
+			var gameClockDiv = $('#game-clock-'+player.id);
 			var gameClock = $(gameClockDiv).FlipClock({countdown: true,clockFace: 'MinuteCounter'});
 			gameClockDiv.height(0);
 			rescale(gameClockDiv, 0.24, 0.24);						
 			
-			var moveClockDiv = $('#move-clock-'+player.id.id);
+			var moveClockDiv = $('#move-clock-'+player.id);
 			var moveClock = $(moveClockDiv).FlipClock({countdown: true,clockFace: 'MinuteCounter'});
 			moveClockDiv.height(0);
 			rescale(moveClockDiv, 0.24, 0.24);
@@ -44,19 +44,19 @@ function GameStatusPanel(panelDivName){
 	};
 	
 	function changePlayerScore(id, score){
-		$("#player"+id.id+"-info").html("Score: " + score);
+		$("#player"+id +"-info").html("Score: " + score);
 	}
 	
 	function createPlayerDiv(player){
 		var playerDiv = document.createElement('div');
-		playerDiv.id = "player" + player.id.id + "-container";		
+		playerDiv.id = "player" + player.id + "-container";		
 		$(playerDiv).css('height','70px');
 		var playerInfo = document.createElement('div');
-		playerInfo.id = "player" + player.id.id + "-info";
+		playerInfo.id = "player" + player.id + "-info";
 		$(playerInfo).css('float', 'left').css('height', 'inherit');
 		
 		var img = document.createElement('img');
-		img.id = "player" + player.id.id + "img";
+		img.id = "player" + player.id + "img";
 		img.src = player.getAvatar();
 		playerInfo.appendChild(img);
 		
@@ -67,13 +67,13 @@ function GameStatusPanel(panelDivName){
 		playerDiv.appendChild(playerInfo);
 		
 		var clockDiv = document.createElement('div');
-		clockDiv.id = 'clocks-'+player.id.id;
+		clockDiv.id = 'clocks-'+player.id;
 		$(clockDiv).css('float', 'left').css('height', 'inherit');
 		var gameClock = document.createElement('div');
-		gameClock.id = 'game-clock-'+player.id.id;
+		gameClock.id = 'game-clock-'+player.id;
 		
 		var moveClock = document.createElement('div');
-		moveClock.id = 'move-clock-'+player.id.id;		
+		moveClock.id = 'move-clock-'+player.id;		
 		clockDiv.appendChild(gameClock);
 		clockDiv.appendChild(moveClock);
 		

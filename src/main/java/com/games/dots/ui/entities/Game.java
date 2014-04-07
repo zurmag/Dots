@@ -15,6 +15,7 @@ public class Game {
 		this.id = other.id;
 		this.size = other.getBoardSize();
 		this.maxPlayers = other.getMaxNumberOfPlayers();	
-		
+		this.state = new State();
+		this.state.players = other.getPlayers();
 	}
 }

@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.games.dots.logic.Game;
+import com.games.dots.ui.entities.Player;
 import com.games.dots.ui.entities.UserId;
 
 public class GamesRepository implements IRepository<Game, UserId> {
@@ -53,6 +54,9 @@ public class GamesRepository implements IRepository<Game, UserId> {
 	
 	@Override
 	public void remove(String id) {
+		for (Player player : m_storage.get(id).getPlayers()) {
+			m_User2Game.remove(player.userId);
+		}
 		m_storage.remove(id);		
 	}
 

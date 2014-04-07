@@ -64,7 +64,9 @@ public class GamesController {
 			){
 		logger.debug("addPlayerToGame");		
 		player.gameId = gameId;
-		GameMessage stateChange = m_games.get(gameId).addPlayer(player); 
+		Game game = m_games.get(gameId);
+		m_games.add(player.userId, game);
+		GameMessage stateChange = game.addPlayer(player); 
 		m_template.convertAndSend("/sub/games/" + gameId, stateChange);
 		return new ResponseEntity<Integer>(player.id, HttpStatus.OK);
 	}
@@ -77,8 +79,8 @@ public class GamesController {
 		
 		Game game = m_games.get(gameId);
 		if (game != null){
-			GameMessage stateChange = game.removePlayer(playerId);
 			Player player = game.getPlayer(playerId);
+			GameMessage stateChange = game.removePlayer(playerId);
 			if (player != null){
 				m_games.remove(player.userId);
 			}
@@ -86,7 +88,9 @@ public class GamesController {
 			if (stateChange != null) {
 				m_template.convertAndSend("/sub/games/" + gameId, stateChange);
 				if ("closed".equals(stateChange.newState.state)) {
+					
 					m_games.remove(gameId);
+					
 				}
 			}
 		}
