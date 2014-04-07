@@ -5,8 +5,8 @@ import java.util.List;
 
 public class GamesStateChange {
 	public String state;
-	public User activePlayer;
-	public User newPlayer;
-	public User removedPlayer;
-	public List<String> winners = new LinkedList<String>();
+	public Player activePlayer;
+	public Player newPlayer;
+	public Player removedPlayer;
+	public List<Integer> winners = new LinkedList<>();
 }

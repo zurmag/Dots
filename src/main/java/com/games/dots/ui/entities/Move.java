@@ -3,27 +3,30 @@ package com.games.dots.ui.entities;
 
 public class Move {
 	
-	private User m_player;
+	private int m_playerId;
 	private Coordinates coordinates;	
 	
-	public Move(User player, Coordinates coordinates) {
-		this.m_player = player;
+	public Move(int playerId, Coordinates coordinates) {
+		this.m_playerId = playerId;
 		this.coordinates = coordinates;
 	}
-	public User getPlayer() {
-		return m_player;
+	public int getPlayerId() {
+		return m_playerId;
 	}	
 	public Coordinates getCoordinates() {
 		return coordinates;
-	}	
+	}		
 	
+	public void setPlayerId(int playerId) {
+		m_playerId = playerId;		
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
 				+ ((coordinates == null) ? 0 : coordinates.hashCode());
-		result = prime * result + ((m_player == null) ? 0 : m_player.hashCode());
+		result = prime * result + m_playerId;
 		return result;
 	}
 	@Override
@@ -40,16 +43,12 @@ public class Move {
 				return false;
 		} else if (!coordinates.equals(other.coordinates))
 			return false;
-		if (m_player == null) {
-			if (other.m_player != null)
-				return false;
-		} else if (!m_player.equals(other.m_player))
+		if (m_playerId != other.m_playerId)
 			return false;
 		return true;
 	}
-	public void setPlayer(User user) {
-		m_player = user;
-		
-	}
+	
+	
+	
 	
 }

@@ -9,11 +9,18 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.games.dots.logic.Game;
-import com.games.dots.ui.entities.User;
+import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.UserId;
 
-public class GamesRepository implements IRepository<Game> {
+public class GamesRepository implements IRepository<Game, UserId> {
 
-	private Map<String, Game> m_storage = new ConcurrentHashMap<String, Game>(); 
+	private Map<UserId, Game> m_User2Game = new ConcurrentHashMap<>(); 
+	private Map<String, Game> m_storage = new ConcurrentHashMap<>(); 
+	
+	@Override
+	public Game get(UserId id) {
+		return m_User2Game.get(id);
+	}
 	
 	@Override
 	public Game get(String id) {
@@ -21,24 +28,42 @@ public class GamesRepository implements IRepository<Game> {
 	}
 
 	@Override
-	public Game add(Game game) {
+	public Game add(UserId id, Game game) {
 		if(game.id == null){
-			UUID id = UUID.randomUUID();
-			game.id = id.toString();
+			UUID gameId = UUID.randomUUID();
+			game.id = gameId.toString();
+		}
+		m_User2Game.put(id, game);
+		return game;
+	}
+	
+	@Override
+	public String add(Game game) {
+		if(game.id == null){
+			UUID gameId = UUID.randomUUID();
+			game.id = gameId.toString();
 		}
 		m_storage.put(game.id, game);
-		return game;
+		return game.id;
 	}
 
 	@Override
+	public void remove(UserId id) {
+		m_User2Game.remove(id);		
+	}
+	
+	@Override
 	public void remove(String id) {
+		for (Player player : m_storage.get(id).getPlayers()) {
+			m_User2Game.remove(player.userId);
+		}
 		m_storage.remove(id);		
 	}
 
 	public Collection<Game> getAllOpenGames() {
 		List<Game> openGames = new LinkedList<Game>();
 		
-		for(Game game : m_storage.values()){
+		for(Game game : m_User2Game.values()){
 			if (game.isOpenForRegistartion()){
 				openGames.add(game);
 			}
@@ -48,19 +73,15 @@ public class GamesRepository implements IRepository<Game> {
 
 	public Collection<Game> getAll() {
 		
-		return m_storage.values();
+		return m_User2Game.values();
 	}
 
-	public Collection<Game> getAactiveGames(String playerId) {
+	public Collection<Game> getActiveGames(UserId userId) {
 		ArrayList<Game> activeGames = new ArrayList<Game>();
-		for (Game game : m_storage.values()){
-			for (User user : game.getPlayers()){
-				if (user.id.equals(playerId)){
-					activeGames.add(game);
-					break;
-				}
-			}
-		}
+		Game game = m_User2Game.get(userId);
+		if (game != null)
+			activeGames.add(game);
+		//TODO: many games per userId not supported here
 		return activeGames;
 	}
 

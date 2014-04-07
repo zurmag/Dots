@@ -24,7 +24,7 @@ function Game(settings, state){
 	
 	//public
 	this.addPlayer = function addPlayer(newPlayer){		
-		var player = new Player(newPlayer.color, newPlayer.id);
+		var player = new Player(newPlayer);
 		m_players[newPlayer.id] = player;
 		globals.statusPanel.addPlayer(player);
 	};
@@ -103,16 +103,24 @@ function Game(settings, state){
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
-				var player = new Player(m_me.color, uid);
+				var player = new Player({
+					color: m_me.color, 
+					userId: {id:uid, type: 'FBUser'}
+				});
 								
-				m_players[player.id] = player;
+				
 				m_activePlayer = player;
 				m_me = player;
 				
 				if (state != null){
 					restoreState(state);		
 				}else{
-					globals.server.addPlayerToGame(m_me, m_gameId);
+					globals.server.addPlayerToGame(m_me, m_gameId, function(data){
+						player.id = data;
+						m_players[player.id] = player;
+						globals.statusPanel.addPlayer(player);
+					});
+					
 					announce('info', 'Waiting for other players...');
 				}
 				
@@ -251,30 +259,35 @@ function Game(settings, state){
 		console.debug(state);
 		
 		for (var i = 0 ; i < state.players.length; i++){
-			var player = new Player(state.players[i].color, state.players[i].id);
+			var player = new Player(state.players[i]);
+			
 			m_players[player.id] = player;
-			if (m_me.id == player.id){
+			if (JSON.stringify(m_me.userId) == JSON.stringify(player.userId)){
 				m_me = player;
 			}
 		}
+		
 		for (var i = 0; i < state.moves.length; i++){
 			
-			m_activePlayer = new Player(state.moves[i].player.color, state.moves[i].player.id);state.moves[i].player;
+			m_activePlayer = new Player(m_players[state.moves[i].playerId]);
 			restoreMove(state.moves[i]);			
 		}
-		m_activePlayer = new Player(state.activePlayer.color, state.activePlayer.id);
+		m_activePlayer = m_players[state.activePlayer.id];
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
-		self.onScoreChange(state.score);
-		
+		var score = {};
+		for (var i = 0;i<state.players.length;i++){
+			score[state.players[i].id] = state.players[i].score;
+		}
+		self.onScoreChange(score);		
 	}
 	
 	function restoreMove(move){
 		var coordinates = move.coordinates;
-		gMouseDown(coordinates.x, coordinates.y, move.player.color);
+		gMouseDown(coordinates.x, coordinates.y, m_players[move.playerId].color);
 		gMouseUp(coordinates.x, coordinates.y);
-		board[coordinates.x][coordinates.y].player = move.player;
+		board[coordinates.x][coordinates.y].player = m_players[move.playerId];
 		
 	}
 	function drawCycles(cycles){
@@ -338,7 +351,7 @@ function Game(settings, state){
 	
 	function errorHandler(message){
 		if (message.move != null){
-			if(message.move.player.id == m_me.id){
+			if(message.move.playerId == m_me.id){
 				undoMove(message.move.coordinates);
 				announce('error', message.errorMessage);
 			}
@@ -354,7 +367,7 @@ function Game(settings, state){
 			if (m_state == 'closed'){
 				if (newState.winners){
 					for (var i = 0; i < newState.winners.length ; i++){
-						if (newState.winners[i] == m_me.id){
+						if (JSON.stringify(newState.winners[i]) == JSON.stringify(m_me.id)){
 							GameOver(true);
 							return;
 						}
@@ -375,13 +388,13 @@ function Game(settings, state){
 		}
 		
 		if (newState.activePlayer){
-			if (newState.activePlayer.id == m_me.id){
+			if (JSON.stringify(newState.activePlayer.id) == JSON.stringify(m_me.id)){
 				announce('info', 'Your turn!');				
 			}
 			else{
 				announce('info', newState.activePlayer.color +'s turn');
 			}
-			m_activePlayer = new Player(newState.activePlayer.color, newState.activePlayer.id);
+			m_activePlayer = new Player(newState.activePlayer);
 		}
 		
 		if (newState.newPlayer){

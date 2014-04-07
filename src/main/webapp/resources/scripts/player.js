@@ -1,8 +1,9 @@
-function Player(color, id){
-	this.id = id;
-	this.color = color;
-	this.score = 0;
+function Player(other){
+	this.id = other.id;
+	this.userId = other.userId;
+	this.color = other.color;
+	this.score = other.score;
 	this.getAvatar = function getAvatar(){
-		return "https://graph.facebook.com/" + this.id + "/picture";
+		return "https://graph.facebook.com/" + this.userId.id + "/picture";
 	};
 }

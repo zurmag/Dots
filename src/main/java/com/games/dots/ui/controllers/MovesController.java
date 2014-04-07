@@ -2,26 +2,30 @@ package com.games.dots.ui.controllers;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.IRepository;
-import com.games.dots.ui.entities.*;
+import com.games.dots.repositories.PlayersRepository;
+import com.games.dots.ui.entities.Coordinates;
+import com.games.dots.ui.entities.GameMessage;
+import com.games.dots.ui.entities.Move;
+import com.games.dots.ui.entities.UserId;
 
 @Controller
 public class MovesController {
-	private final Logger logger = LoggerFactory.getLogger(GamesController.class);
+	//private final Logger logger = LoggerFactory.getLogger(GamesController.class);
 	
 	@Resource(name="gamesRepository")
-	IRepository<Game> games;
+	IRepository<Game, UserId> games;
 	
 	@Resource(name="playersRepository")
-	IRepository<User> players;
+	PlayersRepository players;
 	
 	private SimpMessagingTemplate m_template;
 	
@@ -33,16 +37,10 @@ public class MovesController {
 	public void PostMove( 
 			@Payload Coordinates coordinates, 
 			@DestinationVariable String gameId, 
-			@DestinationVariable String playerId){    
+			@DestinationVariable Integer playerId){    
 		GameMessage response = null;
-		User player = players.get(playerId);
-	    
-	    if (player == null){
-	    	player = new User();
-	    	player.id = playerId;
-	    	player.userType = UserType.FBUser;
-	    }
-		Move move = new Move(player, coordinates);
+	
+		Move move = new Move(playerId, coordinates);
 		Game game = games.get(gameId);
 		if (game == null){
 			response = new GameMessage();

@@ -6,7 +6,6 @@ import java.util.List;
 public class Game {
 	public String id;
 	public BoardSize size;
-	public List<User> players = new LinkedList<User>();
 	public State state = null;
 	public int maxPlayers;
 	
@@ -15,9 +14,8 @@ public class Game {
 		
 		this.id = other.id;
 		this.size = other.getBoardSize();
-		this.maxPlayers = other.getMaxNumberOfPlayers();
-		this.players.addAll(other.getPlayers());
-		
-		
+		this.maxPlayers = other.getMaxNumberOfPlayers();	
+		this.state = new State();
+		this.state.players = other.getPlayers();
 	}
 }

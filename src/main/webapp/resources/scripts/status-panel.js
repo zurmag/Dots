@@ -44,7 +44,7 @@ function GameStatusPanel(panelDivName){
 	};
 	
 	function changePlayerScore(id, score){
-		$("#player"+id+"-info").html("Score: " + score);
+		$("#player"+id +"-info div").html("Score: " + score);
 	}
 	
 	function createPlayerDiv(player){

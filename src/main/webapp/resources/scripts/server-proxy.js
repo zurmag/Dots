@@ -34,10 +34,8 @@ function ServerProxy(){
 		post('games' ,JSON.stringify(gameSettings), callBack);
 	};
 	
-	this.addPlayerToGame = function addPlayerToGame(player, gameId){
-		put('games/' + gameId, JSON.stringify(player), function(){
-			console.debug('successfully added player ' + player.id);
-		});
+	this.addPlayerToGame = function addPlayerToGame(player, gameId, callback){
+		post('games/' + gameId + '/players', JSON.stringify(player), callback);
 	};
 	
 	this.makeMove = function(gameId, player, coordinates){
@@ -73,7 +71,7 @@ function ServerProxy(){
 		var url = '/sub/games/' + gameId;
 		if (m_connected){
 			try{
-				m_stompClient.unsubscribe(url, callBack);
+				m_stompClient.unsubscribe(url, function(){});
 			}catch(e){
 				console.debug('failed to unsubscribe hope it will be better on reconnect');
 			}			

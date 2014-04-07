@@ -186,9 +186,10 @@ function CentralPanel(panelDivName){
 			td = document.createElement('td');td.innerHTML=data.size;tr.appendChild(td);
 			td = document.createElement('td');td.innerHTML=data.maxPlayers;tr.appendChild(td);
 			var connectedPlayers = document.createElement('div');
-			for(var i = 0;i < data.players.length;i++){
+			for(var i = 0;i < data.state.players.length;i++){
 				var img = document.createElement('img');
-				img.src = data.players[i].avatarUrl;
+				var player = new Player(data.state.players[i]);
+				img.src = player.getAvatar();
 				connectedPlayers.appendChild(img);
 			}
 			td = document.createElement('td');td.appendChild(connectedPlayers);tr.appendChild(td);

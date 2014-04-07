@@ -3,7 +3,6 @@ package com.games.dots.ui.controllers;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Controller;
@@ -15,22 +14,25 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
+import com.games.dots.ui.entities.IdType;
 import com.games.dots.ui.entities.State;
+import com.games.dots.ui.entities.UserId;
 
 @Controller
-public class PlayersController {
+public class UsersController {
 	
 	@Resource(name="gamesRepository")
 	GamesRepository m_games;
 	
-	@RequestMapping(value = "/players/{playerId}/activeGames", method = RequestMethod.GET)
+	@RequestMapping(value = "/fbusers/{userId}/activeGames", method = RequestMethod.GET)
 	public @ResponseBody Collection<com.games.dots.ui.entities.Game> getGames(
-			@PathVariable String playerId,
+			@PathVariable String userId,
 			@RequestParam(required=false) boolean fullState
 			){
 		List<com.games.dots.ui.entities.Game> games = new LinkedList<>();
-		
-		for(Game game: m_games.getAactiveGames(playerId)){
+		UserId id = new UserId();
+		id.id = userId;id.type = IdType.FBUser;
+		for(Game game: m_games.getActiveGames(id)){
 			com.games.dots.ui.entities.Game uiGame = new com.games.dots.ui.entities.Game(game);
 			games.add(uiGame);
 			if (fullState){
@@ -40,7 +42,6 @@ public class PlayersController {
 				uiGame.state.cycles.addAll(game.getAllCycles());
 				uiGame.state.players.addAll(game.getPlayers());
 				uiGame.state.activePlayer = game.getActivePlayer();
-				uiGame.state.score = game.getScore();
 				uiGame.size = game.getBoardSize();
 			}
 		}
