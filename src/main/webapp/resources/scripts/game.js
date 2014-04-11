@@ -105,7 +105,8 @@ function Game(settings, state){
 				//var accessToken = response.authResponse.accessToken;
 				var player = new Player({
 					color: m_me.color, 
-					userId: {id:uid, type: 'FBUser'}
+					userId: {id:uid, type: 'FBUser'},
+					score: 0
 				});
 								
 				

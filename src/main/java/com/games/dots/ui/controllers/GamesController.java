@@ -44,7 +44,7 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
-	public ResponseEntity<String> postGame(
+	public ResponseEntity<com.games.dots.ui.entities.Game> postGame(
 			@RequestBody GameSettings gameSettings, 
 			UriComponentsBuilder builder 
 			){
@@ -55,7 +55,8 @@ public class GamesController {
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());
-	    return new ResponseEntity<String>(game.id, headers, HttpStatus.OK);	    
+	    com.games.dots.ui.entities.Game uiGame = new com.games.dots.ui.entities.Game(game);
+	    return new ResponseEntity<com.games.dots.ui.entities.Game>(uiGame, headers, HttpStatus.OK);	    
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.POST)
