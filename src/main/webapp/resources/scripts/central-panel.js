@@ -107,14 +107,22 @@ function CentralPanel(panelDivName){
 			var gameSize = $("#radio-game-size :radio:checked").attr('id').replace('input-','');
 			var playersNumber = $("#radio-players-number :radio:checked").attr('id').replace('input-','');
 			var gameSettings = {size: gameSize, players: playersNumber, widthPx: globals.gameWidth};
-			
-			globals.server.newGame(gameSettings, function (data, textStatus, request){
-				gameSettings.location = request.getResponseHeader('location');
-				gameSettings.id = request.getResponseHeader('location').split('/').pop();
-				gameSettings.color = 'red';
-				globals.activeGame = new Game(gameSettings);
-				showActiveGame();
+			FB.getLoginStatus(function(response) {
+				var newGameData = {gameSettings: gameSettings, token: response.authResponse.accessToken};
+				globals.server.newGame(newGameData, function (data, textStatus, request){
+					
+					var settings = {size: data.size, id: data.id, state: data.state.state, widthPx: globals.gameWidth};
+					globals.activeGame = new Game(settings, data.state);
+					showActiveGame();
+					
+					/*gameSettings.location = request.getResponseHeader('location');
+					gameSettings.id = request.getResponseHeader('location').split('/').pop();
+					gameSettings.color = 'red';
+					globals.activeGame = new Game(gameSettings);
+					showActiveGame();*/
+				});
 			});
+			
 			
 		});
 		div.appendChild(submitButton);

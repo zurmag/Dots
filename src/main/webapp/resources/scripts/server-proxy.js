@@ -30,12 +30,13 @@ function ServerProxy(){
 	    });
 	}
 	
-	this.newGame = function newGame(gameSettings, callBack){
-		post('games' ,JSON.stringify(gameSettings), callBack);
+	this.newGame = function newGame(data, callBack){
+		
+		post('games' ,JSON.stringify(data.gameSettings), data.token ,callBack);
 	};
 	
 	this.addPlayerToGame = function addPlayerToGame(player, gameId, callback){
-		post('games/' + gameId + '/players', JSON.stringify(player), callback);
+		post('games/' + gameId + '/players', JSON.stringify(player),null, callback);
 	};
 	
 	this.makeMove = function(gameId, player, coordinates){
@@ -84,13 +85,16 @@ function ServerProxy(){
 		$.get(url, success);
 	};
 	
-	function post(url, data, success){
+	function post(url, data, authorization, success){
 		$.ajax({
 			  url:url,
 			  type:"POST",
 			  data:data,
 			  contentType:"application/json; charset=utf-8",
 			  success: success,
+			  headers: {
+				    "Authorization": authorization
+				  },
 			  error: function (data, textStatus, request){
 				  announce('error', textStatus);
 			  }

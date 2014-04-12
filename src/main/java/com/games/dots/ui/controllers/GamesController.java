@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,7 +27,12 @@ import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.IdType;
 import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.UserId;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.types.User;
 
 @Controller
 public class GamesController {
@@ -45,13 +51,24 @@ public class GamesController {
 	
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
 	public ResponseEntity<com.games.dots.ui.entities.Game> postGame(
-			@RequestBody GameSettings gameSettings, 
+			@RequestBody GameSettings gameSettings,
+			@RequestHeader String Authorization,
 			UriComponentsBuilder builder 
 			){
 	
 		Game game = new Game(gameSettings);
-		m_games.add(game);
-		logger.info("Game created with Id" + game.id);
+		
+		FacebookClient facebookClient = new DefaultFacebookClient(Authorization);
+		User fbuser = facebookClient.fetchObject("me", User.class);
+		UserId userId = new UserId();
+		userId.type = IdType.FBUser;
+		userId.id = fbuser.getId();
+		Player player = new Player();
+		player.gameId = game.id; player.color = "red";
+		player.userId = userId;
+		game.addPlayer(player);
+		m_games.add(userId, game); m_games.add(game);
+		logger.info("Game created with Id" + game.id + "userId:" + fbuser.getId());
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());

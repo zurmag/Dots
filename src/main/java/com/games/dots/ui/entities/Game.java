@@ -17,5 +17,7 @@ public class Game {
 		this.maxPlayers = other.getMaxNumberOfPlayers();	
 		this.state = new State();
 		this.state.players = other.getPlayers();
+		this.state.state = other.getState();
+		this.state.activePlayer = other.getActivePlayer();
 	}
 }
