@@ -33,9 +33,20 @@ public class ConfigurationManager {
 		return m_properies.getProperty("FbCanvasUrl");
 	}
 
-	public String getGameWidth() {
-		// TODO Auto-generated method stub
-		return m_properies.getProperty("gameWidth");
+	public int getGameWidth() {
+		return Integer.parseInt(m_properies.getProperty("gameWidth"));
+	}
+
+	public int getStatusPanelWidth() {
+		return Integer.parseInt(m_properies.getProperty("statusPanelWidth"));
+	}
+	
+	public String getStatusPanelHeight() {
+		return m_properies.getProperty("statusPanelHeight");
+	}
+	
+	public String getControlPanelHeight() {
+		return m_properies.getProperty("controlPanelHeight");
 	}
 	
 	

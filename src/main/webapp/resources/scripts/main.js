@@ -42,7 +42,6 @@ function joinGame(gameId){
 function showActiveGame(){
 	globals.statusPanel.showActiveGameStatus(globals.activeGame);
 	globals.centralPanel.showBoard();	
-	globals.menuPanel.onGameStart();
 }
 
 
@@ -69,6 +68,7 @@ function onPauseResume(){
 function disconnectGame(){
 	announce('info', 'Disconnecting from game...');
 	globals.activeGame.disconnect();
+	globals.controlPanel.showNoGameControl();
 }
 
 setTimeout(init, 1000);
@@ -76,7 +76,9 @@ setTimeout(init, 1000);
 function init(){
 	globals.centralPanel = new CentralPanel("central-panel");
 	globals.statusPanel = new GameStatusPanel('status-panel');
-	globals.menuPanel = new MenuPanel();
+	globals.controlPanel = new ControlPanel('control-panel');
+	globals.controlPanel.showNoGameControl();
+	/*globals.menuPanel = new MenuPanel();*/
 	globals.server = new ServerProxy();
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {

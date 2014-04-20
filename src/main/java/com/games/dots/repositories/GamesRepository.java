@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.games.dots.logic.Game;
+import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Player;
 import com.games.dots.ui.entities.UserId;
 
@@ -83,6 +84,20 @@ public class GamesRepository implements IRepository<Game, UserId> {
 			activeGames.add(game);
 		//TODO: many games per userId not supported here
 		return activeGames;
+	}
+
+	public Collection<Game> getSimilarGames(GameSettings gameSettings) {
+		
+		List<Game> games = new LinkedList<Game>();
+		for(Game game : m_storage.values()){
+			if (game.getState().equals("waiting") &&
+				game.getBoardSize().toString().equals(gameSettings.size)){
+				games.add(game);
+			}
+		}
+		
+		return games;
+		
 	}
 
 }

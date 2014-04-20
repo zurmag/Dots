@@ -26,9 +26,11 @@ import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.Move;
 import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.UserId;
 
 public class Game {
 	
+	private static final String[] colors = {"red", "green", "blue"};
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
 	private Map<Integer, Player> m_playersMap = new HashMap<>();
@@ -119,6 +121,13 @@ public class Game {
 		return stateChange;
 			
 		
+	}
+	
+	public GameMessage addPlayer(UserId userId) {
+		Player player = new Player();
+		player.gameId = this.id; player.color = colors[m_playersMap.size()];//next color
+		player.userId = userId;
+		return this.addPlayer(player);
 	}
 	
 	public GameMessage removePlayer(Integer playerId) {

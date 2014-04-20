@@ -56,18 +56,24 @@ public class GamesController {
 			UriComponentsBuilder builder 
 			){
 	
-		Game game = new Game(gameSettings);
 		
+		Game game;
 		FacebookClient facebookClient = new DefaultFacebookClient(Authorization);
 		User fbuser = facebookClient.fetchObject("me", User.class);
 		UserId userId = new UserId();
-		userId.type = IdType.FBUser;
-		userId.id = fbuser.getId();
-		Player player = new Player();
-		player.gameId = game.id; player.color = "red";
-		player.userId = userId;
-		game.addPlayer(player);
-		m_games.add(userId, game); m_games.add(game);
+		userId.type = IdType.FBUser;		userId.id = fbuser.getId();
+		Collection<Game> similarGames = m_games.getSimilarGames(gameSettings);
+		
+		if (similarGames.isEmpty()){
+			game = new Game(gameSettings);
+			m_games.add(game);
+		}else{
+			game = similarGames.iterator().next();
+		}
+		m_games.add(userId, game);
+		GameMessage gameMessage = game.addPlayer(userId);
+		m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
+
 		logger.info("Game created with Id" + game.id + "userId:" + fbuser.getId());
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();
