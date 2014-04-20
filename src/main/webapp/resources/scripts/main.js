@@ -1,11 +1,5 @@
  
 
-function onProfile(){
-	globals.centralPanel.showProfile();
-	globals.statusPanel.hideActiveGameStatus();
-	announce('info', 'Your game profile will be here');
-}
-
 function onNewGame(){
 	
 	globals.centralPanel.showNewGameDialog();
@@ -42,22 +36,8 @@ function joinGame(gameId){
 function showActiveGame(){
 	globals.statusPanel.showActiveGameStatus(globals.activeGame);
 	globals.centralPanel.showBoard();	
-	globals.menuPanel.onGameStart();
 }
 
-
-function onShowGames(){
-	announce('info', 'Games to play');
-	$.getJSON('games/',function(data){
-		globals.games = {};
-		for (var i = 0; i< data.length; i++){
-			globals.games[data[i].id] = data[i]; 
-		}
-		globals.centralPanel.showGames(data);
-		globals.statusPanel.hideActiveGameStatus();
-	});
-	
-}
 
 function onPauseResume(){
 	announce('info','Unimplemented yet');
@@ -76,14 +56,15 @@ setTimeout(init, 1000);
 function init(){
 	globals.centralPanel = new CentralPanel("central-panel");
 	globals.statusPanel = new GameStatusPanel('status-panel');
-	globals.menuPanel = new MenuPanel();
+	globals.controlPanel = new ControlPanel('control-panel');
+	globals.controlPanel.showNoGameControl();
 	globals.server = new ServerProxy();
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {
 			var uid = response.authResponse.userID;
 			//var accessToken = response.authResponse.accessToken;
 			$.getJSON('fbusers/'+uid+'/activeGames?fullState=true', function(data){
-				if (data.length > 0){			
+				if (data.length > 0){
 					var settings = {size: data[0].size, id: data[0].id, state: data[0].state.state, widthPx: globals.gameWidth};
 					globals.activeGame = new Game(settings, data[0].state);
 					showActiveGame();

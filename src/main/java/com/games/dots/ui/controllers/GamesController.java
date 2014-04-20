@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,7 +27,12 @@ import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.IdType;
 import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.UserId;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.types.User;
 
 @Controller
 public class GamesController {
@@ -44,18 +50,36 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
-	public ResponseEntity<String> postGame(
-			@RequestBody GameSettings gameSettings, 
+	public ResponseEntity<com.games.dots.ui.entities.Game> postGame(
+			@RequestBody GameSettings gameSettings,
+			@RequestHeader String Authorization,
 			UriComponentsBuilder builder 
 			){
 	
-		Game game = new Game(gameSettings);
-		m_games.add(game);
-		logger.info("Game created with Id" + game.id);
+		
+		Game game;
+		FacebookClient facebookClient = new DefaultFacebookClient(Authorization);
+		User fbuser = facebookClient.fetchObject("me", User.class);
+		UserId userId = new UserId();
+		userId.type = IdType.FBUser;		userId.id = fbuser.getId();
+		Collection<Game> similarGames = m_games.getSimilarGames(gameSettings);
+		
+		if (similarGames.isEmpty()){
+			game = new Game(gameSettings);
+			m_games.add(game);
+		}else{
+			game = similarGames.iterator().next();
+		}
+		m_games.add(userId, game);
+		GameMessage gameMessage = game.addPlayer(userId);
+		m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
+
+		logger.info("Game created with Id" + game.id + "userId:" + fbuser.getId());
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());
-	    return new ResponseEntity<String>(game.id, headers, HttpStatus.OK);	    
+	    com.games.dots.ui.entities.Game uiGame = new com.games.dots.ui.entities.Game(game);
+	    return new ResponseEntity<com.games.dots.ui.entities.Game>(uiGame, headers, HttpStatus.OK);	    
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.POST)
