@@ -59,6 +59,11 @@ function ControlPanel(panelDivName){
 		button.click = globals.centralPanel.showNewGameDialog;
 		button.innerHTML = 'Play';
 		div.appendChild(button);
+		
+		button = document.createElement('button');
+		button.click = globals.centralPanel.showDashboard;
+		button.innerHTML = 'Dashboard';
+		div.appendChild(button);
 		return div;
 	}
 	

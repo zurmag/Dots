@@ -1,11 +1,5 @@
  
 
-function onProfile(){
-	globals.centralPanel.showProfile();
-	globals.statusPanel.hideActiveGameStatus();
-	announce('info', 'Your game profile will be here');
-}
-
 function onNewGame(){
 	
 	globals.centralPanel.showNewGameDialog();
@@ -45,19 +39,6 @@ function showActiveGame(){
 }
 
 
-function onShowGames(){
-	announce('info', 'Games to play');
-	$.getJSON('games/',function(data){
-		globals.games = {};
-		for (var i = 0; i< data.length; i++){
-			globals.games[data[i].id] = data[i]; 
-		}
-		globals.centralPanel.showGames(data);
-		globals.statusPanel.hideActiveGameStatus();
-	});
-	
-}
-
 function onPauseResume(){
 	announce('info','Unimplemented yet');
 	$("#pause-resume span").text(function(i, text){
@@ -68,7 +49,6 @@ function onPauseResume(){
 function disconnectGame(){
 	announce('info', 'Disconnecting from game...');
 	globals.activeGame.disconnect();
-	globals.controlPanel.showNoGameControl();
 }
 
 setTimeout(init, 1000);
@@ -78,7 +58,6 @@ function init(){
 	globals.statusPanel = new GameStatusPanel('status-panel');
 	globals.controlPanel = new ControlPanel('control-panel');
 	globals.controlPanel.showNoGameControl();
-	/*globals.menuPanel = new MenuPanel();*/
 	globals.server = new ServerProxy();
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {

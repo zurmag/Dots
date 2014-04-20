@@ -315,7 +315,7 @@ function Game(settings, state){
 		else{
 			announce('info', 'You lose!');
 		}
-		//globals.menuPanel.onGameEnd(isWinner);
+		globals.controlPanel.showNoGameControl();
 		globals.activeGame = false;
 	}
 	
