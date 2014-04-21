@@ -8,31 +8,6 @@ function onNewGame(){
 	
 }
 
-
-function joinGame(gameId){
-	
-	gameObj = globals.games[gameId];
-	if (!globals.activeGame){
-		globals.activeGame = new Game({
-			size: gameObj.size, 
-			id: gameObj.id,
-			color: 'green'
-		});
-		globals.server.getPlayers(gameId, function(data){
-			for (var i=0;i<data.length;i++){
-				globals.activeGame.addPlayer(data[i]);
-			}
-			showActiveGame();
-		});
-		announce('info', 'Welcome');
-	}
-	else{
-		announce('info', 'you are in active game!');
-	}
-	
-	
-}
-
 function showActiveGame(){
 	globals.statusPanel.showActiveGameStatus(globals.activeGame);
 	globals.centralPanel.showBoard();	
@@ -67,7 +42,9 @@ function init(){
 				if (data.length > 0){
 					var settings = {size: data[0].size, id: data[0].id, state: data[0].state.state, widthPx: globals.gameWidth};
 					globals.activeGame = new Game(settings, data[0].state);
+					globals.controlPanel.showGameControl();
 					showActiveGame();
+					
 					announce('info', 'Welcome back');
 				}
 			});
