@@ -61,7 +61,10 @@ function ControlPanel(panelDivName){
 		div.appendChild(button);
 		
 		button = document.createElement('button');
-		button.click = globals.centralPanel.showDashboard;
+		button.click = function(){
+			globals.centralPanel.showDashboard();
+			globals.statusPanel.hideActiveGameStatus();
+		};
 		button.innerHTML = 'Dashboard';
 		div.appendChild(button);
 		return div;
