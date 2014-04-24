@@ -47,8 +47,8 @@ public class Game {
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
 	List<Coordinates[]> m_emptyCycles = new LinkedList<Coordinates[]>();
 	
-	public Observable onPlayerMove = new Observable();
-	public Observable onScoreChange = new Observable();
+	public MyObservable onPlayerMove = new MyObservable();
+	public MyObservable onError = new MyObservable();
 	
 	public Game (GameSettings settings){
 		m_maxNumberOfPlayers = settings.players;
@@ -110,7 +110,7 @@ public class Game {
 	public GameMessage addPlayer(RealPlayer player) {
 		player.setId(m_playersMap.size());
 		
-		GameMessage stateChange = new GameMessage();
+		GameMessage stateChange = new GameMessage();stateChange.gameId = id;
 		if (m_playersMap.size() < m_maxNumberOfPlayers){
 			m_playersMap.put(player.getId(), player);
 			stateChange.newState.newPlayer = player;
@@ -136,7 +136,7 @@ public class Game {
 	}
 	
 	public GameMessage removePlayer(Integer playerId) {
-		GameMessage stateChange = new GameMessage();
+		GameMessage stateChange = new GameMessage(); stateChange.gameId = id;
 		if (!m_playersMap.containsKey(playerId)) 
 			return null;
 		if (m_playersMap.size() == 1) {
@@ -163,11 +163,13 @@ public class Game {
 	
 	
 	public synchronized GameMessage makeMove(Move move){
-		GameMessage actionResponse = new GameMessage();
+		GameMessage actionResponse = new GameMessage(); actionResponse.gameId = id;
 		
 		actionResponse.move = move;
 		if (move.getPlayerId() != getActivePlayer().getId()){
 			actionResponse.errorMessage = "Not your turn please be patient";
+			onError.setChanged();
+			onError.notifyObservers(actionResponse);
 			return actionResponse;
 		}
 		
@@ -211,6 +213,7 @@ public class Game {
 		}
 		nextTurn();
 		actionResponse.newState.activePlayer = getActivePlayer();
+		onPlayerMove.setChanged();
 		onPlayerMove.notifyObservers(actionResponse);
 		return actionResponse;
 	}	
@@ -350,7 +353,7 @@ public class Game {
 	
 	
 	public GameMessage close() {
-		GameMessage stateChange = new GameMessage();
+		GameMessage stateChange = new GameMessage(); stateChange.gameId = id;
 		stateChange.newState.state = "closed";
 		List<Integer> winners = new LinkedList<>();
 		int maxScore = 0;
@@ -416,5 +419,10 @@ public class Game {
 		PlayerMove, ScoreChange
 	}
 	*/
-	
+	public class MyObservable extends Observable{
+		@Override
+		public void setChanged(){
+			super.setChanged();
+		}
+	}
 }

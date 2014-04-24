@@ -2,11 +2,9 @@ package com.games.dots.ui.controllers;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.games.dots.logic.Game;
@@ -26,13 +24,7 @@ public class MovesController {
 	
 	@Resource(name="playersRepository")
 	PlayersRepository players;
-	
-	private SimpMessagingTemplate m_template;
-	
-	@Autowired
-	public MovesController(SimpMessagingTemplate template){
-		this.m_template = template;
-	}
+		
 	@MessageMapping("/games/{gameId}/players/{playerId}/moves")
 	public void PostMove( 
 			@Payload Coordinates coordinates, 
@@ -53,10 +45,8 @@ public class MovesController {
 			response.errorMessage = "Game is not active please wait for other players";			
 		}
 		else{
-			response = game.makeMove(move);
-		}
-	    m_template.convertAndSend("/sub/games/" + gameId, response);
-	    
+			game.makeMove(move);
+		}	    
 	}
 	
 }

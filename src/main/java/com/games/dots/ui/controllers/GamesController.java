@@ -44,10 +44,13 @@ public class GamesController {
 	GamesRepository m_games;
 
 	private SimpMessagingTemplate m_template;
+
+	private UIProxy m_uiProxy;
 	
 	@Autowired
-	public GamesController(SimpMessagingTemplate template){
+	public GamesController(SimpMessagingTemplate template, UIProxy uiProxy){
 		this.m_template = template;
+		this.m_uiProxy = uiProxy;
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
@@ -68,6 +71,8 @@ public class GamesController {
 		if (similarGames.isEmpty()){
 			game = new Game(gameSettings);
 			m_games.add(game);
+			game.onPlayerMove.addObserver(m_uiProxy);
+			game.onError.addObserver(m_uiProxy);
 		}else{
 			game = similarGames.iterator().next();
 		}
