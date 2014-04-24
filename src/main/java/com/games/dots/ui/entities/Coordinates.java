@@ -8,7 +8,6 @@ public class Coordinates implements Serializable{
 	 */
 	
 	public Coordinates() {
-		// TODO Auto-generated constructor stub
 	}
 	public Coordinates(int x, int y){
 		this.x = x; this.y = y;

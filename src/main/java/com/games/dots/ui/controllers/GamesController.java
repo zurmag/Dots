@@ -27,8 +27,9 @@ import com.games.dots.logic.Game;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.IPlayer;
 import com.games.dots.ui.entities.IdType;
-import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.RealPlayer;
 import com.games.dots.ui.entities.UserId;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
@@ -84,15 +85,15 @@ public class GamesController {
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.POST)
 	public ResponseEntity<Integer> addPlayerToGame(
-			@PathVariable String gameId	, @RequestBody Player player
+			@PathVariable String gameId	, @RequestBody RealPlayer player
 			){
 		logger.debug("addPlayerToGame");		
-		player.gameId = gameId;
+		player.setGameId(gameId);
 		Game game = m_games.get(gameId);
-		m_games.add(player.userId, game);
+		m_games.add(player.getUserId(), game);
 		GameMessage stateChange = game.addPlayer(player); 
 		m_template.convertAndSend("/sub/games/" + gameId, stateChange);
-		return new ResponseEntity<Integer>(player.id, HttpStatus.OK);
+		return new ResponseEntity<Integer>(player.getId(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players/{playerId}", method = RequestMethod.DELETE)
@@ -103,10 +104,10 @@ public class GamesController {
 		
 		Game game = m_games.get(gameId);
 		if (game != null){
-			Player player = game.getPlayer(playerId);
+			IPlayer player = game.getPlayer(playerId);
 			GameMessage stateChange = game.removePlayer(playerId);
-			if (player != null){
-				m_games.remove(player.userId);
+			if (player != null && player instanceof RealPlayer ){
+				m_games.remove(((RealPlayer)player).getUserId());
 			}
 			
 			if (stateChange != null) {
@@ -134,7 +135,7 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.GET)
-	public @ResponseBody Collection<com.games.dots.ui.entities.Player> getGamePlayers(
+	public @ResponseBody Collection<com.games.dots.ui.entities.IPlayer> getGamePlayers(
 			@PathVariable String gameId){
 				
 		return m_games.get(gameId).getPlayers();

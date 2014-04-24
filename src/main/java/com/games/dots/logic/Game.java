@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Set;
 
 import org.jgrapht.GraphPath;
@@ -24,8 +25,9 @@ import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.IPlayer;
 import com.games.dots.ui.entities.Move;
-import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.RealPlayer;
 import com.games.dots.ui.entities.UserId;
 
 public class Game {
@@ -33,7 +35,7 @@ public class Game {
 	private static final String[] colors = {"red", "green", "blue"};
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
-	private Map<Integer, Player> m_playersMap = new HashMap<>();
+	private Map<Integer, IPlayer> m_playersMap = new HashMap<>();
 	private int m_maxNumberOfPlayers;
 	private int m_currentPlayerIndex = 0;
 	private BoardSize m_size;
@@ -44,6 +46,10 @@ public class Game {
 	WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
 	List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
 	List<Coordinates[]> m_emptyCycles = new LinkedList<Coordinates[]>();
+	
+	public Observable onPlayerMove = new Observable();
+	public Observable onScoreChange = new Observable();
+	
 	public Game (GameSettings settings){
 		m_maxNumberOfPlayers = settings.players;
 		try {
@@ -93,7 +99,7 @@ public class Game {
 		return m_maxNumberOfPlayers;
 	}
 	
-	public Collection<Player> getPlayers(){
+	public Collection<IPlayer> getPlayers(){
 		return m_playersMap.values();
 	}
 	
@@ -101,32 +107,31 @@ public class Game {
 		return m_size;
 	}
 
-	public GameMessage addPlayer(Player player) {
-		player.id = m_playersMap.size();
+	public GameMessage addPlayer(RealPlayer player) {
+		player.setId(m_playersMap.size());
 		
 		GameMessage stateChange = new GameMessage();
 		if (m_playersMap.size() < m_maxNumberOfPlayers){
-			m_playersMap.put(player.id, player);
+			m_playersMap.put(player.getId(), player);
 			stateChange.newState.newPlayer = player;
+			
+			if (m_playersMap.size() == m_maxNumberOfPlayers){
+				stateChange.newState.state = "active";
+				m_state = "active";
+			}
 		}
 		else{
-			//TODO: Think about error
-		}
-		
-		if (m_playersMap.size() == m_maxNumberOfPlayers){
-			stateChange.newState.state = "active";
-			m_state = "active";
+			stateChange.errorMessage = "No more players";
 		}
 		
 		return stateChange;
-			
 		
 	}
 	
 	public GameMessage addPlayer(UserId userId) {
-		Player player = new Player();
-		player.gameId = this.id; player.color = colors[m_playersMap.size()];//next color
-		player.userId = userId;
+		RealPlayer player = new RealPlayer();
+		player.setGameId(this.id); player.setColor(colors[m_playersMap.size()]);//next color
+		player.setUserId(userId);
 		return this.addPlayer(player);
 	}
 	
@@ -138,14 +143,14 @@ public class Game {
 			return close();
 		}
 		
-		Player player = m_playersMap.get(playerId);
-		Player activePlayer = getActivePlayer();
+		IPlayer player = m_playersMap.get(playerId);
+		IPlayer activePlayer = getActivePlayer();
 		
 		if (player.equals(activePlayer)) {
 			nextTurn();activePlayer = getActivePlayer();
 		}
 		m_playersMap.remove(playerId);			
-		m_currentPlayerIndex = activePlayer.id;
+		m_currentPlayerIndex = activePlayer.getId();
 		if (m_playersMap.size() == 1){
 			return close();
 		}
@@ -161,7 +166,7 @@ public class Game {
 		GameMessage actionResponse = new GameMessage();
 		
 		actionResponse.move = move;
-		if (move.getPlayerId() != getActivePlayer().id){
+		if (move.getPlayerId() != getActivePlayer().getId()){
 			actionResponse.errorMessage = "Not your turn please be patient";
 			return actionResponse;
 		}
@@ -189,9 +194,9 @@ public class Game {
 					actionResponse.newDeadDots.addAll(deadPoints);
 					actionResponse.newCycles.add(cycle);
 					m_cycles.add(cycle);
-					Player player = m_playersMap.get(move.getPlayerId());
-					player.score += deadPoints.size();					
-					actionResponse.scoreChange.put(move.getPlayerId(), player.score);
+					IPlayer player = m_playersMap.get(move.getPlayerId());
+					player.setScore(player.getScore() + deadPoints.size());					
+					actionResponse.scoreChange.put(move.getPlayerId(), player.getScore());
 				}
 				else{
 					m_emptyCycles.add(cycle);
@@ -206,6 +211,7 @@ public class Game {
 		}
 		nextTurn();
 		actionResponse.newState.activePlayer = getActivePlayer();
+		onPlayerMove.notifyObservers(actionResponse);
 		return actionResponse;
 	}	
 	
@@ -323,11 +329,11 @@ public class Game {
 			}
 			
 			if (left.x < right.x){
-				for (Player otherPlayer : m_playersMap.values()){
-					if (otherPlayer.id == me) continue;
+				for (IPlayer otherPlayer : m_playersMap.values()){
+					if (otherPlayer.getId() == me) continue;
 					for (int x = left.x+1; x <right.x;x++){
 						Coordinates c = new Coordinates(x, left.y);
-						Move move = new Move(otherPlayer.id, c);
+						Move move = new Move(otherPlayer.getId(), c);
 						if (m_moves_board.containsVertex(move))
 							deadPoints.add(c);								
 					}
@@ -348,13 +354,13 @@ public class Game {
 		stateChange.newState.state = "closed";
 		List<Integer> winners = new LinkedList<>();
 		int maxScore = 0;
-		for (Player player : m_playersMap.values()){
-			if (player.score > maxScore){
+		for (IPlayer player : m_playersMap.values()){
+			if (player.getScore() > maxScore){
 				winners.clear();
-				winners.add(player.id);
+				winners.add(player.getId());
 			}
-			else if (player.score == maxScore){
-				winners.add(player.id);
+			else if (player.getScore() == maxScore){
+				winners.add(player.getId());
 			}
 		}
 		stateChange.newState.winners = winners;
@@ -367,7 +373,6 @@ public class Game {
 	}
 	
 	public boolean isActive(){
-		//TODO add check for active players 
 		return !isOpenForRegistartion();
 	}
 	
@@ -379,7 +384,7 @@ public class Game {
 		return m_cycles;
 	}
 
-	public Player getActivePlayer() {
+	public IPlayer getActivePlayer() {
 		return m_playersMap.get(m_currentPlayerIndex);
 	}
 	
@@ -391,10 +396,25 @@ public class Game {
 		return m_state;
 	}
 
-	public Player getPlayer(Integer playerId) {
+	public IPlayer getPlayer(Integer playerId) {
 		return m_playersMap.get(playerId);
 		
 	}
 	
+	
+	//events implementation
+	/*private Map<Events, List<Runnable>> m_callbacks = new HashMap<>();
+	 
+	public void on(Events event, Runnable callback){
+		if (!m_callbacks.containsKey(event)){
+			m_callbacks.put(event, new LinkedList<Runnable>());
+		}
+		m_callbacks.get(event).add(callback);
+	}
+	
+	public enum Events{
+		PlayerMove, ScoreChange
+	}
+	*/
 	
 }
