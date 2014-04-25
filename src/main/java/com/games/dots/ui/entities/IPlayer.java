@@ -6,4 +6,6 @@ public interface IPlayer {
 	String getColor();
 	int getScore();
 	void setScore(int score);
+	void setId(int size);
+	void setColor(String color);
 }

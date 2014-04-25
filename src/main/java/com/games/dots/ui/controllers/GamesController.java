@@ -3,6 +3,7 @@ package com.games.dots.ui.controllers;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import javax.annotation.Resource;
 
@@ -24,6 +25,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.games.dots.logic.Game;
+import com.games.dots.logic.RandomBot;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.GameSettings;
@@ -73,13 +75,19 @@ public class GamesController {
 			m_games.add(game);
 			game.onPlayerMove.addObserver(m_uiProxy);
 			game.onError.addObserver(m_uiProxy);
+			
 		}else{
 			game = similarGames.iterator().next();
 		}
 		m_games.add(userId, game);
 		GameMessage gameMessage = game.addPlayer(userId);
 		m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
-
+		
+		if (true){
+			RandomBot bot = new RandomBot(game);
+			gameMessage = game.addPlayer(bot);
+			m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
+		}
 		logger.info("Game created with Id" + game.id + "userId:" + fbuser.getId());
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();

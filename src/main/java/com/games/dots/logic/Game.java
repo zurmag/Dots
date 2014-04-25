@@ -107,9 +107,9 @@ public class Game {
 		return m_size;
 	}
 
-	public GameMessage addPlayer(RealPlayer player) {
+	public GameMessage addPlayer(IPlayer player) {
 		player.setId(m_playersMap.size());
-		
+		player.setColor(colors[m_playersMap.size()]);//next color
 		GameMessage stateChange = new GameMessage();stateChange.gameId = id;
 		if (m_playersMap.size() < m_maxNumberOfPlayers){
 			m_playersMap.put(player.getId(), player);
@@ -130,7 +130,7 @@ public class Game {
 	
 	public GameMessage addPlayer(UserId userId) {
 		RealPlayer player = new RealPlayer();
-		player.setGameId(this.id); player.setColor(colors[m_playersMap.size()]);//next color
+		player.setGameId(this.id); 
 		player.setUserId(userId);
 		return this.addPlayer(player);
 	}

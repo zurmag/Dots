@@ -1,5 +1,7 @@
 package com.games.dots.logic;
 
+import java.util.Random;
+
 import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.Move;
@@ -9,20 +11,42 @@ public class RandomBot extends AsyncBot{
 
 	private final int maxY=10;
 	private int lastX = 5, lastY = 0;
+	private int[][] m_board;
 	public RandomBot(Game game) {
 		super(game);
+		int boardSize = game.getBoardSize().value;
+		m_board = new int[boardSize][boardSize];
+		for (int i = 0; i < boardSize; i++){
+			for (int j = 0; j< boardSize; j++){
+				m_board[i][j] = -1;//free
+			}
+		}
 	}
 
 	@Override
 	public void onPlayerMove(GameMessage message) {
-		if (lastY == maxY){
-			lastX++;lastY = 0;
-		}else{
-			lastY++;
+		if (message.errorMessage != null)
+			return;
+		else if (message.newState.activePlayer.getId() == m_id){
+			Random r = new Random();
+			int x, y;
+			do{
+				x = r.nextInt(m_board.length);
+				y = r.nextInt(m_board.length);
+			}while(m_board[x][y] != -1);
+			Coordinates coordinates = new Coordinates(x, y);
+			Move move = new Move(m_id, coordinates);
+			try {
+				Thread.sleep(1000l);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			m_game.makeMove(move);
 		}
-		Coordinates coordinates = new Coordinates(lastX, lastY);
-		Move move = new Move(m_id, coordinates);
-		m_game.makeMove(move);
+		for (Coordinates c : message.newDeadDots){
+			m_board[c.x][c.y] = message.move.getPlayerId();
+		}
+		m_board[message.move.getCoordinates().x][message.move.getCoordinates().y] = message.move.getPlayerId();
 	}
 
 	//Player

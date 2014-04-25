@@ -17,11 +17,6 @@ function Game(settings, state){
 	var m_me = null;
 	var m_pressedDot = null;
 	
-	//events
-	self.onScoreChange = function(scores){
-		globals.statusPanel.scoreChange(scores);
-	};
-	
 	//public
 	self.addPlayer = function addPlayer(newPlayer){		
 		var player = new Player(newPlayer);
@@ -115,14 +110,6 @@ function Game(settings, state){
 				
 				if (state != null){
 					restoreState(state);		
-				}else{
-					globals.server.addPlayerToGame(m_me, m_gameId, function(data){
-						player.id = data;
-						m_players[player.id] = player;
-						globals.statusPanel.addPlayer(player);
-					});
-					
-					announce('info', 'Waiting for other players...');
 				}
 				
 		    } 
@@ -281,7 +268,6 @@ function Game(settings, state){
 		for (var i = 0;i<state.players.length;i++){
 			score[state.players[i].id] = state.players[i].score;
 		}
-		self.onScoreChange(score);		
 	}
 	
 	function restoreMove(move){
@@ -344,9 +330,6 @@ function Game(settings, state){
 			drawCycles(data.newCycles);
 		}		
 		
-		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
-			self.onScoreChange(data.scoreChange);
-		}
 		console.debug(message);
 	}
 	

@@ -49,6 +49,8 @@ function CentralPanel(panelDivName){
 				
 				var settings = {size: data.size, id: data.id, state: data.state.state, widthPx: globals.gameWidth};
 				globals.activeGame = new Game(settings, data.state);
+				globals.activeGame.addPlayer(data.state.players[0]);
+				globals.activeGame.addPlayer(data.state.players[1]);
 				showActiveGame();
 				globals.controlPanel.showGameControl();
 			});
