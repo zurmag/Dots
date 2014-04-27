@@ -17,6 +17,11 @@ function Game(settings, state){
 	var m_me = null;
 	var m_pressedDot = null;
 	
+	//events
+	self.onScoreChange = function(scores){
+		globals.statusPanel.scoreChange(scores);
+	};
+	
 	//public
 	self.addPlayer = function addPlayer(newPlayer){		
 		var player = new Player(newPlayer);
@@ -264,6 +269,8 @@ function Game(settings, state){
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
+		self.onScoreChange(state.score);
+		
 		var score = {};
 		for (var i = 0;i<state.players.length;i++){
 			score[state.players[i].id] = state.players[i].score;
@@ -328,8 +335,11 @@ function Game(settings, state){
 				
 		if (data.newCycles.length > 0){
 			drawCycles(data.newCycles);
-		}		
+		}
 		
+		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
+			self.onScoreChange(data.scoreChange);
+		}
 		console.debug(message);
 	}
 	
