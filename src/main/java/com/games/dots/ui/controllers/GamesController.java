@@ -3,6 +3,7 @@ package com.games.dots.ui.controllers;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import javax.annotation.Resource;
 
@@ -24,11 +25,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.games.dots.logic.Game;
+import com.games.dots.logic.RandomBot;
 import com.games.dots.repositories.GamesRepository;
 import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.GameSettings;
+import com.games.dots.ui.entities.IPlayer;
 import com.games.dots.ui.entities.IdType;
-import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.RealPlayer;
 import com.games.dots.ui.entities.UserId;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
@@ -43,10 +46,13 @@ public class GamesController {
 	GamesRepository m_games;
 
 	private SimpMessagingTemplate m_template;
+
+	private UIProxy m_uiProxy;
 	
 	@Autowired
-	public GamesController(SimpMessagingTemplate template){
+	public GamesController(SimpMessagingTemplate template, UIProxy uiProxy){
 		this.m_template = template;
+		this.m_uiProxy = uiProxy;
 	}
 	
 	@RequestMapping(value = "/games", method = RequestMethod.POST)
@@ -67,13 +73,21 @@ public class GamesController {
 		if (similarGames.isEmpty()){
 			game = new Game(gameSettings);
 			m_games.add(game);
+			game.onPlayerMove.addObserver(m_uiProxy);
+			game.onError.addObserver(m_uiProxy);
+			
 		}else{
 			game = similarGames.iterator().next();
 		}
 		m_games.add(userId, game);
 		GameMessage gameMessage = game.addPlayer(userId);
 		m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
-
+		
+		if (true){
+			RandomBot bot = new RandomBot(game);
+			gameMessage = game.addPlayer(bot);
+			m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
+		}
 		logger.info("Game created with Id" + game.id + "userId:" + fbuser.getId());
 		UriComponents uriComponents = builder.path("/games/{id}").buildAndExpand(game.id);		
 	    HttpHeaders headers = new HttpHeaders();
@@ -84,15 +98,15 @@ public class GamesController {
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.POST)
 	public ResponseEntity<Integer> addPlayerToGame(
-			@PathVariable String gameId	, @RequestBody Player player
+			@PathVariable String gameId	, @RequestBody RealPlayer player
 			){
 		logger.debug("addPlayerToGame");		
-		player.gameId = gameId;
+		player.setGameId(gameId);
 		Game game = m_games.get(gameId);
-		m_games.add(player.userId, game);
+		m_games.add(player.getUserId(), game);
 		GameMessage stateChange = game.addPlayer(player); 
 		m_template.convertAndSend("/sub/games/" + gameId, stateChange);
-		return new ResponseEntity<Integer>(player.id, HttpStatus.OK);
+		return new ResponseEntity<Integer>(player.getId(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players/{playerId}", method = RequestMethod.DELETE)
@@ -103,10 +117,10 @@ public class GamesController {
 		
 		Game game = m_games.get(gameId);
 		if (game != null){
-			Player player = game.getPlayer(playerId);
+			IPlayer player = game.getPlayer(playerId);
 			GameMessage stateChange = game.removePlayer(playerId);
-			if (player != null){
-				m_games.remove(player.userId);
+			if (player != null && player instanceof RealPlayer ){
+				m_games.remove(((RealPlayer)player).getUserId());
 			}
 			
 			if (stateChange != null) {
@@ -134,7 +148,7 @@ public class GamesController {
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.GET)
-	public @ResponseBody Collection<com.games.dots.ui.entities.Player> getGamePlayers(
+	public @ResponseBody Collection<com.games.dots.ui.entities.IPlayer> getGamePlayers(
 			@PathVariable String gameId){
 				
 		return m_games.get(gameId).getPlayers();

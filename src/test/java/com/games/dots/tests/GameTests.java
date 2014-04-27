@@ -14,7 +14,7 @@ import com.games.dots.ui.entities.Coordinates;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.IdType;
 import com.games.dots.ui.entities.Move;
-import com.games.dots.ui.entities.Player;
+import com.games.dots.ui.entities.RealPlayer;
 import com.games.dots.ui.entities.UserId;
 
 
@@ -43,8 +43,8 @@ public class GameTests {
 		settings.players = 2;
 		settings.size = "Small";
 		Game smallGame = new Game(settings);
-		Player player1 = createPlayer();player1.color = "red";
-		Player player2 = createPlayer();player2.color = "green";
+		RealPlayer player1 = createPlayer();player1.setColor("red");
+		RealPlayer player2 = createPlayer();player2.setColor("green");
 		smallGame.addPlayer(player1);
 		smallGame.addPlayer(player2);
 		
@@ -58,14 +58,14 @@ public class GameTests {
 		coordinates[6] = new Coordinates(5, 7);
 		coordinates[7] = new Coordinates(2, 1);
 		Move[] moves = new Move[8];
-		moves[0] = new Move(player1.id, coordinates[0]);
-		moves[1] = new Move(player2.id, coordinates[1]);
-		moves[2] = new Move(player1.id, coordinates[2]);
-		moves[3] = new Move(player2.id, coordinates[3]);
-		moves[4] = new Move(player1.id, coordinates[4]);
-		moves[5] = new Move(player2.id, coordinates[5]);
-		moves[6] = new Move(player1.id, coordinates[6]);
-		moves[7] = new Move(player2.id, coordinates[7]);
+		moves[0] = new Move(player1.getId(), coordinates[0]);
+		moves[1] = new Move(player2.getId(), coordinates[1]);
+		moves[2] = new Move(player1.getId(), coordinates[2]);
+		moves[3] = new Move(player2.getId(), coordinates[3]);
+		moves[4] = new Move(player1.getId(), coordinates[4]);
+		moves[5] = new Move(player2.getId(), coordinates[5]);
+		moves[6] = new Move(player1.getId(), coordinates[6]);
+		moves[7] = new Move(player2.getId(), coordinates[7]);
 		
 		
 		//Act
@@ -89,28 +89,28 @@ public class GameTests {
 		settings.players = 2;
 		settings.size = "Small";
 		Game smallGame = new Game(settings);
-		Player player1 = new Player();player1.id = 0;		
-		Player player2 = new Player();player2.id = 1;
+		RealPlayer player1 = new RealPlayer();player1.setId(0);		
+		RealPlayer player2 = new RealPlayer();player2.setId(1);
 		smallGame.addPlayer(player1);
 		smallGame.addPlayer(player2);
 		
 		List<Move> moves = new ArrayList<>();
-		moves.add(new Move(player1.id, new Coordinates(1,1)));
-		moves.add(new Move(player2.id, new Coordinates(1,0)));
-		moves.add(new Move(player1.id, new Coordinates(1,2)));
-		moves.add(new Move(player2.id, new Coordinates(0,1)));
-		moves.add(new Move(player1.id, new Coordinates(8,2)));
-		moves.add(new Move(player2.id, new Coordinates(0,2)));
-		moves.add(new Move(player1.id, new Coordinates(8,3)));
-		moves.add(new Move(player2.id, new Coordinates(0,3)));
-		moves.add(new Move(player1.id, new Coordinates(8,4)));
-		moves.add(new Move(player2.id, new Coordinates(2,1)));
-		moves.add(new Move(player1.id, new Coordinates(8,5)));
-		moves.add(new Move(player2.id, new Coordinates(2,2)));
-		moves.add(new Move(player1.id, new Coordinates(8,6)));
-		moves.add(new Move(player2.id, new Coordinates(2,3)));
-		moves.add(new Move(player1.id, new Coordinates(8,7)));
-		moves.add(new Move(player2.id, new Coordinates(1,3)));
+		moves.add(new Move(player1.getId(), new Coordinates(1,1)));
+		moves.add(new Move(player2.getId(), new Coordinates(1,0)));
+		moves.add(new Move(player1.getId(), new Coordinates(1,2)));
+		moves.add(new Move(player2.getId(), new Coordinates(0,1)));
+		moves.add(new Move(player1.getId(), new Coordinates(8,2)));
+		moves.add(new Move(player2.getId(), new Coordinates(0,2)));
+		moves.add(new Move(player1.getId(), new Coordinates(8,3)));
+		moves.add(new Move(player2.getId(), new Coordinates(0,3)));
+		moves.add(new Move(player1.getId(), new Coordinates(8,4)));
+		moves.add(new Move(player2.getId(), new Coordinates(2,1)));
+		moves.add(new Move(player1.getId(), new Coordinates(8,5)));
+		moves.add(new Move(player2.getId(), new Coordinates(2,2)));
+		moves.add(new Move(player1.getId(), new Coordinates(8,6)));
+		moves.add(new Move(player2.getId(), new Coordinates(2,3)));
+		moves.add(new Move(player1.getId(), new Coordinates(8,7)));
+		moves.add(new Move(player2.getId(), new Coordinates(1,3)));
 		
 		//Act		
 		for (int i = 0; i< moves.size()-1;i++) {
@@ -125,11 +125,12 @@ public class GameTests {
 		
 	}
 	
-	private Player createPlayer() {
-		Player player = new Player();
-		player.userId = new UserId();		
-		player.userId.id = UUID.randomUUID().toString();
-		player.userId.type = IdType.FBUser;
+	private RealPlayer createPlayer() {
+		RealPlayer player = new RealPlayer();
+		UserId userId = new UserId();		
+		userId.id = UUID.randomUUID().toString();
+		userId.type = IdType.FBUser;
+		player.setUserId(userId);
 		
 		return player;
 	}

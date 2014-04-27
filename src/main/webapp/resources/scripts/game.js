@@ -115,14 +115,6 @@ function Game(settings, state){
 				
 				if (state != null){
 					restoreState(state);		
-				}else{
-					globals.server.addPlayerToGame(m_me, m_gameId, function(data){
-						player.id = data;
-						m_players[player.id] = player;
-						globals.statusPanel.addPlayer(player);
-					});
-					
-					announce('info', 'Waiting for other players...');
 				}
 				
 		    } 
@@ -277,11 +269,12 @@ function Game(settings, state){
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
+		self.onScoreChange(state.score);
+		
 		var score = {};
 		for (var i = 0;i<state.players.length;i++){
 			score[state.players[i].id] = state.players[i].score;
 		}
-		self.onScoreChange(score);		
 	}
 	
 	function restoreMove(move){
@@ -342,7 +335,7 @@ function Game(settings, state){
 				
 		if (data.newCycles.length > 0){
 			drawCycles(data.newCycles);
-		}		
+		}
 		
 		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
 			self.onScoreChange(data.scoreChange);

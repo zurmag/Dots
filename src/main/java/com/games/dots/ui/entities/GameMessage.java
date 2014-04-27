@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
  
 public class GameMessage {
-	
+	public String gameId;
 	public GamesStateChange newState = new GamesStateChange();
 	public Map<Integer, Integer> scoreChange = new HashMap<>();
 	public Move move;
