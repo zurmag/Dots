@@ -23,7 +23,7 @@
    	window.globals = {activeGame: false, gameWidth: ${gameWidth}};
    	$(document).ready(function () {
    		
-   		$( "input[type=submit], a, button" )
+   		$( "button" )
 			.button()
      		.click(function( event ) {
        			event.preventDefault();
@@ -45,32 +45,20 @@
 	<div id="fb-root"></div>	
 	<div class="fb-like" data-href="https://apps.facebook.com/simple-games-dots/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
 	<div id="wrapper">
-		<img src="resources/images/Beta_Testing.jpeg" style="float: left; height: 30"/>	
-		<div id="menu-panel" class="Panel" style='width: 132px'>
-			<div id="first-menu">
-				<button onclick='onProfile()'>Profile</button>
-				<button onclick='onNewGame()'>New Game</button>
-				<button onClick='onShowGames()'>Show games</button>
+		<div style='width: ${gameWidth + statusPanelWidth}px; height: ${gameHeight + 20}px'>
+			<div id="central-panel" class=Panel style='width: ${gameWidth}px; height: ${gameHeight}px;'>
+				<img src="resources/images/Beta_Testing.jpeg" style="position: absolute; top: 40; left: 0;opacity: 0.2"/>
+				<div id="announcement-bar" class="info-announcement" style="height: 20">Welcome</div>
 			</div>
-			<div id='active-game-menu' style="display:none">
-				<button id='pause-resume' onClick='onPauseResume()'>Pause</button>
-				<button onClick='disconnectGame()'>Quit</button>
-			</div>
-			
-			<div id='after-game-menu' style="display:none">
-				<button id='return-button' onClick='globals.menuPanel.returnToMainMenu()'>Main menu</button>
-			</div>	
-				
-		</div >
-		<div id="central-panel" class=Panel style='width: ${gameWidth}px'>
-			<div id="announcement-bar" class="info-announcement">Welcome</div>
+			<div id="status-panel" class="Panel" style='width: ${statusPanelWidth}px; height: ${statusPanelHeight}px;'></div>
 		</div>
-		<div id="status-panel" class="Panel" style='width: 355px'></div>
+		<div id="control-panel" style='width: ${controlPanelWidth}px; height: ${controlPanelHeight}px; '></div>
 	</div>
 	<script type="text/javascript" src='resources/scripts/player.js'></script>
 	<script type="text/javascript" src='resources/scripts/board-cell.js'></script>
 	<script type="text/javascript" src='resources/scripts/central-panel.js'></script>
 	<script type="text/javascript" src='resources/scripts/status-panel.js'></script>
+	<script type="text/javascript" src='resources/scripts/control-panel.js'></script>
 	<script type="text/javascript" src='resources/scripts/menu-panel.js'></script>
 	<script type="text/javascript" src='resources/scripts/game.js'></script>
 	<script type="text/javascript" src='resources/scripts/main.js'></script>

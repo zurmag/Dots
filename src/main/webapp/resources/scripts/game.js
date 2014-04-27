@@ -23,23 +23,23 @@ function Game(settings, state){
 	};
 	
 	//public
-	this.addPlayer = function addPlayer(newPlayer){		
+	self.addPlayer = function addPlayer(newPlayer){		
 		var player = new Player(newPlayer);
 		m_players[newPlayer.id] = player;
 		globals.statusPanel.addPlayer(player);
 	};
 	
-	this.getActivePlayer = function getActivePlayer(){
+	self.getActivePlayer = function getActivePlayer(){
 		return m_activePlayer;
 	};
 	
-	this.getPlayers = function(){
+	self.getPlayers = function(){
 		var keys = Object.keys(m_players);
 		var values = keys.map(function(k) { return m_players[k]; });
 		return values;
 	};
 	
-	this.disconnect = function disconnect(){
+	self.disconnect = function disconnect(){
 		globals.server.disconnectGame(m_me.id, m_gameId, function(){
 			announce('info', 'Game completed.');
 		});
@@ -105,7 +105,8 @@ function Game(settings, state){
 				//var accessToken = response.authResponse.accessToken;
 				var player = new Player({
 					color: m_me.color, 
-					userId: {id:uid, type: 'FBUser'}
+					userId: {id:uid, type: 'FBUser'},
+					score: 0
 				});
 								
 				
@@ -114,14 +115,6 @@ function Game(settings, state){
 				
 				if (state != null){
 					restoreState(state);		
-				}else{
-					globals.server.addPlayerToGame(m_me, m_gameId, function(data){
-						player.id = data;
-						m_players[player.id] = player;
-						globals.statusPanel.addPlayer(player);
-					});
-					
-					announce('info', 'Waiting for other players...');
 				}
 				
 		    } 
@@ -276,11 +269,12 @@ function Game(settings, state){
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
+		self.onScoreChange(state.score);
+		
 		var score = {};
 		for (var i = 0;i<state.players.length;i++){
 			score[state.players[i].id] = state.players[i].score;
 		}
-		self.onScoreChange(score);		
 	}
 	
 	function restoreMove(move){
@@ -314,7 +308,7 @@ function Game(settings, state){
 		else{
 			announce('info', 'You lose!');
 		}
-		globals.menuPanel.onGameEnd(isWinner);
+		globals.controlPanel.showNoGameControl();
 		globals.activeGame = false;
 	}
 	
@@ -341,7 +335,7 @@ function Game(settings, state){
 				
 		if (data.newCycles.length > 0){
 			drawCycles(data.newCycles);
-		}		
+		}
 		
 		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
 			self.onScoreChange(data.scoreChange);

@@ -123,6 +123,12 @@ public class FacebookController {
                 mav.addObject("fbAppId", m_configurationManager.getFbAppId());                
                 mav.addObject("user", user);
                 mav.addObject("gameWidth", m_configurationManager.getGameWidth());
+                mav.addObject("gameHeight", m_configurationManager.getGameWidth());
+                mav.addObject("statusPanelWidth", m_configurationManager.getStatusPanelWidth());
+                mav.addObject("statusPanelHeight", m_configurationManager.getGameWidth());
+                mav.addObject("controlPanelWidth", m_configurationManager.getGameWidth() + m_configurationManager.getStatusPanelWidth());
+                mav.addObject("controlPanelHeight", m_configurationManager.getControlPanelHeight());
+                
             }
 			
 
