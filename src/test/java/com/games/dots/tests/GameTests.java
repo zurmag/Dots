@@ -77,7 +77,7 @@ public class GameTests {
 		
 		//Assert		
 		assertEquals(1, actionList.newCycles.size());
-		assertEquals(1, actionList.newDeadDots.size());
+		assertEquals(1, actionList.removedDots.size());
 		
 	}
 	
@@ -121,7 +121,7 @@ public class GameTests {
 		
 		//Assert		
 		assertEquals(1, actionList.newCycles.size());
-		assertEquals(2, actionList.newDeadDots.size());
+		assertEquals(2, actionList.removedDots.size());
 		
 	}
 	

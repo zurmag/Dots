@@ -43,7 +43,7 @@ public class RandomBot extends AsyncBot{
 			}
 			m_game.makeMove(move);
 		}
-		for (Coordinates c : message.newDeadDots){
+		for (Coordinates c : message.removedDots){
 			m_board[c.x][c.y] = message.move.getPlayerId();
 		}
 		m_board[message.move.getCoordinates().x][message.move.getCoordinates().y] = message.move.getPlayerId();

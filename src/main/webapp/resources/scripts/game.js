@@ -269,7 +269,11 @@ function Game(settings, state){
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
-		self.onScoreChange(state.score);
+		var scoreChange = {};
+		for (var i = 0; i< state.players.length;i++){
+			scoreChange[state.players[i].id] = state.players[i].score;
+		}
+		self.onScoreChange(scoreChange);
 		
 		var score = {};
 		for (var i = 0;i<state.players.length;i++){

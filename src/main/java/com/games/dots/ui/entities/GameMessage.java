@@ -14,5 +14,6 @@ public class GameMessage {
 	public Move move;
 	public String errorMessage;
 	public List<Coordinates[]> newCycles = new ArrayList<>();
-	public Set<Coordinates> newDeadDots = new HashSet<>();	
+	public Set<Coordinates> removedDots = new HashSet<>();
+	public Set<Move> capturedDots = new HashSet<>();
 }
