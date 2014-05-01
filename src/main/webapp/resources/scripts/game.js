@@ -98,13 +98,12 @@ function Game(settings, state){
 	    	setPointMouseUp(mousePos.x, mousePos.y);
 	    });
 	    
-	    m_me = {color: settings.color};
 	    FB.getLoginStatus(function(response) {
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
 				var player = new Player({
-					color: m_me.color, 
+					color: 'red', 
 					userId: {id:uid, type: 'FBUser'},
 					score: 0
 				});

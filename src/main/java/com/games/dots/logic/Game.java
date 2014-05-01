@@ -41,11 +41,10 @@ public class Game {
 	private BoardSize m_size;
 	public String id;
 	public String m_state = "waiting";
+	
+	private GamePosition m_gamePosition;
 	private Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
-	private SimpleGraph<Coordinates, MyEdge> m_board = new SimpleGraph<>(MyEdge.class);
-	private WeightedGraph<Move, MyEdge> m_moves_board = new WeightedPseudograph<>(MyEdge.class);
-	private List<Coordinates[]> m_cycles = new LinkedList<Coordinates[]>();
-	private List<Coordinates[]> m_emptyCycles = new LinkedList<Coordinates[]>();
+	
 	
 	private Map<Move, GameMessage> m_tryMoves = new HashMap<>();
 	
@@ -60,20 +59,9 @@ public class Game {
 			m_logger.warn("Unknown size %s", settings.size);
 			m_size = BoardSize.Medium;			
 		}
-		initBoard();
+		m_gamePosition = new GamePosition(m_size);
 	}
 	
-	private void initBoard (){
-		
-		//Create vertexes
-		for (int i = 0; i<m_size.value; i++){
-			for (int j = 0; j<m_size.value; j++){
-				Coordinates coordinate = new Coordinates(i, j);
-				createBoardPoint(coordinate);
-			}
-		}		
-	}
-
 	public int getMaxNumberOfPlayers(){
 		return m_maxNumberOfPlayers;
 	}
@@ -105,6 +93,7 @@ public class Game {
 				stateChange.newState.state = "active";
 				m_state = "active";
 			}
+			m_gamePosition.addColor(player.getColor());
 		}
 		else{
 			stateChange.errorMessage = "No more players";
@@ -168,10 +157,11 @@ public class Game {
 		GameMessage message = m_tryMoves.get(move);
 		//Revert move
 		m_moves.remove(message.move);
-		m_moves_board.removeVertex(message.move);
+		m_gamePosition.MovesBoard.removeVertex(message.move);
 		
-		
-	
+		for(Coordinates c : message.removedDots){
+			createBoardPoint(c);
+		}
 		m_tryMoves.remove(move);
 	}
 	
@@ -184,50 +174,66 @@ public class Game {
 			return actionResponse;
 		}
 		
-		if (!m_board.containsVertex(move.getCoordinates())){
+		if (!m_gamePosition.Board.containsVertex(move.getCoordinates())){
 			actionResponse.errorMessage = "There is no point here";
 			return actionResponse;
 		}
 		
 		m_moves.put(move.getCoordinates(), move);		
-		m_moves_board.addVertex(move);
+		m_gamePosition.MovesBoard.addVertex(move);
 		
 		//checking for stepping into cycle
-		for (int i = 0; i< m_emptyCycles.size();i++){
-			Coordinates[] cycle = m_emptyCycles.get(i);
-			if (isDeadPoint(move, cycle)){
-				actionResponse.newCycles.add(cycle);
-				actionResponse.removedDots.add(move.getCoordinates());
-				m_emptyCycles.remove(i);
-				m_cycles.add(cycle);
-				break;
+		for (String color : m_gamePosition.EmptyCycles.keySet()){
+			int cyclePlayerIndex = Arrays.asList(colors).indexOf(color);
+			IPlayer cyclePlayer = m_playersMap.get(cyclePlayerIndex);
+			if (color == m_playersMap.get(m_currentPlayerIndex).getColor())
+				continue;
+			for (Coordinates[] cycle : m_gamePosition.EmptyCycles.get(color)){
+				if (isDeadPoint(move, cycle)){
+					actionResponse.newCycles.add(cycle);
+					actionResponse.removedDots.addAll(getRemovedPoints(cycle));
+					actionResponse.capturedDots.add(move);
+					m_gamePosition.EmptyCycles.get(color).remove(cycle);
+					m_gamePosition.Cycles.get(color).add(cycle);
+					
+					cyclePlayer.setScore(cyclePlayer.getScore() + actionResponse.capturedDots.size());
+					actionResponse.scoreChange.put(cyclePlayer.getId(), cyclePlayer.getScore());
+					break;					
+				}
 			}
+			
+			if (!actionResponse.newCycles.isEmpty())
+				break;
 		}
 		//have not stepped into enemy cycle
 		if (actionResponse.newCycles.isEmpty()){
 		
 			for (Coordinates[] cycle : createAndGetNewCycles(move)){
-				Set<Coordinates> removedPoints = getRemovedPoints(cycle, move.getPlayerId());
-				
-				if (removedPoints.size() > 0){
+				Set<Coordinates> removedPoints = getRemovedPoints(cycle);
+				Set<Move> capturedPoints = getCapturedMoves(removedPoints);
+				String color = m_playersMap.get(move.getPlayerId()).getColor();
+				if (capturedPoints.size() > 0){
 					actionResponse.removedDots.addAll(removedPoints);
-					actionResponse.capturedDots.addAll(getCapturedMoves(removedPoints));
+					actionResponse.capturedDots.addAll(capturedPoints);
+					
 					actionResponse.newCycles.add(cycle);
-					m_cycles.add(cycle);
+					m_gamePosition.Cycles.get(color).add(cycle);
 					IPlayer player = m_playersMap.get(move.getPlayerId());
 					player.setScore(player.getScore() + actionResponse.capturedDots.size());					
 					actionResponse.scoreChange.put(move.getPlayerId(), player.getScore());
+						
 				}
 				else{
-					m_emptyCycles.add(cycle);
-				}				
+					m_gamePosition.EmptyCycles.get(color).add(cycle);
+				}
+								
 			}
 			
 		}
 		
-		m_board.removeAllVertices(actionResponse.removedDots);
+		m_gamePosition.Board.removeAllVertices(actionResponse.removedDots);
 		for (Coordinates coordinate: actionResponse.removedDots){
-			m_moves_board.removeVertex(m_moves.get(coordinate));						
+			m_gamePosition.MovesBoard.removeVertex(m_moves.get(coordinate));						
 		}
 		nextTurn();
 		actionResponse.newState.activePlayer = getActivePlayer();
@@ -242,10 +248,10 @@ public class Game {
 		//change
 		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
 			Move target = new Move(move.getPlayerId(), coordinates);
-			if (!m_moves_board.containsVertex(target)) //only my moves
+			if (!m_gamePosition.MovesBoard.containsVertex(target)) //only my moves
 				continue;			
 			
-			DijkstraShortestPath<Move, MyEdge> daijkstra = new DijkstraShortestPath<Move, MyEdge>(m_moves_board, move, target);
+			DijkstraShortestPath<Move, MyEdge> daijkstra = new DijkstraShortestPath<Move, MyEdge>(m_gamePosition.MovesBoard, move, target);
 			GraphPath<Move, MyEdge> path = daijkstra.getPath();
 			double weight = 0;
 			if (path != null){
@@ -262,8 +268,8 @@ public class Game {
 				cycles.add(cycle);				
 				
 			}
-			MyEdge newEdge = m_moves_board.addEdge(move, target);
-			m_moves_board.setEdgeWeight(newEdge, weight);
+			MyEdge newEdge = m_gamePosition.MovesBoard.addEdge(move, target);
+			m_gamePosition.MovesBoard.setEdgeWeight(newEdge, weight);
 		}
 		return cycles;
 	}
@@ -298,10 +304,10 @@ public class Game {
 				if (newCycle.isEmpty())
 					newCycle.add(v);
 				else{
-					if (m_board.containsEdge(v, newCycle.peekLast())){
+					if (m_gamePosition.Board.containsEdge(v, newCycle.peekLast())){
 						newCycle.addLast(v);
 					}
-					else if (m_board.containsEdge(v, newCycle.peekFirst())){
+					else if (m_gamePosition.Board.containsEdge(v, newCycle.peekFirst())){
 						newCycle.addFirst(v);
 					}
 					else{
@@ -319,7 +325,7 @@ public class Game {
 	
 	private Set<Coordinates> getAdjacentVertices(Coordinates vertex){
 		Set<Coordinates> vertexes = new HashSet<Coordinates>();
-		for(MyEdge e : m_board.edgesOf(vertex)){
+		for(MyEdge e : m_gamePosition.Board.edgesOf(vertex)){
 			vertexes.add((Coordinates) e.getSource());
 			vertexes.add((Coordinates) e.getTarget());
 		}
@@ -327,7 +333,7 @@ public class Game {
 		return vertexes;
 	}
 	
-	private Set<Coordinates> getRemovedPoints(Coordinates[] cycle, int me){
+	private Set<Coordinates> getRemovedPoints(Coordinates[] cycle){
 		Set<Coordinates> deadPoints = new HashSet<>();
 		//sort by second coordinate:
 		Coordinates[] newCycle =cycle.clone();
@@ -355,19 +361,7 @@ public class Game {
 				}
 			}
 			
-			/*if (left.x < right.x){
-				for (IPlayer otherPlayer : m_playersMap.values()){
-					if (otherPlayer.getId() == me) continue;
-					for (int x = left.x+1; x <right.x;x++){
-						Coordinates c = new Coordinates(x, left.y);
-						Move move = new Move(otherPlayer.getId(), c);
-						if (m_moves_board.containsVertex(move))
-							deadPoints.add(c);								
-					}
-				}
-			}*/
 			i = j-1;
-			
 		}
 		
 		return deadPoints;
@@ -380,7 +374,7 @@ public class Game {
 			if (otherPlayer.getId() == m_currentPlayerIndex) continue;
 			for (Coordinates c : points){
 				Move move = new Move(otherPlayer.getId(), c);
-				if (m_moves_board.containsVertex(move))
+				if (m_gamePosition.MovesBoard.containsVertex(move))
 					capturedMoves.add(move);								
 			}
 		}
@@ -420,7 +414,11 @@ public class Game {
 	}
 
 	public Collection<Coordinates[]> getAllCycles() {
-		return m_cycles;
+		Collection<Coordinates[]> list = new LinkedList<Coordinates[]>();
+		for (String color : m_gamePosition.Cycles.keySet()){
+			list.addAll(m_gamePosition.Cycles.get(color));
+		}
+		return list;
 	}
 
 	public IPlayer getActivePlayer() {
@@ -441,7 +439,7 @@ public class Game {
 	}
 	
 	private void createBoardPoint(Coordinates coordinate){
-		m_board.addVertex(coordinate);
+		m_gamePosition.Board.addVertex(coordinate);
 		int x = coordinate.x;
 		int y = coordinate.y;
 		for (int i = -1; i <= 1; i++){
@@ -450,9 +448,9 @@ public class Game {
 					x + i >=0 && y + j >= 0 && x + i < m_size.value && y + j < m_size.value) {//within board
 					Coordinates trg = new Coordinates(x+i, y+j);
 					
-					if (m_board.containsVertex(trg) && !m_board.containsEdge(coordinate, trg)){
+					if (m_gamePosition.Board.containsVertex(trg) && !m_gamePosition.Board.containsEdge(coordinate, trg)){
 						//m_logger.debug(String.format("Adding edge from %s to %s", src, trg));
-						m_board.addEdge(coordinate, trg, new MyEdge());
+						m_gamePosition.Board.addEdge(coordinate, trg, new MyEdge());
 					}
 				}
 			}

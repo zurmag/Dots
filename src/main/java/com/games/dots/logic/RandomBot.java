@@ -36,11 +36,7 @@ public class RandomBot extends AsyncBot{
 			}while(m_board[x][y] != -1);
 			Coordinates coordinates = new Coordinates(x, y);
 			Move move = new Move(m_id, coordinates);
-			try {
-				Thread.sleep(1000l);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			
 			m_game.makeMove(move);
 		}
 		for (Coordinates c : message.removedDots){
