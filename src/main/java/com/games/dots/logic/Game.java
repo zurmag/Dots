@@ -43,7 +43,7 @@ public class Game {
 	private Map<Coordinates, Move> m_moves = new HashMap<Coordinates, Move>();
 	
 	
-	private Map<Move, GameMessage> m_tryMoves = new HashMap<>();
+	private Map<Move, GamePositionDiff> m_tryMoves = new HashMap<>();
 	
 	public MyObservable onPlayerMove = new MyObservable();
 	public MyObservable onError = new MyObservable();
@@ -131,50 +131,52 @@ public class Game {
 	public synchronized GameMessage makeMove(Move move){
 		
 		GameMessage actionResponse;
+		MyObservable observalble;
 		try {
-			actionResponse = _makeMove(move);
-			onPlayerMove.setChanged();
-			onPlayerMove.notifyObservers(actionResponse);
+			actionResponse = _makeMove(move).toGameMessage();
+			actionResponse.newState.activePlayer = getActivePlayer();
+			observalble = onPlayerMove;
 		} catch (Exception e) {
 			actionResponse = new GameMessage();
-			actionResponse.move = move; actionResponse.gameId = id;
 			actionResponse.errorMessage = e.getMessage();
-			onError.setChanged();
-			onError.notifyObservers(actionResponse);
+			observalble = onError;
+			
 		}
-		
+		actionResponse.move = move;
+		actionResponse.gameId = id;
+		observalble.setChanged();
+		observalble.notifyObservers(actionResponse);
 		return actionResponse;
 	}
 	
 	public GameMessage tryMakeMove(Move move){
 		GameMessage actionResponse;
 		try {
-			actionResponse = _makeMove(move);
+			GamePositionDiff positionDiff = _makeMove(move);
+			actionResponse = positionDiff.toGameMessage();
+			actionResponse.newState.activePlayer = getActivePlayer();
+			m_tryMoves.put(move, positionDiff);
 		} catch (Exception e) {
 			actionResponse = new GameMessage();
-			actionResponse.move = move;
-			actionResponse.gameId = id;
+			actionResponse.errorMessage = e.getMessage();
 		}
-		if (actionResponse.errorMessage != null)
-			m_tryMoves.put(move, actionResponse);
+		actionResponse.move = move;
+		actionResponse.gameId = id;
+			
 		return actionResponse;
 	}
 	
 	public void revertMove(Move move){
 		if (!m_tryMoves.containsKey(move))
 			return;
-		GameMessage message = m_tryMoves.get(move);
-		//Revert move
-		m_moves.remove(message.move);
-		m_gamePosition.MovesBoard.removeVertex(message.move);
+		GamePositionDiff gamePositionDiff = m_tryMoves.get(move);
+		m_moves.remove(move);
+		m_gamePosition.revertMove(gamePositionDiff);
 		
-		for(Coordinates c : message.removedDots){
-			createBoardPoint(c);
-		}
 		m_tryMoves.remove(move);
 	}
 	
-	private GameMessage _makeMove(Move move) throws Exception{
+	private GamePositionDiff _makeMove(Move move) throws Exception{
 		GamePositionDiff diff = new GamePositionDiff(m_gamePosition);
 		if (move.getPlayerId() != getActivePlayer().getId()){
 			throw new Exception("Not your turn please be patient");
@@ -242,12 +244,9 @@ public class Game {
 		
 		
 		applyPositionDiff(diff);
-		GameMessage gameMessage = diff.toGameMessage();
-		gameMessage.move = move;
-		gameMessage.gameId = id;
+		
 		nextTurn();
-		gameMessage.newState.activePlayer = getActivePlayer();
-		return gameMessage;
+		return diff;
 	}	
 	
 	private void applyPositionDiff(GamePositionDiff diff){
@@ -278,7 +277,7 @@ public class Game {
 		
 		List<Coordinates[]> cycles = new LinkedList<Coordinates[]>();
 		//change
-		for (Coordinates coordinates : getAdjacentVertices(move.getCoordinates())){
+		for (Coordinates coordinates : m_gamePosition.getAdjacentVertices(move.getCoordinates())){
 			Move target = new Move(move.getPlayerId(), coordinates);
 			if (!m_gamePosition.MovesBoard.containsVertex(target)) //only my moves
 				continue;			
@@ -352,17 +351,6 @@ public class Game {
 		} while(!leftovers.isEmpty());
 		
 		return (Coordinates[]) newCycle.toArray(new Coordinates[0]);
-	}
-	
-	
-	private Set<Coordinates> getAdjacentVertices(Coordinates vertex){
-		Set<Coordinates> vertexes = new HashSet<Coordinates>();
-		for(MyEdge e : m_gamePosition.Board.edgesOf(vertex)){
-			vertexes.add((Coordinates) e.getSource());
-			vertexes.add((Coordinates) e.getTarget());
-		}
-		vertexes.remove(vertex);
-		return vertexes;
 	}
 	
 	private Set<Coordinates> getRemovedPoints(Coordinates[] cycle){
@@ -467,26 +455,6 @@ public class Game {
 
 	public IPlayer getPlayer(Integer playerId) {
 		return m_playersMap.get(playerId);
-		
-	}
-	
-	private void createBoardPoint(Coordinates coordinate){
-		m_gamePosition.Board.addVertex(coordinate);
-		int x = coordinate.x;
-		int y = coordinate.y;
-		for (int i = -1; i <= 1; i++){
-			for (int j = -1; j<=1; j++){
-				if ((i != 0 || j != 0) &&// not self 
-					x + i >=0 && y + j >= 0 && x + i < m_size.value && y + j < m_size.value) {//within board
-					Coordinates trg = new Coordinates(x+i, y+j);
-					
-					if (m_gamePosition.Board.containsVertex(trg) && !m_gamePosition.Board.containsEdge(coordinate, trg)){
-						//m_logger.debug(String.format("Adding edge from %s to %s", src, trg));
-						m_gamePosition.Board.addEdge(coordinate, trg, new MyEdge());
-					}
-				}
-			}
-		}
 		
 	}
 	

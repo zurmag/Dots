@@ -58,5 +58,52 @@ public class GamePosition {
 			}
 		}		
 	}
+
+	public void revertMove(GamePositionDiff diff) {
+		//Revert move
+		for (Move move : diff.Moves){
+			MovesBoard.removeVertex(move);
+		}
+		
+		
+		for(Coordinates c : diff.RemovedDots){
+			createBoardPoint(c);
+		}
+		
+		for (List<Move> capturedMoves : diff.CapturedDots.values()){
+			for (Move capturedMove : capturedMoves){
+				for (Coordinates coordinates : getAdjacentVertices(capturedMove.getCoordinates())){
+					Move target = new Move(capturedMove.getPlayerId(), coordinates);
+					if (!MovesBoard.containsVertex(target)) //only my moves
+						continue;	
+					MyEdge newEdge = MovesBoard.addEdge(capturedMove, target);
+					MovesBoard.setEdgeWeight(newEdge, 0);
+				}
+			}
+		}
+		
+		for (String color : diff.NewCycles.keySet()){
+			Cycles.get(color).removeAll(diff.NewCycles.get(color));
+		}
+		
+		for (String color : diff.NewEmptyCycles.keySet()){
+			EmptyCycles.get(color).removeAll(diff.NewEmptyCycles.get(color));
+		}
+		
+		for (String color : diff.RemovedEmptyCycles.keySet()){
+			EmptyCycles.get(color).addAll(diff.RemovedEmptyCycles.get(color));
+		}
+		
+	}
+	
+	public Set<Coordinates> getAdjacentVertices(Coordinates vertex){
+		Set<Coordinates> vertexes = new HashSet<Coordinates>();
+		for(MyEdge e : Board.edgesOf(vertex)){
+			vertexes.add((Coordinates) e.getSource());
+			vertexes.add((Coordinates) e.getTarget());
+		}
+		vertexes.remove(vertex);
+		return vertexes;
+	}
 	
 }

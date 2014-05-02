@@ -340,8 +340,14 @@ function Game(settings, state){
 			drawCycles(data.newCycles);
 		}
 		
+		
 		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
-			self.onScoreChange(data.scoreChange);
+			var scoreChange = {};
+			data.scoreChange = Object.keys(data.scoreChange).map(function(playerId){
+				m_players[playerId].score = m_players[playerId].score + data.scoreChange[playerId];
+				scoreChange[playerId] = m_players[playerId].score; 
+			});
+			self.onScoreChange(scoreChange);
 		}
 		console.debug(message);
 	}
