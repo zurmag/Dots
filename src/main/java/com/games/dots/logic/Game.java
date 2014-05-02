@@ -14,16 +14,13 @@ import java.util.Observable;
 import java.util.Set;
 
 import org.jgrapht.GraphPath;
-import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.graph.SimpleGraph;
-import org.jgrapht.graph.WeightedPseudograph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.BoardSize;
 import com.games.dots.ui.entities.Coordinates;
+import com.games.dots.ui.entities.GameMessage;
 import com.games.dots.ui.entities.GameSettings;
 import com.games.dots.ui.entities.IPlayer;
 import com.games.dots.ui.entities.Move;
@@ -32,7 +29,7 @@ import com.games.dots.ui.entities.UserId;
 
 public class Game {
 	
-	private static final String[] colors = {"red", "green", "blue"};
+	private static final List<String> colors = Arrays.asList(new String[]{"red", "green", "blue"});
 	private static final Logger m_logger = LoggerFactory.getLogger(Game.class);
 	
 	private Map<Integer, IPlayer> m_playersMap = new HashMap<>();
@@ -83,7 +80,7 @@ public class Game {
 	
 	public GameMessage addPlayer(IPlayer player) {
 		player.setId(m_playersMap.size());
-		player.setColor(colors[m_playersMap.size()]);//next color
+		player.setColor(colors.get(m_playersMap.size()));//next color
 		GameMessage stateChange = new GameMessage();stateChange.gameId = id;
 		if (m_playersMap.size() < m_maxNumberOfPlayers){
 			m_playersMap.put(player.getId(), player);
@@ -132,20 +129,32 @@ public class Game {
 	}
 	
 	public synchronized GameMessage makeMove(Move move){
-		GameMessage actionResponse = _makeMove(move);
-		if (actionResponse.errorMessage != null){
+		
+		GameMessage actionResponse;
+		try {
+			actionResponse = _makeMove(move);
+			onPlayerMove.setChanged();
+			onPlayerMove.notifyObservers(actionResponse);
+		} catch (Exception e) {
+			actionResponse = new GameMessage();
+			actionResponse.move = move; actionResponse.gameId = id;
+			actionResponse.errorMessage = e.getMessage();
 			onError.setChanged();
 			onError.notifyObservers(actionResponse);
 		}
-		else{
-			onPlayerMove.setChanged();
-			onPlayerMove.notifyObservers(actionResponse);
-		}
+		
 		return actionResponse;
 	}
 	
 	public GameMessage tryMakeMove(Move move){
-		GameMessage actionResponse = _makeMove(move);
+		GameMessage actionResponse;
+		try {
+			actionResponse = _makeMove(move);
+		} catch (Exception e) {
+			actionResponse = new GameMessage();
+			actionResponse.move = move;
+			actionResponse.gameId = id;
+		}
 		if (actionResponse.errorMessage != null)
 			m_tryMoves.put(move, actionResponse);
 		return actionResponse;
@@ -165,82 +174,105 @@ public class Game {
 		m_tryMoves.remove(move);
 	}
 	
-	private GameMessage _makeMove(Move move){
-		GameMessage actionResponse = new GameMessage(); actionResponse.gameId = id;
-		
-		actionResponse.move = move;
+	private GameMessage _makeMove(Move move) throws Exception{
+		GamePositionDiff diff = new GamePositionDiff(m_gamePosition);
 		if (move.getPlayerId() != getActivePlayer().getId()){
-			actionResponse.errorMessage = "Not your turn please be patient";
-			return actionResponse;
+			throw new Exception("Not your turn please be patient");
 		}
 		
 		if (!m_gamePosition.Board.containsVertex(move.getCoordinates())){
-			actionResponse.errorMessage = "There is no point here";
-			return actionResponse;
+			throw new Exception("There is no point here");
 		}
 		
-		m_moves.put(move.getCoordinates(), move);		
+		diff.Moves.add(move);
 		m_gamePosition.MovesBoard.addVertex(move);
+		Map<Integer, LinkedList<Coordinates[]>> newCycles = new HashMap<>();
+			
 		
 		//checking for stepping into cycle
 		for (String color : m_gamePosition.EmptyCycles.keySet()){
-			int cyclePlayerIndex = Arrays.asList(colors).indexOf(color);
-			IPlayer cyclePlayer = m_playersMap.get(cyclePlayerIndex);
 			if (color == m_playersMap.get(m_currentPlayerIndex).getColor())
 				continue;
+
+			int cyclePlayerIndex = colors.indexOf(color);
 			for (Coordinates[] cycle : m_gamePosition.EmptyCycles.get(color)){
 				if (isDeadPoint(move, cycle)){
-					actionResponse.newCycles.add(cycle);
-					actionResponse.removedDots.addAll(getRemovedPoints(cycle));
-					actionResponse.capturedDots.add(move);
-					m_gamePosition.EmptyCycles.get(color).remove(cycle);
-					m_gamePosition.Cycles.get(color).add(cycle);
 					
-					cyclePlayer.setScore(cyclePlayer.getScore() + actionResponse.capturedDots.size());
-					actionResponse.scoreChange.put(cyclePlayer.getId(), cyclePlayer.getScore());
+					newCycles.put(cyclePlayerIndex, new LinkedList<Coordinates[]>());
+					newCycles.get(cyclePlayerIndex).add(cycle);					
+					diff.RemovedEmptyCycles.get(color).add(cycle);
+					
 					break;					
 				}
 			}
 			
-			if (!actionResponse.newCycles.isEmpty())
+			if (newCycles.containsKey(cyclePlayerIndex))
 				break;
-		}
-		//have not stepped into enemy cycle
-		if (actionResponse.newCycles.isEmpty()){
+		}		
 		
+		//have not stepped into enemy cycle
+		if (newCycles.isEmpty()){
+			newCycles.put(move.getPlayerId(), new LinkedList<Coordinates[]>());
 			for (Coordinates[] cycle : createAndGetNewCycles(move)){
+				
+				newCycles.get(move.getPlayerId()).add(cycle);			
+			}
+		}
+		
+		for (int playerId : newCycles.keySet()){
+			IPlayer player = m_playersMap.get(playerId);
+			for (Coordinates[] cycle : newCycles.get(playerId)){
 				Set<Coordinates> removedPoints = getRemovedPoints(cycle);
-				Set<Move> capturedPoints = getCapturedMoves(removedPoints);
-				String color = m_playersMap.get(move.getPlayerId()).getColor();
+				Set<Move> capturedPoints = getCapturedMoves(removedPoints, playerId);
+				String color = m_playersMap.get(playerId).getColor();
 				if (capturedPoints.size() > 0){
-					actionResponse.removedDots.addAll(removedPoints);
-					actionResponse.capturedDots.addAll(capturedPoints);
+					diff.RemovedDots.addAll(removedPoints);
+					diff.CapturedDots.put(playerId, new LinkedList<Move>());
+					diff.CapturedDots.get(playerId).addAll(capturedPoints);
+					diff.NewCycles.get(color).add(cycle);
 					
-					actionResponse.newCycles.add(cycle);
-					m_gamePosition.Cycles.get(color).add(cycle);
-					IPlayer player = m_playersMap.get(move.getPlayerId());
-					player.setScore(player.getScore() + actionResponse.capturedDots.size());					
-					actionResponse.scoreChange.put(move.getPlayerId(), player.getScore());
+					player.setScore(player.getScore() + diff.CapturedDots.size());					
 						
 				}
 				else{
-					m_gamePosition.EmptyCycles.get(color).add(cycle);
+					diff.NewEmptyCycles.get(color).add(cycle);
 				}
-								
 			}
-			
 		}
 		
-		m_gamePosition.Board.removeAllVertices(actionResponse.removedDots);
-		for (Coordinates coordinate: actionResponse.removedDots){
-			m_gamePosition.MovesBoard.removeVertex(m_moves.get(coordinate));						
-		}
+		
+		applyPositionDiff(diff);
+		GameMessage gameMessage = diff.toGameMessage();
+		gameMessage.move = move;
+		gameMessage.gameId = id;
 		nextTurn();
-		actionResponse.newState.activePlayer = getActivePlayer();
-		return actionResponse;
+		gameMessage.newState.activePlayer = getActivePlayer();
+		return gameMessage;
 	}	
 	
-	
+	private void applyPositionDiff(GamePositionDiff diff){
+		for (Move move : diff.Moves){
+			m_moves.put(move.getCoordinates(), move);
+			m_gamePosition.MovesBoard.addVertex(move);
+		}
+		
+		m_gamePosition.Board.removeAllVertices(diff.RemovedDots);
+		for (Coordinates coordinate: diff.RemovedDots){
+			m_gamePosition.MovesBoard.removeVertex(m_moves.get(coordinate));						
+		}
+		
+		for (String color : diff.NewCycles.keySet()){
+			m_gamePosition.Cycles.get(color).addAll(diff.NewCycles.get(color));
+		}
+		
+		for (String color : diff.NewEmptyCycles.keySet()){
+			m_gamePosition.EmptyCycles.get(color).addAll(diff.NewEmptyCycles.get(color));
+		}
+		
+		for (String color : diff.RemovedEmptyCycles.keySet()){
+			m_gamePosition.EmptyCycles.get(color).removeAll(diff.RemovedEmptyCycles.get(color));
+		}
+	}
 
 	private List<Coordinates[]> createAndGetNewCycles(Move move) {
 		
@@ -368,10 +400,10 @@ public class Game {
 		
 	}
 
-	private Set<Move> getCapturedMoves(Set<Coordinates> points){
+	private Set<Move> getCapturedMoves(Set<Coordinates> points, int playerId){
 		Set<Move> capturedMoves= new HashSet<>();
 		for (IPlayer otherPlayer : m_playersMap.values()){
-			if (otherPlayer.getId() == m_currentPlayerIndex) continue;
+			if (otherPlayer.getId() == playerId) continue;
 			for (Coordinates c : points){
 				Move move = new Move(otherPlayer.getId(), c);
 				if (m_gamePosition.MovesBoard.containsVertex(move))
