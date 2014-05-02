@@ -42,15 +42,20 @@ function CentralPanel(panelDivName){
 	self.submitGame = function submitGame(){
 		var gameSize = $("#radio-game-size :radio:checked").attr('id').replace('input-','');
 		var playersNumber = $("#radio-players-number :radio:checked").attr('id').replace('input-','');
-		var gameSettings = {size: gameSize, players: playersNumber, widthPx: globals.gameWidth};
+		var gameSettings = {
+				size: gameSize, 
+				players: playersNumber, 
+				widthPx: globals.gameWidth
+		};
 		FB.getLoginStatus(function(response) {
 			var newGameData = {gameSettings: gameSettings, token: response.authResponse.accessToken};
 			globals.server.newGame(newGameData, function (data, textStatus, request){
 				
 				var settings = {size: data.size, id: data.id, state: data.state.state, widthPx: globals.gameWidth};
 				globals.activeGame = new Game(settings, data.state);
-				globals.activeGame.addPlayer(data.state.players[0]);
-				globals.activeGame.addPlayer(data.state.players[1]);
+				for (var i = 0; i < data.state.players.length ; i++){
+					globals.activeGame.addPlayer(data.state.players[i]);
+				}
 				showActiveGame();
 				globals.controlPanel.showGameControl();
 			});

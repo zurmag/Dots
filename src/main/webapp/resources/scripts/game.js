@@ -98,13 +98,12 @@ function Game(settings, state){
 	    	setPointMouseUp(mousePos.x, mousePos.y);
 	    });
 	    
-	    m_me = {color: settings.color};
 	    FB.getLoginStatus(function(response) {
 			if (response.status === 'connected') {
 				var uid = response.authResponse.userID;
 				//var accessToken = response.authResponse.accessToken;
 				var player = new Player({
-					color: m_me.color, 
+					color: 'red', 
 					userId: {id:uid, type: 'FBUser'},
 					score: 0
 				});
@@ -269,7 +268,11 @@ function Game(settings, state){
 		drawCycles(state.cycles);
 		
 		globals.statusPanel.showActiveGameStatus(self);
-		self.onScoreChange(state.score);
+		var scoreChange = {};
+		for (var i = 0; i< state.players.length;i++){
+			scoreChange[state.players[i].id] = state.players[i].score;
+		}
+		self.onScoreChange(scoreChange);
 		
 		var score = {};
 		for (var i = 0;i<state.players.length;i++){
@@ -337,8 +340,14 @@ function Game(settings, state){
 			drawCycles(data.newCycles);
 		}
 		
+		
 		if (data.scoreChange != undefined && Object.keys(data.scoreChange).length > 0){
-			self.onScoreChange(data.scoreChange);
+			var scoreChange = {};
+			data.scoreChange = Object.keys(data.scoreChange).map(function(playerId){
+				m_players[playerId].score = m_players[playerId].score + data.scoreChange[playerId];
+				scoreChange[playerId] = m_players[playerId].score; 
+			});
+			self.onScoreChange(scoreChange);
 		}
 		console.debug(message);
 	}

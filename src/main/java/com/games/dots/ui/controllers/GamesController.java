@@ -83,7 +83,8 @@ public class GamesController {
 		GameMessage gameMessage = game.addPlayer(userId);
 		m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
 		
-		if (true){
+		boolean isBot = true;
+		if (isBot){
 			RandomBot bot = new RandomBot(game);
 			gameMessage = game.addPlayer(bot);
 			m_template.convertAndSend("/sub/games/" + game.id, gameMessage);
