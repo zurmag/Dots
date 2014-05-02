@@ -3,8 +3,11 @@ package com.games.dots.tests;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 
@@ -123,6 +126,177 @@ public class GameTests {
 		assertEquals(1, actionList.newCycles.size());
 		assertEquals(2, actionList.removedDots.size());
 		
+	}
+	@Test
+	public void RevertFirstMoveTest(){
+		//Arrange
+		
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
+		RealPlayer player1 = new RealPlayer();player1.setId(0);		
+		RealPlayer player2 = new RealPlayer();player2.setId(1);
+		smallGame.addPlayer(player1);
+		smallGame.addPlayer(player2);
+		
+		Move move = new Move(player1.getId(), new Coordinates(1,1));
+		
+		//act
+		smallGame.tryMakeMove(move);
+		smallGame.revertMove(move);
+		
+		//assert
+		Assert.assertEquals(0, smallGame.getAllMoves().size());
+		Assert.assertEquals(smallGame.getBoardSize().value * smallGame.getBoardSize().value, smallGame.getGamePosition().Board.vertexSet().size());
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().Cycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().EmptyCycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		Assert.assertEquals(0, smallGame.getGamePosition().MovesBoard.vertexSet().size());
+
+	}
+	
+	@Test
+	public void RevertThreeMoveTest(){
+		//Arrange
+		
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
+		RealPlayer player1 = new RealPlayer();player1.setId(0);		
+		RealPlayer player2 = new RealPlayer();player2.setId(1);
+		smallGame.addPlayer(player1);
+		smallGame.addPlayer(player2);
+		
+		
+		List<Move> moves = new ArrayList<>();
+		moves.add(new Move(player1.getId(), new Coordinates(1,1)));
+		moves.add(new Move(player2.getId(), new Coordinates(1,0)));
+		moves.add(new Move(player1.getId(), new Coordinates(1,2)));
+		
+		
+		
+		//act
+		
+		for (int i = 0; i< moves.size()-1;i++) {
+			smallGame.tryMakeMove(moves.get(i));
+		}
+		
+		for (int i = moves.size()-1; i >= 0  ; i--) {
+			smallGame.revertMove(moves.get(i));
+		}
+		
+		//assert
+		Assert.assertEquals(0, smallGame.getAllMoves().size());
+		Assert.assertEquals(smallGame.getBoardSize().value * smallGame.getBoardSize().value, smallGame.getGamePosition().Board.vertexSet().size());
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().Cycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().EmptyCycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		Assert.assertEquals(0, smallGame.getGamePosition().MovesBoard.vertexSet().size());
+
+	}
+	
+	@Test
+	public void RevertAfterThreeMoveTest(){
+		//Arrange
+		
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
+		RealPlayer player1 = new RealPlayer();player1.setId(0);		
+		RealPlayer player2 = new RealPlayer();player2.setId(1);
+		smallGame.addPlayer(player1);
+		smallGame.addPlayer(player2);
+		
+		
+		List<Move> moves = new ArrayList<>();
+		moves.add(new Move(player1.getId(), new Coordinates(1,1)));
+		moves.add(new Move(player2.getId(), new Coordinates(1,0)));
+		moves.add(new Move(player1.getId(), new Coordinates(1,2)));
+		
+		for (int i = 0; i< moves.size();i++) {
+			smallGame.makeMove(moves.get(i));
+		}
+		
+		//act
+		
+		
+		Move move = new Move(player1.getId(), new Coordinates(0,2)); 
+		smallGame.tryMakeMove(move);
+		smallGame.revertMove(move);
+		
+		//assert
+		Assert.assertEquals(3, smallGame.getAllMoves().size());
+		Assert.assertEquals(smallGame.getBoardSize().value * smallGame.getBoardSize().value, smallGame.getGamePosition().Board.vertexSet().size());
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().Cycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().EmptyCycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		Assert.assertEquals(3, smallGame.getGamePosition().MovesBoard.vertexSet().size());
+
+	}
+	
+	@Test
+	public void revertCycleTest(){
+		//Arrange
+		GameSettings settings = new GameSettings();
+		settings.players = 2;
+		settings.size = "Small";
+		Game smallGame = new Game(settings);
+		RealPlayer player1 = createPlayer();player1.setColor("red");
+		RealPlayer player2 = createPlayer();player2.setColor("green");
+		smallGame.addPlayer(player1);
+		smallGame.addPlayer(player2);
+		
+		List<Move> moves = new ArrayList<>();
+		moves.add(new Move(player1.getId(), new Coordinates(1, 1)));
+		moves.add(new Move(player2.getId(), new Coordinates(0, 1)));
+		moves.add(new Move(player1.getId(), new Coordinates(5, 5)));
+		moves.add(new Move(player2.getId(), new Coordinates(1, 0)));
+		moves.add(new Move(player1.getId(), new Coordinates(5, 6)));
+		moves.add(new Move(player2.getId(), new Coordinates(1, 2)));
+		moves.add(new Move(player1.getId(), new Coordinates(5, 7)));
+		moves.add(new Move(player2.getId(), new Coordinates(2, 1)));
+		
+		
+		//act
+		
+		for (int i = 0; i< moves.size()-1;i++) {
+			smallGame.tryMakeMove(moves.get(i));
+		}
+		
+		for (int i = moves.size()-1; i >= 0  ; i--) {
+			smallGame.revertMove(moves.get(i));
+		}
+		
+		//assert
+		Assert.assertEquals(0, smallGame.getAllMoves().size());
+		Assert.assertEquals(smallGame.getBoardSize().value * smallGame.getBoardSize().value, smallGame.getGamePosition().Board.vertexSet().size());
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().Cycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		for (Collection<Coordinates[]> cycles : smallGame.getGamePosition().EmptyCycles.values()){
+			Assert.assertEquals(0, cycles.size());
+		}
+		
+		Assert.assertEquals(0, smallGame.getGamePosition().MovesBoard.vertexSet().size());
 	}
 	
 	private RealPlayer createPlayer() {

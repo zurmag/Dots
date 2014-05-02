@@ -71,6 +71,10 @@ public class Game {
 		return m_size;
 	}
 
+	public GamePosition getGamePosition(){
+		return m_gamePosition;
+	}
+	
 	public GameMessage addPlayer(UserId userId) {
 		RealPlayer player = new RealPlayer();
 		player.setGameId(this.id); 
@@ -170,10 +174,11 @@ public class Game {
 		if (!m_tryMoves.containsKey(move))
 			return;
 		GamePositionDiff gamePositionDiff = m_tryMoves.get(move);
-		m_moves.remove(move);
+		m_moves.remove(move.getCoordinates());
 		m_gamePosition.revertMove(gamePositionDiff);
 		
 		m_tryMoves.remove(move);
+		m_currentPlayerIndex = (--m_currentPlayerIndex + m_playersMap.size()) % m_playersMap.size() ;
 	}
 	
 	private GamePositionDiff _makeMove(Move move) throws Exception{
