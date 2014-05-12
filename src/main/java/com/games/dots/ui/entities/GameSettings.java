@@ -6,4 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class GameSettings {
 	public String size;
 	public int players;
+	public boolean isRobot;
+	
 }
