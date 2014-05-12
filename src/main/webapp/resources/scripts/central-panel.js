@@ -41,11 +41,13 @@ function CentralPanel(panelDivName){
 	
 	self.submitGame = function submitGame(){
 		var gameSize = $("#radio-game-size :radio:checked").attr('id').replace('input-','');
-		var playersNumber = $("#radio-players-number :radio:checked").attr('id').replace('input-','');
+		var playersNumber = $("#radio-number-of-players :radio:checked").attr('id').replace('input-','');
+		var isRobot = $("#radio-chalenger :radio:checked").attr('id').replace('input-', '') == 'Robot';
 		var gameSettings = {
 				size: gameSize, 
 				players: playersNumber, 
-				widthPx: globals.gameWidth
+				widthPx: globals.gameWidth,
+				isRobot: isRobot
 		};
 		FB.getLoginStatus(function(response) {
 			var newGameData = {gameSettings: gameSettings, token: response.authResponse.accessToken};
@@ -87,44 +89,37 @@ function CentralPanel(panelDivName){
 	}
 	
 	function createNewGameView(){
-		var label;
+
 		var div = document.createElement('div');
 		
-		var gameSizeDiv = document.createElement('div');
-		gameSizeDiv.id = 'game-size-div';
-		div.appendChild(gameSizeDiv);		
-		label = document.createElement('h3');
-		label.innerHTML = 'Game size';
-		gameSizeDiv.appendChild(label);
-		gameSizeDiv.appendChild(createRadioInputs(['Small', 'Medium', 'Big'], 'Medium', 'game-size'));
+		div.appendChild(createRadioInputs(['Small', 'Medium', 'Big'], 'Medium', 'Game Size'));
 		
-		var playernumberDiv = document.createElement('div');
-		playernumberDiv.id = 'player-number-div';
-		div.appendChild(playernumberDiv);
-		label = document.createElement('h3');
-		label.innerHTML = 'Players in game';
-		playernumberDiv.appendChild(label);
-		playernumberDiv.appendChild(createRadioInputs(['2', '3', '4'], '2', 'players-number'));
+		div.appendChild(createRadioInputs(['2', '3', '4'], '2', 'Number of players'));
 		
-		
+		div.appendChild(createRadioInputs(['Human', 'Robot'], 'Human', 'Chalenger'));
 		
 		return div;
 	}
 	
 	function createRadioInputs(labels, defaultLabel, name){
-		
+		var labelText = name;
+		var id = name.toLowerCase().replace(/ /g, '-');
 		var gameSizeForm = document.createElement('form');
-		gameSizeForm.id = 'form-' + name;
+		gameSizeForm.id = 'form-' + id;
 		
 		var div = document.createElement('div');
+		label = document.createElement('h3');
+		label.innerHTML = labelText;
+		div.appendChild(label);
+		
 		div.className = 'radio';
-		div.id = 'radio-'+name;
+		div.id = 'radio-'+id;
 		for (var i = 0;i<labels.length;i++){
 			var label = labels[i];
 			var input = document.createElement('input');
 			input.id = 'input-'+label;
 			input.type = 'radio';
-			input.name = name;
+			input.name = id;
 			
 			if (label == defaultLabel){
 				input.checked = 'checked';
