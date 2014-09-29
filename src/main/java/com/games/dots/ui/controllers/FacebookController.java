@@ -83,7 +83,7 @@ public class FacebookController {
 	
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ModelAndView fBAuthorization(HttpServletRequest request) throws Exception{
-		
+
 			ModelAndView mav = new ModelAndView("home");
 		
 			Base64 base64 = new Base64(true);
