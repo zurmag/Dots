@@ -93,7 +93,7 @@ public class GamesController {
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setLocation(uriComponents.toUri());
 	    com.games.dots.ui.entities.Game uiGame = new com.games.dots.ui.entities.Game(game);
-	    return new ResponseEntity<com.games.dots.ui.entities.Game>(uiGame, headers, HttpStatus.OK);	    
+	    return new ResponseEntity<>(uiGame, headers, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/games/{gameId}/players", method = RequestMethod.POST)
